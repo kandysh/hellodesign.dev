@@ -8,15 +8,14 @@
     "typecheck": "turbo typecheck",
     "format": "biome format --write .",
     "check": "biome check .",
-    "db:generate": "pnpm --filter @sysdesign/db db:generate",
-    "db:migrate": "pnpm --filter @sysdesign/db db:migrate",
-    "db:push": "pnpm --filter @sysdesign/db db:push",
-    "db:studio": "pnpm --filter @sysdesign/db db:studio"
+    "db:migrate": "pnpm turbo run db:migrate",
+    "db:deploy": "pnpm turbo run db:deploy",
+    "db:generate": "pnpm turbo run db:generate"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "turbo": "^2.3.3",
-    "typescript": "^5.7.2"
+    "turbo": "^2.9.6",
+    "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@9.15.4",
   "engines": {

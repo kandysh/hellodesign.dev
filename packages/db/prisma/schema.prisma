@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -34,13 +34,13 @@ enum MessageRole {
 // ─── Auth models (better-auth required schema) ────────────────────────────────
 
 model User {
-  id            String       @id @default(cuid())
-  email         String       @unique
+  id            String   @id @default(cuid())
+  email         String   @unique
   name          String?
-  emailVerified Boolean      @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   apiKeys     UserApiKey[]
   submissions Submission[]
@@ -135,8 +135,8 @@ model Submission {
   agentJobId     String?
   createdAt      DateTime         @default(now())
 
-  question Question      @relation(fields: [questionId], references: [id])
-  user     User?         @relation(fields: [userId], references: [id])
+  question Question       @relation(fields: [questionId], references: [id])
+  user     User?          @relation(fields: [userId], references: [id])
   result   EvalResult?
   messages AgentMessage[]
 }

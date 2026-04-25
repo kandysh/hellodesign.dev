@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ArchMaster - Master System Design with AI</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface": "#0b1326",
+                        "on-tertiary-container": "#000703",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "surface-container": "#171f33",
+                        "surface-container-high": "#222a3d",
+                        "on-secondary": "#233143",
+                        "tertiary": "#4edea3",
+                        "surface-container-highest": "#2d3449",
+                        "surface-container-low": "#131b2e",
+                        "on-error": "#690005",
+                        "on-secondary-container": "#a7b6cc",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-dim": "#0b1326",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-tint": "#c0c1ff",
+                        "surface-container-lowest": "#060e20",
+                        "error-container": "#93000a",
+                        "on-primary-fixed": "#07006c",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "inverse-on-surface": "#283044",
+                        "background": "#0b1326",
+                        "secondary-container": "#39485a",
+                        "surface-variant": "#2d3449",
+                        "primary-container": "#8083ff",
+                        "on-primary-container": "#0d0096",
+                        "primary": "#c0c1ff",
+                        "surface-bright": "#31394d",
+                        "secondary": "#b9c8de",
+                        "outline": "#908fa0",
+                        "tertiary-container": "#00885d",
+                        "on-tertiary": "#003824",
+                        "secondary-fixed": "#d4e4fa",
+                        "outline-variant": "#464554",
+                        "on-surface": "#dae2fd",
+                        "inverse-primary": "#494bd6",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-fixed": "#002113",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "inverse-surface": "#dae2fd",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "primary-fixed-dim": "#c0c1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin": "24px",
+                        "unit": "4px",
+                        "container-max": "1440px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "code-inline": ["Space Grotesk"],
+                        "display-lg": ["Manrope"],
+                        "body-base": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "code-inline": ["14px", { "lineHeight": "1", "letterSpacing": "0em", "fontWeight": "500" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-base": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body-base text-body-base min-h-screen flex flex-col">
+<!-- JSON Component: TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex justify-between items-center px-6 py-3">
+<div class="text-xl font-black tracking-tighter text-indigo-500">
+            ArchMaster
+        </div>
+<nav class="hidden md:flex space-x-8 font-manrope text-sm font-medium tracking-tight">
+<!-- Explore is active as this is the primary landing destination -->
+<a class="text-indigo-400 border-b-2 border-indigo-500 pb-1" href="#">Explore</a>
+<a class="text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 transition-colors duration-150 px-2 py-1 rounded" href="#">Community</a>
+<a class="text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 transition-colors duration-150 px-2 py-1 rounded" href="#">Solutions</a>
+<a class="text-slate-400 hover:text-slate-200 hover:bg-slate-900/50 transition-colors duration-150 px-2 py-1 rounded" href="#">Pricing</a>
+</nav>
+<div class="flex items-center space-x-4 font-manrope text-sm font-medium tracking-tight">
+<button class="text-slate-400 hover:text-slate-200 active:scale-95 transition-transform">Sign In</button>
+<button class="bg-indigo-500 text-white px-4 py-2 rounded active:scale-95 transition-transform hover:bg-indigo-600">Get Started</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 pb-16 px-gutter md:px-margin max-w-[1440px] mx-auto w-full flex flex-col gap-12">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center py-16 md:py-24">
+<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant mb-6">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#4edea3]"></span>
+<span class="font-label-caps text-label-caps text-tertiary uppercase">ArchMaster Engine v2.0 Live</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface max-w-4xl mb-6">
+                Master System Design with <span class="text-primary drop-shadow-[0_0_12px_rgba(192,193,255,0.4)]">AI Precision</span>
+</h1>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl mb-10">
+                Elevate your architectural rigor. Engage in interactive interviews, map complex topologies with our intelligent Excalidraw canvas, and receive real-time, deterministic AI evaluation traces.
+            </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="bg-inverse-primary text-on-primary font-body-sm text-body-sm px-8 py-3 rounded-lg hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(73,75,214,0.3)]">
+                    Try for Free
+                </button>
+<button class="bg-transparent border border-inverse-primary text-primary font-body-sm text-body-sm px-8 py-3 rounded-lg hover:bg-surface-container-high active:scale-95 transition-all">
+                    View Technical Demo
+                </button>
+</div>
+</section>
+<!-- Social Proof Banner -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-1 p-1 bg-outline-variant rounded-xl overflow-hidden">
+<div class="bg-surface-container py-8 px-6 flex flex-col items-center text-center">
+<span class="font-display-lg text-[32px] font-extrabold text-on-surface leading-tight mb-1">10,000+</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Architectures Solved</span>
+</div>
+<div class="bg-surface-container py-8 px-6 flex flex-col items-center text-center">
+<span class="font-display-lg text-[32px] font-extrabold text-tertiary leading-tight mb-1">99.9%</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">AI Evaluation Accuracy</span>
+</div>
+<div class="bg-surface-container py-8 px-6 flex flex-col items-center text-center">
+<span class="font-display-lg text-[32px] font-extrabold text-on-surface leading-tight mb-1">&lt; 50ms</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Trace Latency</span>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-8">
+<!-- Feature 1: Lexical Editor -->
+<div class="md:col-span-5 bg-surface-container border border-outline-variant rounded-xl p-8 flex flex-col relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-surface-container-high to-surface-container opacity-50 z-0"></div>
+<div class="relative z-10 flex flex-col h-full">
+<span class="material-symbols-outlined text-primary mb-4" data-icon="edit_document">edit_document</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Lexical Rich Text</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6 flex-grow">
+                        Draft technical specifications with unparalleled precision. Our customized Lexical editor supports native markdown, inline code highlighting, and structured data blocks seamlessly.
+                    </p>
+<div class="mt-auto h-32 bg-surface-container-highest border border-outline-variant rounded-lg p-4 font-code-inline text-code-inline text-on-surface-variant overflow-hidden relative">
+<div class="absolute left-0 top-0 bottom-0 w-8 bg-surface-container-high border-r border-outline-variant flex flex-col items-center py-4 text-outline space-y-1">
+<span>1</span><span>2</span><span>3</span>
+</div>
+<div class="pl-10 text-primary"># System Context</div>
+<div class="pl-10 mt-1">The primary load balancer routes...</div>
+<div class="pl-10 mt-1 text-tertiary">```json</div>
+</div>
+</div>
+</div>
+<!-- Feature 2: Excalidraw Canvas -->
+<div class="md:col-span-7 bg-surface-container border border-outline-variant rounded-xl p-8 flex flex-col relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="architecture">architecture</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Intelligent Canvas</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-6 max-w-lg">
+                        Visualize microservices and state flows on our Excalidraw-powered infinite canvas. Built-in primitives for databases, queues, and gateways automatically sync with your text spec.
+                    </p>
+</div>
+<div class="mt-auto relative w-full h-48 bg-surface-container-highest border border-outline-variant rounded-lg overflow-hidden flex items-center justify-center">
+<!-- Placeholder for abstract diagram graphic -->
+<div class="w-full h-full bg-surface-container flex items-center justify-center" data-alt="abstract wireframe diagram of cloud infrastructure components connected by glowing data lines in a dark blue technical style">
+<div class="flex gap-4 items-center">
+<div class="w-16 h-12 border-2 border-primary rounded bg-surface flex items-center justify-center"><span class="material-symbols-outlined text-primary text-sm" data-icon="dns">dns</span></div>
+<div class="w-12 h-[2px] bg-outline-variant relative"><div class="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 border-t-2 border-r-2 border-outline-variant rotate-45"></div></div>
+<div class="w-16 h-16 border-2 border-tertiary rounded-full bg-surface flex items-center justify-center"><span class="material-symbols-outlined text-tertiary text-sm" data-icon="database">database</span></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Feature 3: AI Trace -->
+<div class="md:col-span-12 bg-surface-container border border-outline-variant rounded-xl p-8 flex flex-col lg:flex-row gap-8 items-center">
+<div class="lg:w-1/3">
+<span class="material-symbols-outlined text-primary mb-4" data-icon="troubleshoot">troubleshoot</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-2">Real-Time Evaluation Trace</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                        Stop guessing. Our deterministic AI engine processes your architecture against known anti-patterns and performance constraints, providing a clear, line-by-line trace of its reasoning and identified bottlenecks.
+                    </p>
+</div>
+<div class="lg:w-2/3 w-full bg-surface border border-outline-variant rounded-lg p-4 font-code-inline text-code-inline text-on-surface-variant relative">
+<div class="flex justify-between items-center border-b border-outline-variant pb-2 mb-3">
+<span class="text-primary">trace_execution.log</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error shadow-[0_0_5px_#ffb4ab]"></span>
+<span class="text-xs text-outline">1 Error</span>
+</div>
+</div>
+<div class="space-y-1">
+<div><span class="text-outline">[10:42:01]</span> INFO: Analyzing Node(Database_Primary)...</div>
+<div><span class="text-outline">[10:42:02]</span> INFO: Checking read replica configuration...</div>
+<div class="text-error bg-error-container/20 py-1 px-2 -mx-2 rounded"><span class="text-error">[10:42:03]</span> WARN: High contention risk detected on single write node under heavy load context.</div>
+<div class="pl-24 text-outline-variant">-&gt; Suggestion: Implement sharding strategy or write-ahead caching queue.</div>
+<div><span class="text-outline">[10:42:04]</span> INFO: Trace complete.</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- JSON Component: Footer -->
+<footer class="w-full border-t border-slate-800 bg-slate-950 flex flex-col md:flex-row justify-between items-center px-12 py-8 max-w-7xl mx-auto mt-auto">
+<div class="font-manrope text-xs text-slate-500 mb-4 md:mb-0">
+            © 2024 ArchMaster Engine. All rights reserved.
+        </div>
+<nav class="flex space-x-6 font-manrope text-xs">
+<a class="text-slate-500 hover:text-indigo-400 underline decoration-indigo-500/30" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-indigo-400 underline decoration-indigo-500/30" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-indigo-400 underline decoration-indigo-500/30" href="#">Security</a>
+<a class="text-slate-500 hover:text-indigo-400 underline decoration-indigo-500/30" href="#">Changelog</a>
+</nav>
+</footer>
+</body></html>

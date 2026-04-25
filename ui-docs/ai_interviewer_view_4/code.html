@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Interviewer - SysDesign Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.css" rel="stylesheet" type="text/css"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "primary-container": "#8083ff",
+                        "surface-container-high": "#222a3d",
+                        "secondary-container": "#39485a",
+                        "surface-variant": "#2d3449",
+                        "surface-container-highest": "#2d3449",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-container-low": "#131b2e",
+                        "on-tertiary": "#003824",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface-container-lowest": "#060e20",
+                        "surface-bright": "#31394d",
+                        "inverse-primary": "#494bd6",
+                        "on-surface": "#dae2fd",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "surface-tint": "#c0c1ff",
+                        "primary": "#c0c1ff",
+                        "on-primary": "#1000a9",
+                        "inverse-surface": "#dae2fd",
+                        "outline": "#908fa0",
+                        "tertiary-fixed": "#6ffbbe",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#00885d",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "surface-container": "#171f33",
+                        "on-background": "#dae2fd",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#0d0096",
+                        "on-primary-fixed": "#07006c",
+                        "surface": "#0b1326",
+                        "inverse-on-surface": "#283044",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary": "#b9c8de",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-container": "#000703",
+                        "on-secondary-container": "#a7b6cc",
+                        "primary-fixed": "#e1e0ff",
+                        "on-tertiary-fixed": "#002113",
+                        "error-container": "#93000a",
+                        "outline-variant": "#464554",
+                        "on-secondary": "#233143",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "background": "#0b1326",
+                        "tertiary": "#4edea3"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-max": "1440px",
+                        "unit": "4px",
+                        "margin": "24px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Manrope"],
+                        "body-base": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "code-inline": ["Space Grotesk"],
+                        "headline-md": ["Manrope"],
+                        "display-lg": ["Manrope"],
+                        "mono": ["Space Grotesk", "monospace"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "body-base": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "code-inline": ["14px", { "lineHeight": "1", "letterSpacing": "0em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-dots {
+            background-image: radial-gradient(var(--tw-colors-surface-container-high) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased h-screen w-full flex overflow-hidden">
+<!-- Left Navigation (SideNavBar JSON) -->
+<nav class="bg-slate-900 dark:bg-slate-900 text-indigo-500 dark:text-indigo-400 font-manrope text-sm font-medium fixed left-0 top-0 h-screen w-64 border-r border-slate-800 flex flex-col p-4 py-8 overflow-y-auto z-10">
+<div class="text-indigo-500 font-black text-2xl mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined">architecture</span>
+            SysDesign Pro
+        </div>
+<div class="flex items-center gap-3 mb-8 px-2">
+<img alt="System Architect Profile" class="w-10 h-10 rounded-full border border-slate-700" data-alt="professional headshot of a software architect in a dark tech environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4WjR6f3oKZJiuhaiKSnvsXQnGoMeIvRHidMxPVwkNOuOyAhAaY36zY_zd6XXrCL1Ty1iuqjdvXkhy-6DvtC3N0QjsqZ5ghy-jv-HBlrC60Mhbq3B1Zil2VNhpli1IW-QU71qfsC8veT7Nu0jg3S1LSOrALNYP05sBUF3PzMPqIaaKJfQqvwhu90v7yPjhLsK8B28qIskvVgmiBiHahX_7wdRp6ui-uiyvRxzcUguZVNxOgkm3gupEsVJsggUzNhbs8JAGjx2DqnEG"/>
+<div>
+<div class="text-slate-100 font-bold">Architect Workspace</div>
+<div class="text-slate-400 text-xs">Power User Tier</div>
+</div>
+</div>
+<button class="bg-indigo-600 hover:bg-indigo-500 text-white w-full py-2 rounded-lg mb-6 flex items-center justify-center gap-2 transition-all duration-150 active:scale-95 shadow-[0_0_8px_rgba(99,102,241,0.4)]">
+<span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+            New Design Doc
+        </button>
+<div class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+                Problem Library
+            </a>
+<!-- Active Tab -->
+<a class="flex items-center gap-3 bg-indigo-500/10 text-indigo-400 border-r-2 border-indigo-500 rounded-none px-4 py-3 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">architecture</span>
+                Practice Room
+            </a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                Interview Results
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-1 border-t border-slate-800 pt-4">
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined">description</span>
+                Documentation
+            </a>
+<a class="flex items-center gap-3 text-slate-400 px-4 py-3 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+                Logout
+            </a>
+</div>
+</nav>
+<!-- Middle Diagram Area -->
+<main class="flex-1 ml-64 bg-surface-container-lowest bg-dots relative flex flex-col border-r border-surface-container-high h-full w-full">
+<!-- Toolbar -->
+<div class="h-14 bg-surface-container-low border-b border-surface-container-high flex items-center justify-between px-4 sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md text-on-surface">Global Chat System Design</span>
+<span class="bg-surface-variant px-2 py-1 rounded text-label-caps font-label-caps text-tertiary-fixed-dim border border-surface-container-high flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+                    LIVE
+                </span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant transition-colors border border-transparent hover:border-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">undo</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant transition-colors border border-transparent hover:border-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">redo</span>
+</button>
+<div class="w-[1px] h-6 bg-surface-container-high mx-2 self-center"></div>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant transition-colors border border-transparent hover:border-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">zoom_in</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-variant text-on-surface-variant transition-colors border border-transparent hover:border-surface-container-high">
+<span class="material-symbols-outlined text-[20px]">zoom_out</span>
+</button>
+</div>
+</div>
+<!-- Canvas Content (Mock Diagram) -->
+<div class="flex-1 relative overflow-auto p-12 flex items-center justify-center">
+<div class="relative w-[600px] h-[400px]">
+<!-- Client Node -->
+<div class="absolute top-1/2 left-0 -translate-y-1/2 w-24 h-16 bg-surface border-2 border-primary-container rounded-xl shadow-[0_0_15px_rgba(128,131,255,0.1)] flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary transition-colors">
+<span class="material-symbols-outlined text-primary mb-1 text-[20px]">smartphone</span>
+<span class="font-code-inline text-code-inline text-on-surface text-[10px]">Client</span>
+</div>
+<!-- Load Balancer Node -->
+<div class="absolute top-1/2 left-40 -translate-y-1/2 w-32 h-16 bg-surface border border-surface-container-high rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center cursor-pointer hover:border-outline transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant mb-1 text-[20px]">dns</span>
+<span class="font-code-inline text-code-inline text-on-surface text-[10px]">LoadBalancer_1</span>
+<div class="absolute -top-2 -right-2 w-4 h-4 bg-primary rounded-full shadow-[0_0_8px_rgba(192,193,255,0.8)] border border-background"></div>
+</div>
+<!-- App Servers -->
+<div class="absolute top-0 right-40 w-32 h-16 bg-surface border border-surface-container-high rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center cursor-pointer hover:border-outline transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant mb-1 text-[20px]">storage</span>
+<span class="font-code-inline text-code-inline text-on-surface text-[10px]">Chat Server A</span>
+</div>
+<div class="absolute bottom-0 right-40 w-32 h-16 bg-surface border border-surface-container-high rounded-xl shadow-[0_4px_6px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center cursor-pointer hover:border-outline transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant mb-1 text-[20px]">storage</span>
+<span class="font-code-inline text-code-inline text-on-surface text-[10px]">Chat Server B</span>
+</div>
+<!-- Lines -->
+<svg class="absolute top-0 left-0 w-full h-full pointer-events-none stroke-outline" fill="none" stroke-width="2">
+<!-- Client to LB -->
+<path class="animate-[dash_1s_linear_infinite]" d="M 96 200 L 160 200" stroke-dasharray="4"></path>
+<polygon fill="var(--tw-colors-outline)" points="160,200 150,195 150,205" stroke="none"></polygon>
+<!-- LB to Server A -->
+<path d="M 288 180 C 320 180, 320 32, 440 32" stroke-dasharray="4"></path>
+<!-- LB to Server B -->
+<path d="M 288 220 C 320 220, 320 368, 440 368" stroke-dasharray="4"></path>
+</svg>
+</div>
+</div>
+<!-- Tools Palette -->
+<div class="absolute left-4 top-20 bg-surface border border-surface-container-high rounded-xl shadow-[0_8px_16px_rgba(0,0,0,0.4)] p-2 flex flex-col gap-2">
+<button class="w-10 h-10 rounded-lg bg-surface-variant text-primary border border-primary flex items-center justify-center shadow-[0_0_8px_rgba(192,193,255,0.2)]">
+<span class="material-symbols-outlined">near_me</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">rectangle</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">database</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">cloud</span>
+</button>
+<button class="w-10 h-10 rounded-lg hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined">arrow_right_alt</span>
+</button>
+</div>
+</main>
+<!-- Right Panel (Chat & Evaluation) -->
+<aside class="w-96 flex-shrink-0 bg-surface-container-low flex flex-col h-full border-l border-surface-container-high">
+<!-- Tabs -->
+<div class="flex border-b border-surface-container-high bg-surface-container-lowest">
+<button class="flex-1 py-3 px-4 font-label-caps text-label-caps text-primary border-b-2 border-primary bg-surface-container text-center">
+                INTERVIEW CHAT
+            </button>
+<button class="flex-1 py-3 px-4 font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors border-b-2 border-transparent text-center">
+                HINTS &amp; DOCS
+            </button>
+</div>
+<!-- Chat Area -->
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+<!-- AI Msg -->
+<div class="chat chat-start">
+<div class="chat-image avatar">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0 border border-primary shadow-[0_0_8px_rgba(128,131,255,0.3)]">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+</div>
+<div class="chat-header text-primary font-bold text-xs mb-1">ArchMaster AI</div>
+<div class="chat-bubble bg-surface border border-surface-container-high text-body-sm font-body-sm text-on-surface rounded-2xl">
+                    I see you've added a Load Balancer in front of the Chat Servers. How do you plan to handle state if a user connects to <span class="font-code-inline text-code-inline bg-surface-variant px-1 rounded text-primary-fixed">Chat Server A</span>, but their friend is connected to <span class="font-code-inline text-code-inline bg-surface-variant px-1 rounded text-primary-fixed">Chat Server B</span>?
+                </div>
+</div>
+<!-- User Msg -->
+<div class="chat chat-end">
+<div class="chat-image avatar">
+<div class="w-8 rounded-full border border-outline">
+<img alt="User" data-alt="professional headshot of a software architect in a dark tech environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0HZ8Mkhw9q_CFvNsHHwaTrBups198eHV4QN96mEpNJPgX2ZVgm7chM9AZQEPwKBYzr3bCdGinIa2yEcvxCIR5s7OXYDfMQb_BGD2FU1hXGtdDSF6GqLz-NfMXyOimqLuuSiOAd4NLeLVHmiP5eM1QPC1t2shMkY9zdF8iCoT6PaAbwNzJF4y7PEQbWyiSDEeKu-TkccOGl3W8HRkThvSK9wNtoQtgSzqn4CFnsrPGInZk3Lou-8V7SYqKGkWvLT4jZtwzuVyJ03tj"/>
+</div>
+</div>
+<div class="chat-bubble bg-secondary-container border border-secondary text-body-sm font-body-sm text-on-surface rounded-2xl">
+                    We could use a Pub/Sub system like Redis or Kafka to route messages between the servers. Server A would publish the message, and Server B would subscribe to it.
+                </div>
+</div>
+<!-- AI Msg -->
+<div class="chat chat-start">
+<div class="chat-image avatar">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center flex-shrink-0 border border-primary shadow-[0_0_8px_rgba(128,131,255,0.3)]">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+</div>
+<div class="chat-header text-primary font-bold text-xs mb-1">ArchMaster AI</div>
+<div class="chat-bubble bg-surface border border-surface-container-high text-body-sm font-body-sm text-on-surface rounded-2xl">
+                    Good approach. Now consider the scale. If we have 10 million concurrent users, what specific bottleneck might we hit with a single Redis cluster, and how would you mitigate it?
+                    <div class="mt-3 flex gap-2">
+<button class="bg-surface-variant hover:bg-surface-bright border border-outline text-on-surface-variant px-3 py-1 rounded text-label-caps font-label-caps transition-colors">
+                            REQUEST HINT
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Chat Input -->
+<div class="p-4 bg-surface border-t border-surface-container-high z-10">
+<div class="relative">
+<textarea class="w-full bg-surface-container-low border border-outline rounded-xl py-3 pl-4 pr-12 text-body-sm font-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner resize-none h-20 placeholder:text-on-surface-variant" placeholder="Explain your scaling strategy..."></textarea>
+<button class="absolute bottom-3 right-3 w-8 h-8 bg-primary hover:bg-inverse-primary text-on-primary rounded-lg flex items-center justify-center transition-all duration-150 active:scale-95 shadow-[0_0_8px_rgba(192,193,255,0.4)]">
+<span class="material-symbols-outlined text-[18px]">send</span>
+</button>
+</div>
+</div>
+<!-- Evaluation Stream (Real-time trace) -->
+<div class="h-64 flex-shrink-0 bg-[#0d1117] border-t border-surface-container-high flex flex-col font-mono text-sm">
+<div class="px-4 py-2 border-b border-surface-container-high bg-[#161b22] flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-[#8b949e] flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+                    EVALUATION STREAM
+                </span>
+<span class="w-2 h-2 rounded-full bg-[#3fb950] animate-pulse" title="Recording"></span>
+</div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-1 text-[#c9d1d9] bg-[#0d1117]">
+<div class="flex items-start gap-3 hover:bg-[#161b22] px-2 py-1 rounded">
+<span class="text-[#8b949e] shrink-0 w-20">10:40:12</span>
+<span class="text-[#58a6ff] shrink-0 w-20">[STRUCT]</span>
+<span>Component added: <span class="text-[#79c0ff]">LoadBalancer_1</span></span>
+</div>
+<div class="flex items-start gap-3 hover:bg-[#161b22] px-2 py-1 rounded">
+<span class="text-[#8b949e] shrink-0 w-20">10:40:15</span>
+<span class="text-[#d2a8ff] shrink-0 w-20">[LINK]</span>
+<span>Connection established: <span class="text-[#79c0ff]">Client</span> -&gt; <span class="text-[#79c0ff]">LoadBalancer_1</span></span>
+</div>
+<div class="flex items-start gap-3 bg-[#ffebe9] dark:bg-[#490202] text-[#cf222e] dark:text-[#ff7b72] px-2 py-1 rounded border-l-4 border-[#cf222e] dark:border-[#ff7b72] my-1">
+<span class="shrink-0 w-20 opacity-70">10:41:30</span>
+<span class="font-bold shrink-0 w-36">[RISK DETECTED]</span>
+<span>Traffic Spike Vulnerability. <br/><span class="opacity-80 text-xs">Analysis: Entry Point Configuration lacks rate limiting.</span></span>
+</div>
+<div class="flex items-start gap-3 hover:bg-[#161b22] px-2 py-1 rounded">
+<span class="text-[#8b949e] shrink-0 w-20">10:42:05</span>
+<span class="text-[#3fb950] shrink-0 w-20">[AUDIO]</span>
+<span class="animate-pulse">Transcribing user response...</span>
+</div>
+</div>
+</div>
+</aside>
+</body></html>

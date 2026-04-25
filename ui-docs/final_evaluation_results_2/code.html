@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ArchMaster - Interview Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;family=Fira+Code&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#c4e7ff",
+                      "on-primary-fixed": "#00201d",
+                      "surface-variant": "#273647",
+                      "on-tertiary-fixed-variant": "#004c69",
+                      "secondary-fixed": "#dae2fd",
+                      "primary": "#6bd8cb",
+                      "surface-container": "#122131",
+                      "secondary-container": "#3f465c",
+                      "surface-container-highest": "#273647",
+                      "error": "#ffb4ab",
+                      "outline": "#879391",
+                      "on-tertiary-fixed": "#001e2c",
+                      "on-tertiary": "#00354a",
+                      "surface-dim": "#051424",
+                      "on-error": "#690005",
+                      "inverse-primary": "#006a61",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed-dim": "#6bd8cb",
+                      "on-primary": "#003732",
+                      "surface-container-high": "#1c2b3c",
+                      "on-background": "#d4e4fa",
+                      "outline-variant": "#3d4947",
+                      "surface-bright": "#2c3a4c",
+                      "surface": "#051424",
+                      "on-tertiary-container": "#002d40",
+                      "inverse-on-surface": "#233143",
+                      "background": "#051424",
+                      "surface-container-lowest": "#010f1f",
+                      "primary-fixed": "#89f5e7",
+                      "tertiary-fixed-dim": "#7bd0ff",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary": "#283044",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "on-error-container": "#ffdad6",
+                      "surface-tint": "#6bd8cb",
+                      "on-primary-fixed-variant": "#005049",
+                      "tertiary-container": "#009bd1",
+                      "on-secondary-container": "#adb4ce",
+                      "on-secondary-fixed": "#131b2e",
+                      "on-primary-container": "#00302b",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "primary-container": "#29a195",
+                      "error-container": "#93000a",
+                      "on-surface-variant": "#bcc9c6",
+                      "secondary": "#bec6e0",
+                      "surface-container-low": "#0d1c2d",
+                      "tertiary": "#7bd0ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "sidebar-width": "280px",
+                      "toolbar-height": "56px",
+                      "sm": "8px",
+                      "xl": "40px",
+                      "lg": "24px",
+                      "unit": "4px",
+                      "md": "16px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "code": [
+                              "monospace"
+                      ],
+                      "headline-sm": [
+                              "Manrope"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Space Grotesk"
+                      ],
+                      "label-sm": [
+                              "Space Grotesk"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "code": [
+                              "13px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.08em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        /* Scrollbar styling for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: theme('colors.surface-container-highest'); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.outline-variant'); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex w-full overflow-hidden relative">
+<!-- Shared Component: SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[280px] border-r bg-slate-900 dark:bg-slate-900 border-r border-slate-800 flex flex-col py-6 z-50">
+<!-- Header -->
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
+<span class="material-symbols-outlined text-teal-500 text-[20px]">architecture</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter text-teal-500 dark:text-teal-400 leading-none">ArchMaster</h1>
+<p class="font-manrope text-sm font-medium tracking-tight text-slate-400 mt-1">System Design Prep</p>
+</div>
+</div>
+<!-- Main Navigation -->
+<ul class="flex flex-col gap-1 px-4 flex-1">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">list_alt</span>
+                    Problem Library
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">architecture</span>
+                    Practice Room
+                </a>
+</li>
+<!-- Active State -->
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-manrope text-sm font-medium tracking-tight bg-teal-500/10 text-teal-500 border-r-2 border-teal-500 scale-[0.98] duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">analytics</span>
+                    Interview Results
+                </a>
+</li>
+</ul>
+<!-- Footer Navigation -->
+<ul class="flex flex-col gap-1 px-4 mt-auto">
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                    Settings
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+                    Support
+                </a>
+</li>
+</ul>
+<!-- User Profile minimal -->
+<div class="px-6 mt-6 pt-6 border-t border-slate-800 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest border border-outline-variant overflow-hidden">
+<!-- Decorative placeholder for avatar -->
+<div aria-label="User Profile" class="w-full h-full bg-gradient-to-br from-primary-container to-tertiary-container"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface">Alex Engineer</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">L5 Architect</span>
+</div>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col w-[calc(100%-280px)] ml-[280px] h-screen relative">
+<!-- Shared Component: TopAppBar -->
+<header class="sticky top-0 z-40 w-full bg-slate-950/80 backdrop-blur-md dark:bg-slate-950/80 border-b border-slate-800 flex items-center justify-between px-8 h-16">
+<!-- Search Bar -->
+<div class="flex items-center bg-[#0F172A] border border-[#1E293B] rounded-lg px-3 py-1.5 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500/20 transition-all w-64">
+<span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
+<input class="bg-transparent border-none outline-none text-slate-200 font-manrope text-sm w-full placeholder-slate-500" placeholder="Search sessions..." type="text"/>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-teal-400 transition-all w-8 h-8 flex items-center justify-center rounded hover:bg-slate-800/50 focus:ring-2 focus:ring-teal-500/20">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+</button>
+<button class="text-slate-400 hover:text-teal-400 transition-all w-8 h-8 flex items-center justify-center rounded hover:bg-slate-800/50 focus:ring-2 focus:ring-teal-500/20">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+<div class="w-px h-6 bg-slate-800 mx-2"></div>
+<button class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-manrope text-sm font-bold px-4 py-2 rounded transition-colors focus:ring-2 focus:ring-teal-500/20">
+                    New Session
+                </button>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-y-auto p-gutter bg-background">
+<div class="max-w-[1200px] mx-auto flex flex-col gap-md">
+<!-- Page Header & Breadcrumbs -->
+<div class="flex flex-col gap-sm mb-4">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Sessions</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Distributed Cache</a>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-on-surface">Evaluation</span>
+</div>
+<div class="flex items-end justify-between">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Final Evaluation Results</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Design a Distributed Cache System (Memcached/Redis clone)</p>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 border border-outline-variant rounded font-label-md text-label-md text-on-surface hover:border-primary hover:text-primary transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">download</span> Export PDF
+                            </button>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-md">
+<!-- Overall Score Card (Col span 4) -->
+<div class="col-span-12 md:col-span-4 bg-surface-container rounded-xl border border-surface-container-highest p-lg flex flex-col justify-between relative overflow-hidden">
+<!-- Decorative bg glow -->
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 blur-2xl rounded-full -mr-10 -mt-10"></div>
+<div>
+<span class="font-label-md text-label-md text-on-surface-variant tracking-wider uppercase">Overall Verdict</span>
+<div class="mt-4 flex items-baseline gap-2">
+<span class="font-headline-lg text-[64px] font-bold text-primary leading-none">88</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">/ 100</span>
+</div>
+</div>
+<div class="mt-8">
+<div class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                                Strong Hire Alignment
+                            </div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-4 leading-relaxed">
+                                Exceptional grasp of partitioning strategies and consistency models. Minor gaps in operational readiness and deployment topologies.
+                            </p>
+</div>
+</div>
+<!-- Comprehensive Scorecard (Col span 8) -->
+<div class="col-span-12 md:col-span-8 bg-surface-container rounded-xl border border-surface-container-highest p-lg flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<span class="font-label-md text-label-md text-on-surface-variant tracking-wider uppercase">Technical Dimensions</span>
+</div>
+<div class="flex flex-col gap-6 flex-1 justify-center">
+<!-- Metric 1 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-body-md text-body-md text-on-surface font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">dns</span>
+                                        Scalability &amp; Partitioning
+                                    </span>
+<span class="font-code text-code text-primary">95/100</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 95%;"></div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-body-md text-body-md text-on-surface font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">health_and_safety</span>
+                                        Reliability &amp; Fault Tolerance
+                                    </span>
+<span class="font-code text-code text-primary">85/100</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 85%;"></div>
+</div>
+</div>
+<!-- Metric 3 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-body-md text-body-md text-on-surface font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">speed</span>
+                                        Performance &amp; Latency
+                                    </span>
+<span class="font-code text-code text-primary">90/100</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 90%;"></div>
+</div>
+</div>
+<!-- Metric 4 -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="font-body-md text-body-md text-on-surface font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">build</span>
+                                        Maintainability &amp; Ops
+                                    </span>
+<span class="font-code text-code text-error">65/100</span>
+</div>
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-error rounded-full" style="width: 65%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback Alerts (Col span 5) -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Key Insights</h3>
+<!-- Success Alert -->
+<div class="bg-primary-container/10 border border-primary/30 rounded-lg p-4 flex gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<h4 class="font-label-md text-label-md text-primary mb-1">Consistent Hashing Implemented</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Excellent use of virtual nodes to ensure even data distribution and minimal rehashing during cluster scaling events.</p>
+</div>
+</div>
+<!-- Warning Alert -->
+<div class="bg-error-container/10 border border-error/30 rounded-lg p-4 flex gap-3">
+<span class="material-symbols-outlined text-error mt-0.5" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<h4 class="font-label-md text-label-md text-error mb-1">Missing Telemetry Specs</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">No explicit mention of cache hit/miss ratio tracking, memory eviction rate monitoring, or hot-key detection mechanisms.</p>
+</div>
+</div>
+<!-- Info Alert -->
+<div class="bg-tertiary-container/10 border border-tertiary/30 rounded-lg p-4 flex gap-3">
+<span class="material-symbols-outlined text-tertiary mt-0.5" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div>
+<h4 class="font-label-md text-label-md text-tertiary mb-1">Eviction Policy Choice</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">LRU is a solid default, but W-TinyLFU could provide better hit rates for long-tail access patterns discussed in requirements.</p>
+</div>
+</div>
+</div>
+<!-- AI Architectural Recommendations (Col span 7) -->
+<div class="col-span-12 lg:col-span-7 flex flex-col">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-3">AI Architectural Recommendations</h3>
+<div class="grid grid-cols-1 gap-md">
+<!-- Rec Card 1 -->
+<div class="bg-surface-container-high rounded-lg border border-surface-container-highest p-5 hover:border-outline-variant transition-colors group">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center shrink-0 border border-outline-variant">
+<span class="material-symbols-outlined text-secondary">alt_route</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-label-md text-label-md text-on-surface">Hot-Key Mitigation Strategy</h4>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm px-2 py-0.5 rounded border border-outline-variant">P1</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 mb-3">
+                                            Your design assumes uniform access. Introduce an L1 local cache (e.g., Guava/Caffeine) on the application servers to absorb reads for celebrity keys before hitting the distributed cluster.
+                                        </p>
+<div class="bg-[#0F172A] p-3 rounded border border-[#1E293B] font-code text-code text-slate-300 overflow-x-auto">
+<span class="text-tertiary">if</span> (localCache.has(key)) return localCache.get(key);<br/>
+<span class="text-slate-500">// Fallback to distributed cache</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Rec Card 2 -->
+<div class="bg-surface-container-high rounded-lg border border-surface-container-highest p-5 hover:border-outline-variant transition-colors group">
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center shrink-0 border border-outline-variant">
+<span class="material-symbols-outlined text-secondary">schema</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-label-md text-label-md text-on-surface">Gossip Protocol for Cluster State</h4>
+<span class="bg-surface-variant text-on-surface-variant font-label-sm px-2 py-0.5 rounded border border-outline-variant">P2</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2">
+                                            Relying on a central configuration store (ZooKeeper) for every node routing request is a potential bottleneck. Recommend implementing a decentralized gossip protocol (like Redis Cluster) to propagate node health and slot ownership.
+                                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

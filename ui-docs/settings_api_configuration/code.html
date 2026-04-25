@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings - SysDesign Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#6ffbbe",
+                      "surface": "#0b1326",
+                      "tertiary": "#4edea3",
+                      "secondary-container": "#39485a",
+                      "primary-fixed": "#e1e0ff",
+                      "outline": "#908fa0",
+                      "on-surface": "#dae2fd",
+                      "inverse-primary": "#494bd6",
+                      "on-primary": "#1000a9",
+                      "error-container": "#93000a",
+                      "on-primary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "surface-variant": "#2d3449",
+                      "surface-container-low": "#131b2e",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-tertiary-fixed": "#002113",
+                      "primary": "#c0c1ff",
+                      "surface-container-highest": "#2d3449",
+                      "secondary": "#b9c8de",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-primary-container": "#0d0096",
+                      "outline-variant": "#464554",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "on-error-container": "#ffdad6",
+                      "primary-container": "#8083ff",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "error": "#ffb4ab",
+                      "on-surface-variant": "#c7c4d7",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "tertiary-container": "#00885d",
+                      "surface-bright": "#31394d",
+                      "on-tertiary": "#003824",
+                      "surface-dim": "#0b1326",
+                      "surface-tint": "#c0c1ff",
+                      "background": "#0b1326",
+                      "inverse-on-surface": "#283044",
+                      "on-error": "#690005",
+                      "on-tertiary-container": "#000703",
+                      "on-secondary-container": "#a7b6cc",
+                      "surface-container-lowest": "#060e20",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-background": "#dae2fd",
+                      "inverse-surface": "#dae2fd",
+                      "surface-container": "#171f33",
+                      "on-secondary": "#233143",
+                      "surface-container-high": "#222a3d",
+                      "secondary-fixed": "#d4e4fa"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "container-max": "1440px",
+                      "unit": "4px",
+                      "margin": "24px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "body-sm": [
+                              "Manrope"
+                      ],
+                      "label-caps": [
+                              "Manrope"
+                      ],
+                      "code-inline": [
+                              "Space Grotesk"
+                      ],
+                      "body-base": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "code-inline": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased min-h-screen flex">
+<!-- SideNavBar (Suppressed intentionally as per rules for Settings page which is considered a sub-page/details/settings page relative to main nav) -->
+<!-- Actually, the prompt says "Layout: A fixed sidebar on the left and a scrollable main content area." - I must follow prompt layout instructions if it specifically asks for it, but rule says "Automatic Suppression: You MUST exclude the navigation shell if the page intent is... Task-Focused: Any sub-page featuring a 'Close' or 'Back' action". Settings is often a top level in some apps, but let's assume it's meant to be visible as requested by the user prompt explicitly ("A fixed sidebar on the left"). Wait, the JSON component for SideNavBar says tab_labels are "Dashboard", "Problem Library", "Practice Room", "Interview Results". Settings isn't there. Therefore Settings is a sub-page. I will suppress the SideNavBar to follow the strict rule: "Automatic Suppression...". Wait, the prompt explicitly asks for "Layout: A fixed sidebar on the left". I will include it but nothing will be active, or I'll just follow the strict rule and suppress it because Settings is not in the list. Wait, "Contextual State & Identity... Semantic Mapping... DO NOT highlight generic tabs...". I'll include the sidebar to fulfill the layout request but not highlight any tab as active since Settings is not there. -->
+<nav class="fixed left-0 top-0 h-screen w-64 border-r bg-slate-900 dark:bg-slate-900 border-r border-slate-800 flat no shadows tonal layering flex flex-col h-full p-4 py-8 overflow-y-auto hidden md:flex z-50">
+<div class="text-indigo-500 font-black text-2xl mb-8 font-manrope">Architect Workspace</div>
+<div class="mb-8">
+<div class="flex items-center gap-3 mb-1">
+<img alt="System Architect Profile" class="w-10 h-10 rounded-full border border-slate-700" data-alt="Portrait of a male system architect in a dimly lit server room or tech environment, professional and focused." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAo5sOvkag_A5npW1JI1H1KSVcllJnciwdfBjlGTSYEJeYc3JsL50-BLvMNmM_QBf0bJUg-9NvnIGMI7Nhmxqr7VmN_g-ZZ7R-ubUjCgKevMLUnt1qwxowHQDwTfKcrJHX8RFfJhDNF__yWtz8FC1XCa1-WD_Tuy5kmRDbIJzJrWyg0Gc4B_bxHyxI2jhwPVqBQxN08GNBDU0KMwqXICrSKe4mXKpqjdJ7ICWXTTXluWXO8pZ59rqv5_e3onxdRFroh_9acPHn-R24X"/>
+<div>
+<div class="text-sm font-medium text-slate-100 font-manrope">System Architect Profile</div>
+<div class="text-xs text-slate-400 font-manrope">Power User Tier</div>
+</div>
+</div>
+</div>
+<button class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-manrope text-sm font-medium py-2 px-4 rounded mb-6 transition-all duration-150 active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+            New Design Doc
+        </button>
+<ul class="space-y-1 flex-1 font-manrope text-sm font-medium">
+<!-- Dashboard -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+                    Dashboard
+                </a>
+</li>
+<!-- Problem Library -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu_book</span>
+                    Problem Library
+                </a>
+</li>
+<!-- Practice Room -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">architecture</span>
+                    Practice Room
+                </a>
+</li>
+<!-- Interview Results -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">analytics</span>
+                    Interview Results
+                </a>
+</li>
+</ul>
+<ul class="space-y-1 mt-auto font-manrope text-sm font-medium pt-4 border-t border-slate-800">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">description</span>
+                    Documentation
+                </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all duration-200 active:translate-x-1 duration-150 rounded" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">logout</span>
+                    Logout
+                </a>
+</li>
+</ul>
+</nav>
+<div class="flex-1 flex flex-col md:ml-64 min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-slate-950 dark:bg-slate-950 border-b border-slate-800 flex justify-between items-center px-6 h-16 w-full docked full-width top-0 z-50 flat no shadows font-manrope antialiased tracking-tight sticky">
+<div class="flex items-center gap-4">
+<span class="text-lg font-bold text-slate-50 tracking-tighter">SysDesign Pro</span>
+<div class="h-4 w-px bg-slate-800 mx-2 hidden md:block"></div>
+<span class="font-headline-md text-headline-md text-surface-tint">Settings</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-indigo-400 hover:bg-slate-900/50 transition-all duration-150 p-2 rounded active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-indigo-400 border-b-2 border-indigo-500 hover:bg-slate-900/50 transition-all duration-150 p-2 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="text-slate-400 hover:text-indigo-400 hover:bg-slate-900/50 transition-all duration-150 p-2 rounded active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">help</span>
+</button>
+<img alt="User avatar" class="w-8 h-8 rounded-full ml-2 border border-slate-700" data-alt="Portrait of a male system architect in a dimly lit server room or tech environment, professional and focused." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuFqMs0q5gxOn0SFdInQloCgf8gZXwnFyH-dGSSwQk6m_UwsQ59Fw-7p50xsY5lUbqberyTB3Us6D74wES6QyYPqJIfRNbUOV1-jejlOXLXbav1-57GSZGY-VEw6F3maEHGcos7ObyJpXg-vnxv0uDS8WGM5-3my0TeAm-EbCxpnBACxRvwNiIgcTQ04dXoqk0R12tYbzx8oK1dcm2nR1P4YBn1CjTpNdPAOd8y-qwDurTuEBDNvQ0sBVh8OPyEOq-qNygwec_wW3F"/>
+</div>
+</header>
+<main class="flex-1 p-8 overflow-y-auto w-full max-w-container-max mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Settings Navigation (In-page) & Profile -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Account Profile Card -->
+<div class="bg-surface-container-highest border border-outline-variant rounded-xl p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6">Account Profile</h2>
+<div class="flex items-center gap-4 mb-6">
+<div class="relative">
+<img alt="User Avatar" class="w-16 h-16 rounded-full border-2 border-surface-container-highest" data-alt="Portrait of a male system architect in a dimly lit server room or tech environment, professional and focused." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbwlwiGj7xvU-o1Ax4Cex9o_S_JlgYxfa533k5haQ84o8S38mVLWmsxksrhCcOyzU0htL6pvDTNKW0dCE3b_bXwOKrN4fnNFNCiOVJwc0gUs0sO-g5KxM84tEiOZv2GIBcsREGEkDJo60aMH4oyxtWMKeuOvf5qTE4pjtTyOIo2_z7fMV0AymUB6T1b0uC5CGv3zW-meKsvU391-hTJeBeszBOc77G5WbFkDsS6yNx6q9PrLtmQnoB3nbLbAZH5XfO3faJxmxyvG_T"/>
+<button class="absolute bottom-0 right-0 bg-surface-bright border border-outline-variant rounded-full p-1 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">edit</span>
+</button>
+</div>
+<div>
+<h3 class="font-body-base text-body-base text-on-surface font-medium">Alex Mercer</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">alex.mercer@architects.io</p>
+</div>
+</div>
+<div class="space-y-4">
+<button class="w-full flex items-center justify-between p-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors group">
+<div class="flex items-center gap-3 text-on-surface-variant group-hover:text-primary">
+<span class="material-symbols-outlined">lock</span>
+<span class="font-body-sm text-body-sm">Change Password</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</button>
+<button class="w-full flex items-center justify-between p-3 rounded-lg border border-outline-variant hover:bg-surface-variant transition-colors group">
+<div class="flex items-center gap-3 text-on-surface-variant group-hover:text-primary">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-sm text-body-sm">Social Connections</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Workspace Preferences -->
+<div class="bg-surface-container-highest border border-outline-variant rounded-xl p-6">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6">Workspace Preferences</h2>
+<div class="space-y-6">
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">THEME</label>
+<div class="flex p-1 bg-surface rounded-lg border border-outline-variant">
+<button class="flex-1 py-2 text-center rounded-md font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors">Light</button>
+<button class="flex-1 py-2 text-center rounded-md font-body-sm text-body-sm bg-surface-bright text-primary shadow-sm border border-outline-variant">Dark</button>
+<button class="flex-1 py-2 text-center rounded-md font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors">System</button>
+</div>
+</div>
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">EDITOR FONT SIZE</label>
+<div class="flex items-center gap-4">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Aa</span>
+<input class="w-full accent-primary h-1 bg-surface rounded-lg appearance-none cursor-pointer" max="24" min="12" type="range" value="14"/>
+<span class="font-headline-md text-headline-md text-on-surface">Aa</span>
+</div>
+<div class="text-right mt-1 font-code-inline text-code-inline text-primary">14px</div>
+</div>
+<div>
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">DEFAULT DIAGRAM STYLE</label>
+<select class="w-full bg-surface border border-outline-variant rounded-lg p-3 text-on-surface font-body-sm text-body-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none appearance-none">
+<option>Architectural (Precise)</option>
+<option>Sketchy (Hand-drawn)</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Data Management -->
+<div class="bg-surface-container-highest border border-outline-variant rounded-xl p-6">
+<h2 class="font-headline-md text-headline-md text-error mb-4">Danger Zone</h2>
+<div class="space-y-4">
+<button class="w-full flex items-center justify-center gap-2 p-3 rounded-lg border border-outline-variant hover:bg-surface-variant text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span class="font-body-sm text-body-sm font-medium">Export All Data</span>
+</button>
+<button class="w-full flex items-center justify-center gap-2 p-3 rounded-lg border border-error/50 hover:bg-error-container text-error transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+<span class="font-body-sm text-body-sm font-medium">Delete Account</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Main Content (API Config) -->
+<div class="lg:col-span-8 space-y-6">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">API Configuration</h1>
+<p class="font-body-base text-body-base text-on-surface-variant mb-6">Manage your LLM provider keys for automated architecture reviews and generation.</p>
+<!-- Guest Mode Alert -->
+<div class="bg-surface-bright border border-tertiary/30 rounded-lg p-4 flex gap-4 mb-8">
+<span class="material-symbols-outlined text-tertiary">shield_person</span>
+<div>
+<h4 class="font-body-base text-body-base text-on-surface font-bold mb-1">Guest Mode Active</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Your API keys are stored securely in your browser's local storage and are never sent to our servers. They are only used to communicate directly with the LLM providers.</p>
+</div>
+</div>
+</div>
+<!-- OpenAI Card -->
+<div class="bg-surface-container-highest border border-outline-variant rounded-xl p-6 group transition-all duration-200 hover:border-primary/50">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">smart_toy</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[18px]">OpenAI</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">GPT-4, GPT-3.5-Turbo</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-tertiary-container/20 border border-tertiary/30 px-3 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.6)]"></span>
+<span class="font-label-caps text-label-caps text-tertiary">VALID</span>
+</div>
+</div>
+<div class="mt-4">
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">API KEY</label>
+<div class="relative">
+<input class="w-full bg-surface border border-outline-variant rounded-lg p-3 pr-12 text-on-surface font-code-inline text-code-inline focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_8px_rgba(192,193,255,0.3)] focus:outline-none transition-all" readonly="" type="password" value="sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-2 text-xs">Last verified: 10 minutes ago</p>
+</div>
+</div>
+<!-- Anthropic Card -->
+<div class="bg-surface-container-highest border border-outline-variant rounded-xl p-6 group transition-all duration-200 hover:border-primary/50">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">psychology</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[18px]">Anthropic</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Claude 3 Opus, Sonnet</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface border border-outline-variant px-3 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="font-label-caps text-label-caps text-outline-variant">NOT SET</span>
+</div>
+</div>
+<div class="mt-4">
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">API KEY</label>
+<div class="relative">
+<input class="w-full bg-surface border border-outline-variant rounded-lg p-3 text-on-surface font-code-inline text-code-inline focus:border-primary focus:ring-1 focus:ring-primary focus:shadow-[0_0_8px_rgba(192,193,255,0.3)] focus:outline-none transition-all placeholder:text-outline-variant" placeholder="sk-ant-..." type="text"/>
+</div>
+<div class="flex justify-end mt-3">
+<button class="bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary px-4 py-2 rounded-lg font-body-sm text-body-sm font-bold transition-all duration-150 active:scale-95">Save Key</button>
+</div>
+</div>
+</div>
+<!-- Google Gemini Card -->
+<div class="bg-surface-container-highest border border-error/50 rounded-xl p-6 group transition-all duration-200">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface">token</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[18px]">Google Gemini</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Gemini 1.5 Pro</p>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-error-container/20 border border-error/30 px-3 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="font-label-caps text-label-caps text-error">INVALID</span>
+</div>
+</div>
+<div class="mt-4">
+<label class="font-label-caps text-label-caps text-on-surface-variant block mb-2">API KEY</label>
+<div class="relative">
+<input class="w-full bg-surface border border-error rounded-lg p-3 pr-12 text-on-surface font-code-inline text-code-inline focus:border-error focus:ring-1 focus:ring-error focus:outline-none transition-all" type="text" value="AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxx"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">visibility_off</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-error mt-2 text-xs">Error: Authentication failed. Please check your key.</p>
+<div class="flex justify-end mt-3">
+<button class="bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary px-4 py-2 rounded-lg font-body-sm text-body-sm font-bold transition-all duration-150 active:scale-95">Update Key</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
