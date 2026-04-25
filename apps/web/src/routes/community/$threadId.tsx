@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useState } from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import {
   ArrowLeft,
   ThumbsUp,
@@ -233,7 +235,7 @@ function CommunityThreadPage() {
     setLocalComments((prev) => [
       ...prev,
       {
-        id: `local-${Date.now()}`,
+        id: crypto.randomUUID(),
         author: "You",
         authorInitials: "YO",
         timeAgo: "just now",
@@ -325,30 +327,8 @@ function CommunityThreadPage() {
             <div className="flex items-center gap-2 border-b border-base-300/40 px-5 py-3">
               <span className="text-sm font-semibold">Design Overview</span>
             </div>
-            <div className="p-5 prose prose-sm max-w-none prose-invert prose-p:text-base-content/80 prose-strong:text-base-content prose-headings:text-base-content">
-              {thread.overview.split("\n\n").map((para, i) => {
-                if (para.startsWith("**") && para.includes(":**")) {
-                  return (
-                    <p key={i} className="text-sm text-base-content/80 leading-relaxed mb-3">
-                      {para.split("\n").map((line, j) => {
-                        const boldMatch = line.match(/\*\*(.+?)\*\*(.*)/)
-                        if (boldMatch) {
-                          return (
-                            <span key={j} className="block">
-                              <strong className="text-base-content">{boldMatch[1]}</strong>
-                              {boldMatch[2]}
-                            </span>
-                          )
-                        }
-                        return <span key={j} className="block">{line}</span>
-                      })}
-                    </p>
-                  )
-                }
-                return (
-                  <p key={i} className="text-sm text-base-content/80 leading-relaxed mb-3">{para}</p>
-                )
-              })}
+            <div className="p-5 prose prose-sm max-w-none prose-invert prose-p:text-base-content/80 prose-strong:text-base-content prose-headings:text-base-content prose-li:text-base-content/80">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{thread.overview}</ReactMarkdown>
             </div>
           </section>
 

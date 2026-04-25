@@ -132,6 +132,22 @@ function scoreColor(score: number) {
   return "text-error"
 }
 
+function matchesFilters(
+  post: CommunityPost,
+  query: string,
+  difficulty: string | null,
+  category: string | null,
+): boolean {
+  const q = query.toLowerCase()
+  const matchQ =
+    !query ||
+    post.title.toLowerCase().includes(q) ||
+    post.tags.some((t) => t.toLowerCase().includes(q))
+  const matchD = !difficulty || post.difficulty === difficulty
+  const matchC = !category || post.category === category
+  return matchQ && matchD && matchC
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 function CommunityPage() {
@@ -139,12 +155,7 @@ function CommunityPage() {
   const [difficulty, setDifficulty] = useState<string | null>(null)
   const [category, setCategory] = useState<string | null>(null)
 
-  const filtered = POSTS.filter((p) => {
-    const matchQ = !query || p.title.toLowerCase().includes(query.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(query.toLowerCase()))
-    const matchD = !difficulty || p.difficulty === difficulty
-    const matchC = !category || p.category === category
-    return matchQ && matchD && matchC
-  })
+  const filtered = POSTS.filter((p) => matchesFilters(p, query, difficulty, category))
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
