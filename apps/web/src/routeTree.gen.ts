@@ -9,13 +9,20 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
 import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId'
 import { Route as QuestionsQuestionIdRouteImport } from './routes/questions/$questionId'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as QuestionsQuestionIdResultSubmissionIdRouteImport } from './routes/questions/$questionId_.result.$submissionId'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MeRoute = MeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -46,70 +53,97 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestionsQuestionIdResultSubmissionIdRoute =
+  QuestionsQuestionIdResultSubmissionIdRouteImport.update({
+    id: '/questions/$questionId_/result/$submissionId',
+    path: '/questions/$questionId/result/$submissionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
+  '/settings': typeof SettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions/': typeof QuestionsIndexRoute
+  '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
+  '/settings': typeof SettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions': typeof QuestionsIndexRoute
+  '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/me': typeof MeRoute
+  '/settings': typeof SettingsRoute
   '/auth/login': typeof AuthLoginRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions/': typeof QuestionsIndexRoute
+  '/questions/$questionId_/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/me'
+    | '/settings'
     | '/auth/login'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
     | '/questions/'
+    | '/questions/$questionId/result/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/me'
+    | '/settings'
     | '/auth/login'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
     | '/questions'
+    | '/questions/$questionId/result/$submissionId'
   id:
     | '__root__'
     | '/'
     | '/me'
+    | '/settings'
     | '/auth/login'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
     | '/questions/'
+    | '/questions/$questionId_/result/$submissionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MeRoute: typeof MeRoute
+  SettingsRoute: typeof SettingsRoute
   AuthLoginRoute: typeof AuthLoginRoute
   QuestionsQuestionIdRoute: typeof QuestionsQuestionIdRoute
   SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
   QuestionsIndexRoute: typeof QuestionsIndexRoute
+  QuestionsQuestionIdResultSubmissionIdRoute: typeof QuestionsQuestionIdResultSubmissionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/me': {
       id: '/me'
       path: '/me'
@@ -152,16 +186,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/questions/$questionId_/result/$submissionId': {
+      id: '/questions/$questionId_/result/$submissionId'
+      path: '/questions/$questionId/result/$submissionId'
+      fullPath: '/questions/$questionId/result/$submissionId'
+      preLoaderRoute: typeof QuestionsQuestionIdResultSubmissionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MeRoute: MeRoute,
+  SettingsRoute: SettingsRoute,
   AuthLoginRoute: AuthLoginRoute,
   QuestionsQuestionIdRoute: QuestionsQuestionIdRoute,
   SubmissionsSubmissionIdRoute: SubmissionsSubmissionIdRoute,
   QuestionsIndexRoute: QuestionsIndexRoute,
+  QuestionsQuestionIdResultSubmissionIdRoute:
+    QuestionsQuestionIdResultSubmissionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

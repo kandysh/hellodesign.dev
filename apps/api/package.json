@@ -12,13 +12,13 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
-    "bullmq": "^5.53.1",
-    "drizzle-orm": "^0.45.0",
     "hono": "^4.7.7",
     "ioredis": "^5.6.1",
     "@sysdesign/auth": "workspace:*",
     "@sysdesign/db": "workspace:*",
-    "@sysdesign/types": "workspace:*"
+    "@sysdesign/queue": "workspace:*",
+    "@sysdesign/shared": "workspace:*",
+    "@sysdesign/ai": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",

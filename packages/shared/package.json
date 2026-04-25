@@ -1,5 +1,5 @@
 {
-  "name": "@sysdesign/auth",
+  "name": "@sysdesign/shared",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -10,12 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "better-auth": "^1.2.7",
-    "@sysdesign/db": "workspace:*"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@sysdesign/config": "workspace:*",
-    "@types/node": "^22.10.2",
     "typescript": "^5.7.2"
   }
 }

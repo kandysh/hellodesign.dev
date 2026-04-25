@@ -1,32 +1,37 @@
 interface ScoreRingProps {
-  score: number // 0-10
+  score: number // 0-100
   size?: number
   label?: string
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 8) return "#22c55e" // green
-  if (score >= 6) return "#eab308" // yellow
-  if (score >= 4) return "#f97316" // orange
-  return "#ef4444" // red
+  if (score >= 75) return "#4ade80"  // success green
+  if (score >= 50) return "#fbbf24"  // warning amber
+  return "#f87171"                    // error red
 }
 
 export function ScoreRing({ score, size = 80, label }: ScoreRingProps) {
   const radius = (size - 10) / 2
   const circumference = 2 * Math.PI * radius
-  const offset = circumference - (score / 10) * circumference
-  const color = getScoreColor(score)
+  const normalized = Math.max(0, Math.min(100, score))
+  const offset = circumference - (normalized / 100) * circumference
+  const color = getScoreColor(normalized)
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div
+      className="flex flex-col items-center gap-1"
+      role="img"
+      aria-label={`Score: ${Math.round(normalized)} out of 100`}
+    >
       <svg width={size} height={size}>
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
-          strokeWidth={8}
+          stroke="currentColor"
+          strokeWidth={7}
+          className="text-base-300/60"
         />
         <circle
           cx={size / 2}
@@ -34,7 +39,7 @@ export function ScoreRing({ score, size = 80, label }: ScoreRingProps) {
           r={radius}
           fill="none"
           stroke={color}
-          strokeWidth={8}
+          strokeWidth={7}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -43,16 +48,18 @@ export function ScoreRing({ score, size = 80, label }: ScoreRingProps) {
         />
         <text
           x={size / 2}
-          y={size / 2 + 5}
+          y={size / 2 + 4}
           textAnchor="middle"
           fontSize={size * 0.22}
           fontWeight="bold"
           fill={color}
         >
-          {score.toFixed(1)}
+          {Math.round(normalized)}
         </text>
       </svg>
-      {label && <span className="text-xs text-muted-foreground">{label}</span>}
+      {label && (
+        <span className="text-xs text-base-content/50">{label}</span>
+      )}
     </div>
   )
 }

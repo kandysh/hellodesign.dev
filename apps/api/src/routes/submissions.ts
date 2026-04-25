@@ -1,75 +1,215 @@
 import { Hono } from "hono"
-import { db, submissions, evaluations, agentResults, questions } from "@sysdesign/db"
-import { eq } from "drizzle-orm"
-import { evalQueue } from "../lib/queue.js"
+import { streamSSE } from "hono/streaming"
+import { db } from "@sysdesign/db"
+import { redis, submissionChannel } from "../lib/redis.js"
+import { evalQueue } from "@sysdesign/queue"
+import { extractLexicalText, summarizeExcalidraw } from "@sysdesign/shared"
+import type { AgentEvent } from "@sysdesign/shared"
 
 const app = new Hono()
 
-// Create a new submission and enqueue evaluation
+// POST /api/submissions — create submission + enqueue eval job
 app.post("/", async (c) => {
-  const user = c.get("user" as never) as { id: string } | null
-  if (!user) return c.json({ error: "Unauthorized" }, 401)
+  const user = c.get("user" as never) as { id: string } | undefined
+  const sessionId = c.get("sessionId" as never) as string
 
   const body = await c.req.json<{
     questionId: string
-    answerText: string
-    excalidrawJson?: Record<string, unknown>
+    lexicalState: Record<string, unknown>
+    excalidrawData?: unknown[]
+    strategy?: "quick" | "agentic"
   }>()
 
-  const [question] = await db.select().from(questions).where(eq(questions.id, body.questionId))
+  if (!body.questionId || !body.lexicalState) {
+    return c.json({ error: "questionId and lexicalState are required" }, 400)
+  }
+
+  const question = await db.question.findUnique({ where: { id: body.questionId } })
   if (!question) return c.json({ error: "Question not found" }, 404)
 
-  const [submission] = await db
-    .insert(submissions)
-    .values({
-      userId: user.id,
+  // Extract plain text from Lexical JSON for the LLM
+  const lexicalContent = extractLexicalText(body.lexicalState)
+  const excalidrawSummary = body.excalidrawData
+    ? summarizeExcalidraw(body.excalidrawData)
+    : undefined
+
+  const submission = await db.submission.create({
+    data: {
       questionId: body.questionId,
-      answerText: body.answerText,
-      excalidrawJson: body.excalidrawJson ?? null,
-      status: "pending",
-    })
-    .returning()
+      userId: user?.id ?? null,
+      sessionId: user ? null : sessionId,
+      lexicalState: body.lexicalState as object,
+      excalidrawData: body.excalidrawData ? (body.excalidrawData as object) : undefined,
+      status: "PENDING",
+    },
+  })
 
-  if (!submission) return c.json({ error: "Failed to create submission" }, 500)
+  const strategy = body.strategy ?? "agentic"
 
-  await evalQueue.add("evaluate", {
-    submissionId: submission.id,
-    questionId: body.questionId,
-    userId: user.id,
+  // Enqueue with submissionId as jobId for idempotency
+  const job = await evalQueue.add(
+    "evaluate",
+    {
+      submissionId: submission.id,
+      questionId: body.questionId,
+      userId: user?.id,
+      sessionId: user ? undefined : sessionId,
+      strategy,
+      lexicalContent,
+      excalidrawSummary,
+    },
+    { jobId: submission.id },
+  )
+
+  await db.submission.update({
+    where: { id: submission.id },
+    data: { jobId: job.id ?? null },
   })
 
   return c.json({ submissionId: submission.id }, 201)
 })
 
-// Get submission with evaluation results
+// GET /api/submissions/:id — get submission + result
 app.get("/:id", async (c) => {
-  const user = c.get("user" as never) as { id: string } | null
-  if (!user) return c.json({ error: "Unauthorized" }, 401)
-
+  const user = c.get("user" as never) as { id: string } | undefined
+  const sessionId = c.get("sessionId" as never) as string
   const id = c.req.param("id")
 
-  const [submission] = await db
-    .select()
-    .from(submissions)
-    .where(eq(submissions.id, id))
+  const submission = await db.submission.findUnique({
+    where: { id },
+    include: { result: true },
+  })
 
   if (!submission) return c.json({ error: "Not found" }, 404)
-  if (submission.userId !== user.id) return c.json({ error: "Forbidden" }, 403)
 
-  const [evaluation] = await db
-    .select()
-    .from(evaluations)
-    .where(eq(evaluations.submissionId, id))
+  // Authorization: owned by user or matches session
+  const isOwner =
+    (user && submission.userId === user.id) ||
+    (!user && submission.sessionId === sessionId)
+  if (!isOwner) return c.json({ error: "Forbidden" }, 403)
 
-  let agents: typeof agentResults.$inferSelect[] = []
-  if (evaluation) {
-    agents = await db
-      .select()
-      .from(agentResults)
-      .where(eq(agentResults.evaluationId, evaluation.id))
+  return c.json(submission)
+})
+
+// GET /api/submissions/:id/messages — full agent conversation
+app.get("/:id/messages", async (c) => {
+  const user = c.get("user" as never) as { id: string } | undefined
+  const sessionId = c.get("sessionId" as never) as string
+  const id = c.req.param("id")
+
+  const submission = await db.submission.findUnique({
+    where: { id },
+    include: {
+      messages: { orderBy: { createdAt: "asc" } },
+    },
+  })
+
+  if (!submission) return c.json({ error: "Not found" }, 404)
+
+  const isOwner =
+    (user && submission.userId === user.id) ||
+    (!user && submission.sessionId === sessionId)
+  if (!isOwner) return c.json({ error: "Forbidden" }, 403)
+
+  return c.json(submission.messages)
+})
+
+// POST /api/submissions/:id/reply — user sends follow-up reply
+app.post("/:id/reply", async (c) => {
+  const user = c.get("user" as never) as { id: string } | undefined
+  const sessionId = c.get("sessionId" as never) as string
+  const id = c.req.param("id")
+
+  const submission = await db.submission.findUnique({ where: { id } })
+  if (!submission) return c.json({ error: "Not found" }, 404)
+
+  const isOwner =
+    (user && submission.userId === user.id) ||
+    (!user && submission.sessionId === sessionId)
+  if (!isOwner) return c.json({ error: "Forbidden" }, 403)
+
+  if (submission.status !== "FOLLOWUP") {
+    return c.json({ error: "Submission is not waiting for a reply" }, 409)
   }
 
-  return c.json({ submission, evaluation: evaluation ?? null, agents })
+  const body = await c.req.json<{ content: string }>()
+  if (!body.content?.trim()) {
+    return c.json({ error: "content is required" }, 400)
+  }
+
+  const replyText = body.content.trim()
+
+  // Persist the user message
+  await db.agentMessage.create({
+    data: {
+      submissionId: id,
+      role: "USER",
+      content: replyText,
+      metadata: { type: "followup_reply" },
+    },
+  })
+
+  // Notify the waiting eval worker via Redis pub/sub
+  await redis.set(`submission:${id}:reply`, replyText, "EX", 360)
+  await redis.publish(`submission:${id}:reply`, replyText)
+
+  return c.json({ ok: true })
+})
+
+// GET /api/submissions/:id/events — SSE stream
+app.get("/:id/events", async (c) => {
+  const user = c.get("user" as never) as { id: string } | undefined
+  const sessionId = c.get("sessionId" as never) as string
+  const id = c.req.param("id")
+
+  const submission = await db.submission.findUnique({ where: { id } })
+  if (!submission) return c.json({ error: "Not found" }, 404)
+
+  const isOwner =
+    (user && submission.userId === user.id) ||
+    (!user && submission.sessionId === sessionId)
+  if (!isOwner) return c.json({ error: "Forbidden" }, 403)
+
+  // If already terminal, return immediately
+  if (submission.status === "DONE" || submission.status === "FAILED") {
+    return c.json({ status: submission.status }, 200)
+  }
+
+  const channel = submissionChannel(id)
+
+  return streamSSE(c, async (stream) => {
+    const sub = redis.duplicate()
+    await sub.subscribe(channel)
+
+    const keepalive = setInterval(() => {
+      stream.writeSSE({ event: "ping", data: "" }).catch(() => {})
+    }, 15_000)
+
+    sub.on("message", async (_, raw) => {
+      try {
+        const event = JSON.parse(raw) as AgentEvent
+        await stream.writeSSE({
+          event: event.type,
+          data: JSON.stringify(event),
+          id: Date.now().toString(),
+        })
+        if (event.type === "eval_done" || event.type === "error") {
+          clearInterval(keepalive)
+          await sub.unsubscribe()
+          await sub.quit()
+          stream.close()
+        }
+      } catch {
+        // ignore parse errors
+      }
+    })
+
+    stream.onAbort(() => {
+      clearInterval(keepalive)
+      sub.unsubscribe().catch(() => {})
+      sub.quit().catch(() => {})
+    })
+  })
 })
 
 export default app

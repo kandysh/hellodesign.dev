@@ -1,5 +1,5 @@
 {
-  "name": "@sysdesign/auth",
+  "name": "@sysdesign/queue",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -10,8 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "better-auth": "^1.2.7",
-    "@sysdesign/db": "workspace:*"
+    "bullmq": "^5.53.1",
+    "ioredis": "^5.6.1",
+    "@sysdesign/shared": "workspace:*"
   },
   "devDependencies": {
     "@sysdesign/config": "workspace:*",

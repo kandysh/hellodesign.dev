@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  PENDING
+  PROCESSING
+  FOLLOWUP
+  EVALUATING
+  DONE
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  AGENT
+  SYSTEM
+  REASONING
+}
+
+// ─── Auth models (better-auth required schema) ────────────────────────────────
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  name          String?
+  emailVerified Boolean      @default(false)
+  image         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  apiKeys     UserApiKey[]
+  submissions Submission[]
+  sessions    Session[]
+  accounts    Account[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// ─── API key management ───────────────────────────────────────────────────────
+
+model UserApiKey {
+  id           String    @id @default(cuid())
+  userId       String? // null = anonymous session key
+  sessionId    String? // for anonymous users
+  provider     String // "mistral"
+  encryptedKey String
+  iv           String
+  keyHint      String // last 4 chars shown to user
+  validatedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+// ─── Interview content ────────────────────────────────────────────────────────
+
+model Question {
+  id                String     @id @default(cuid())
+  title             String
+  prompt            String     @db.Text
+  difficulty        Difficulty
+  category          String
+  estimatedMins     Int        @default(30)
+  hints             Json // string[]
+  coverageChecklist Json // string[]
+  rubric            Json // RubricConfig
+  isPublished       Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  submissions Submission[]
+}
+
+model Submission {
+  id             String           @id @default(cuid())
+  questionId     String
+  userId         String?
+  sessionId      String?
+  lexicalState   Json // Lexical editor JSON
+  excalidrawData Json? // Excalidraw elements JSON
+  status         SubmissionStatus @default(PENDING)
+  jobId          String?
+  agentJobId     String?
+  createdAt      DateTime         @default(now())
+
+  question Question      @relation(fields: [questionId], references: [id])
+  user     User?         @relation(fields: [userId], references: [id])
+  result   EvalResult?
+  messages AgentMessage[]
+}
+
+model AgentMessage {
+  id           String      @id @default(cuid())
+  submissionId String
+  role         MessageRole
+  content      String      @db.Text
+  metadata     Json? // { type: "followup" | "reasoning" | "evaluation_progress" }
+  createdAt    DateTime    @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+}
+
+model EvalResult {
+  id              String   @id @default(cuid())
+  submissionId    String   @unique
+  overallScore    Float
+  componentScores Json // Record<string, ComponentScore>
+  feedback        String   @db.Text
+  improvements    Json // string[]
+  agentSatisfied  Boolean  @default(false)
+  followupRounds  Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  submission Submission @relation(fields: [submissionId], references: [id])
+}

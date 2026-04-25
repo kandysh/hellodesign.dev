@@ -1,17 +1,104 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@plugin "daisyui";
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
+@plugin "daisyui" {
+  themes: sysdesign --default;
+}
+
+@plugin "daisyui/theme" {
+  name: "sysdesign";
+  default: true;
+  color-scheme: dark;
+
+  --color-primary: oklch(62% 0.214 264);
+  --color-primary-content: oklch(100% 0 0);
+  --color-secondary: oklch(59% 0.221 292);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: oklch(71% 0.166 206);
+  --color-accent-content: oklch(15% 0.02 206);
+  --color-neutral: oklch(22% 0.027 273);
+  --color-neutral-content: oklch(88% 0.017 264);
+  --color-base-100: oklch(13% 0.02 273);
+  --color-base-200: oklch(16% 0.02 273);
+  --color-base-300: oklch(22% 0.027 273);
+  --color-base-content: oklch(89% 0.017 264);
+  --color-info: oklch(73% 0.148 218);
+  --color-info-content: oklch(15% 0.02 218);
+  --color-success: oklch(74% 0.169 154);
+  --color-success-content: oklch(15% 0.02 154);
+  --color-warning: oklch(80% 0.148 77);
+  --color-warning-content: oklch(15% 0.02 77);
+  --color-error: oklch(72% 0.166 20);
+  --color-error-content: oklch(15% 0.02 20);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --border: 1px;
+}
+
+@plugin "@tailwindcss/typography";
+
+*, *::before, *::after {
+  @apply border-base-300/50;
+}
+
+html {
+  color-scheme: dark;
+}
 
 body {
-  @apply m-0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
-    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  @apply m-0 bg-base-100 text-base-content antialiased;
+  font-family: 'Geist Variable', 'Geist', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family:
-    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+code, pre, .font-mono {
+  font-family: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'Cascadia Code', Menlo, monospace;
 }
+
+/* ── Scrollbar styling ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-base-200; }
+::-webkit-scrollbar-thumb { @apply bg-base-300 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-neutral; }
+
+/* ── Focus rings ───────────────────────────────────────────── */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* ── Transition default ────────────────────────────────────── */
+.transition-default {
+  @apply transition-all duration-150 ease-in-out;
+}
+
+/* ── Glass panel ───────────────────────────────────────────── */
+.glass-panel {
+  @apply backdrop-blur-md bg-base-100/70 border border-base-300/40;
+}
+
+/* ── Reasoning trace terminal ──────────────────────────────── */
+.reasoning-trace {
+  font-family: 'Geist Mono Variable', 'Geist Mono', ui-monospace, monospace;
+  @apply text-xs text-success/80 bg-base-300/30 rounded-lg p-3 overflow-auto;
+  line-height: 1.6;
+}
+
+/* ── Lexical editor prose ──────────────────────────────────── */
+.lexical-prose {
+  line-height: 1.8;
+  @apply text-base-content;
+}
+.lexical-prose h1 { @apply text-2xl font-bold mt-4 mb-2; }
+.lexical-prose h2 { @apply text-xl font-semibold mt-3 mb-2; }
+.lexical-prose p  { @apply mb-2; }
+.lexical-prose ul { @apply list-disc list-inside mb-2 space-y-0.5; }
+.lexical-prose ol { @apply list-decimal list-inside mb-2 space-y-0.5; }
+.lexical-prose li { @apply ml-4 text-base-content/90; }
+.lexical-prose blockquote { @apply border-l-4 border-primary/40 pl-4 italic text-base-content/60 my-2; }
+.lexical-prose code { @apply font-mono text-sm bg-base-300/60 px-1.5 py-0.5 rounded text-accent; }
+.lexical-prose pre  { @apply font-mono text-sm bg-base-300/60 p-3 rounded-lg my-2 overflow-x-auto; }
