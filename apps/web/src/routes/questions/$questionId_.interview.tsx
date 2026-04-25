@@ -221,7 +221,7 @@ function InterviewPage() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string }
-        throw new Error(err.error ?? "Failed to start interview")
+        throw new Error(err.error ?? `Failed to start interview (HTTP ${res.status})`)
       }
       return res.json() as Promise<{ submissionId: string }>
     },
@@ -266,7 +266,7 @@ function InterviewPage() {
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string }
-        throw new Error(err.error ?? "Failed to send reply")
+        throw new Error(err.error ?? `Failed to send reply (HTTP ${res.status})`)
       }
       setPhase("thinking")
     } catch (err) {
