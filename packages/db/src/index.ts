@@ -1,9 +1,3 @@
-import { PrismaClient } from "@prisma/client"
-
-export const db = new PrismaClient({
-  log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-})
-
-export * from "./crypto.js"
-export type { Prisma } from "@prisma/client"
-export { PrismaClient } from "@prisma/client"
+export { prisma as db } from "./client.js"; // exports instance of prisma
+export * from "../generated/prisma/client.js"; // exports generated types from prisma
+export * from "./crypto.js";

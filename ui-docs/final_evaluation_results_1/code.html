@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ArchMaster - Interview Results</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#d4e4fa",
+                        "surface-container": "#122131",
+                        "on-error-container": "#ffdad6",
+                        "background": "#051424",
+                        "on-tertiary-fixed-variant": "#004c69",
+                        "tertiary-fixed": "#c4e7ff",
+                        "error-container": "#93000a",
+                        "on-primary-container": "#00302b",
+                        "on-tertiary": "#00354a",
+                        "on-error": "#690005",
+                        "surface-dim": "#051424",
+                        "surface-tint": "#6bd8cb",
+                        "inverse-primary": "#006a61",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-primary-fixed-variant": "#005049",
+                        "primary-container": "#29a195",
+                        "on-primary-fixed": "#00201d",
+                        "error": "#ffb4ab",
+                        "on-background": "#d4e4fa",
+                        "secondary-fixed": "#dae2fd",
+                        "on-tertiary-fixed": "#001e2c",
+                        "on-primary": "#003732",
+                        "outline": "#879391",
+                        "tertiary": "#7bd0ff",
+                        "surface-container-lowest": "#010f1f",
+                        "outline-variant": "#3d4947",
+                        "surface-container-low": "#0d1c2d",
+                        "inverse-surface": "#d4e4fa",
+                        "on-secondary-fixed": "#131b2e",
+                        "primary-fixed": "#89f5e7",
+                        "tertiary-fixed-dim": "#7bd0ff",
+                        "on-tertiary-container": "#002d40",
+                        "primary-fixed-dim": "#6bd8cb",
+                        "primary": "#6bd8cb",
+                        "surface": "#051424",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "surface-bright": "#2c3a4c",
+                        "surface-container-highest": "#273647",
+                        "secondary-container": "#3f465c",
+                        "inverse-on-surface": "#233143",
+                        "surface-container-high": "#1c2b3c",
+                        "tertiary-container": "#009bd1",
+                        "surface-variant": "#273647",
+                        "on-secondary": "#283044",
+                        "secondary": "#bec6e0",
+                        "on-secondary-container": "#adb4ce",
+                        "on-surface-variant": "#bcc9c6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "toolbar-height": "56px",
+                        "lg": "24px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "md": "16px",
+                        "sm": "8px",
+                        "unit": "4px",
+                        "xl": "40px",
+                        "sidebar-width": "280px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Space Grotesk"],
+                        "label-md": ["Space Grotesk"],
+                        "code": ["monospace"],
+                        "headline-lg": ["Manrope"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Manrope"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["11px", { "lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "code": ["13px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400" }],
+                        "headline-sm": ["18px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "1.5", "letterSpacing": "0.01em", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen antialiased flex">
+<!-- Shared Component: SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-[280px] border-r border-slate-800 bg-slate-900 dark:bg-slate-900 flex flex-col py-6 z-50">
+<!-- Brand/Header -->
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-teal-500 dark:text-teal-400" style="font-variation-settings: 'FILL' 1;">architecture</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter text-teal-500 dark:text-teal-400">ArchMaster</h1>
+<p class="font-label-sm text-label-sm text-slate-400 uppercase tracking-wider mt-1">System Design Prep</p>
+</div>
+</div>
+</div>
+<!-- Main Navigation -->
+<div class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined text-[20px]">list_alt</span>
+                Problem Library
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined text-[20px]">architecture</span>
+                Practice Room
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-teal-500/10 text-teal-500 border-r-2 border-teal-500 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight scale-[0.98] duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+                Interview Results
+            </a>
+</div>
+<!-- Footer Navigation -->
+<div class="px-4 mt-auto space-y-1 pt-6 border-t border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+                Support
+            </a>
+<!-- User Profile Snippet -->
+<div class="mt-4 flex items-center gap-3 px-3 py-2">
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden flex-shrink-0 border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close up portrait of a professional man in a dark modern studio setting with dramatic side lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAg1avIWXCdEe3dGJRocSF8MJ5vqjfFlgLUkaVPiZg8fSA1xbLx_VUNSlye6jL7a5OwXPgiFYUMoj1JIYaZJftna8E3WE80hh6meHkhbslczb6tWzZ6uosrCFAubOAEbjZkB8WBGlFOBcDsk4v3aN4TJYUWnCP588wkskdNAM0Pz_ni6asXcoZTHMKtQ84-9R3aPZlLvTGz4ibNagrYUtPHgNIJ1HJqFP4jRicXwCCqXEcBy47CPVYfhVgdmvijgOwdN6LxedQHNpER"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-label-md text-label-md text-on-surface truncate">Alex Chen</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">L5 Engineer</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 ml-[280px] flex flex-col min-h-screen">
+<!-- Shared Component: TopAppBar -->
+<header class="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md dark:bg-slate-950/80 flex items-center justify-between px-8 h-16">
+<!-- Contextual Breadcrumb (replaces missing search logic for this specific page intent) -->
+<div class="flex items-center gap-2 text-slate-400 font-manrope text-sm">
+<a class="hover:text-teal-400 transition-all" href="#">Results</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-teal-500 font-bold">Evaluation: Distributed Rate Limiter</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-teal-400 transition-all focus:ring-2 focus:ring-teal-500/20 rounded-full p-1.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+</button>
+<button class="text-slate-400 hover:text-teal-400 transition-all focus:ring-2 focus:ring-teal-500/20 rounded-full p-1.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+<button class="bg-teal-500 hover:bg-teal-400 text-slate-950 font-manrope text-sm font-semibold px-4 py-2 rounded-lg transition-colors focus:ring-2 focus:ring-teal-500/20 ml-2">
+                    New Session
+                </button>
+</div>
+</header>
+<!-- Page Canvas -->
+<main class="flex-1 p-lg overflow-y-auto w-full max-w-7xl mx-auto">
+<!-- Page Header -->
+<div class="mb-8 flex items-end justify-between">
+<div>
+<p class="font-label-sm text-label-sm text-primary tracking-widest uppercase mb-2">Evaluation Completed</p>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Distributed Rate Limiter</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-2xl">Your design architecture has been analyzed. Below is the comprehensive breakdown of your system's performance, tradeoffs, and areas for improvement.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 rounded-lg border border-outline-variant text-on-surface hover:bg-surface-variant transition-colors font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span> Export PDF
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Overall Score (Hero Card) -->
+<div class="col-span-1 md:col-span-4 bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col relative overflow-hidden group">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+<div class="flex items-center justify-between mb-4 relative z-10">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Overall Grade</h3>
+<span class="material-symbols-outlined text-outline">military_tech</span>
+</div>
+<div class="flex-1 flex flex-col items-center justify-center relative z-10 py-6">
+<div class="relative flex items-center justify-center w-32 h-32 mb-4">
+<!-- Faux Circular Progress using absolute positioning -->
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="stroke-surface-container-high" cx="50" cy="50" fill="none" r="45" stroke-width="8"></circle>
+<circle class="stroke-primary" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.7" stroke-dashoffset="33.9" stroke-linecap="round" stroke-width="8"></circle> <!-- 88% -->
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg text-on-surface">88</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 100</span>
+</div>
+</div>
+<div class="bg-inverse-primary/20 text-primary px-3 py-1 rounded-full font-label-sm text-label-sm border border-primary/30 uppercase tracking-widest">
+                            Strong Hire
+                        </div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-center mt-4 relative z-10">
+                        Demonstrated strong understanding of distributed caching and token bucket algorithms.
+                    </p>
+</div>
+<!-- Category Breakdown -->
+<div class="col-span-1 md:col-span-8 bg-surface-container rounded-xl border border-outline-variant p-6 flex flex-col">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">System Dimensions</h3>
+<span class="material-symbols-outlined text-outline">radar</span>
+</div>
+<div class="flex-1 flex flex-col justify-between gap-4">
+<!-- Metric: Scalability -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary">zoom_out_map</span>
+<span class="font-label-md text-label-md text-on-surface">Scalability</span>
+</div>
+<span class="font-code text-code text-on-surface-variant">95/100</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[95%] rounded-full"></div>
+</div>
+</div>
+<!-- Metric: Reliability -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">gpp_good</span>
+<span class="font-label-md text-label-md text-on-surface">Reliability &amp; Fault Tolerance</span>
+</div>
+<span class="font-code text-code text-on-surface-variant">85/100</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[85%] rounded-full"></div>
+</div>
+</div>
+<!-- Metric: Security -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">lock</span>
+<span class="font-label-md text-label-md text-on-surface">Security</span>
+</div>
+<span class="font-code text-code text-on-surface-variant">70/100</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-on-surface-variant w-[70%] rounded-full"></div>
+</div>
+</div>
+<!-- Metric: Cost -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-error">payments</span>
+<span class="font-label-md text-label-md text-on-surface">Cost Efficiency</span>
+</div>
+<span class="font-code text-code text-on-surface-variant">60/100</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-error w-[60%] rounded-full"></div>
+</div>
+</div>
+<!-- Metric: Trade-offs -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-secondary">balance</span>
+<span class="font-label-md text-label-md text-on-surface">Trade-offs Articulation</span>
+</div>
+<span class="font-code text-code text-on-surface-variant">90/100</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[90%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Recommendations -->
+<div class="col-span-1 md:col-span-12 bg-surface-container rounded-xl border border-outline-variant p-6">
+<div class="flex items-center gap-3 mb-6 border-b border-outline-variant/30 pb-4">
+<span class="material-symbols-outlined text-primary text-[24px]">model_training</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">AI Architectural Recommendations</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Recommendation 1 -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-error mt-0.5" style="font-variation-settings: 'FILL' 1;">warning</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1">Cost Optimization in Redis Layer</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                                        Your design proposed a multi-region Redis cluster for the token bucket data. While highly available, cross-region replication for every request is cost-prohibitive. 
+                                        <strong>Action:</strong> Consider a local in-memory cache (like Guava) synchronized periodically with a central Redis, accepting eventual consistency for lower infrastructure cost.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Recommendation 2 -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary"></div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-tertiary mt-0.5" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1">Handling Thundering Herd</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                                        When a highly active user's bucket resets, queued requests might flood the backend simultaneously. 
+                                        <strong>Action:</strong> Introduce a jitter mechanism to the bucket refill interval or implement exponential backoff on the client-side 429 response handling.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Recommendation 3 -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-on-surface-variant"></div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-on-surface-variant mt-0.5" style="font-variation-settings: 'FILL' 1;">security</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1">Malicious Actor Mitigation</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                                        The current routing relies solely on IP addresses for limiting, which is vulnerable to IP spoofing or shared NAT gateways.
+                                        <strong>Action:</strong> Implement a hybrid key strategy combining IP address with a required API key or User ID to accurately isolate traffic sources.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Recommendation 4 -->
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/50 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-1">Excellent Load Balancer Config</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                                        Your choice of L7 load balancing with consistent hashing ensures that requests for the same user ID consistently hit the same rate limiter node, maximizing local cache hit rates. <strong>Keep this pattern for future designs.</strong>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

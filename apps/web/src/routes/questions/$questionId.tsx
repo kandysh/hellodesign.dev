@@ -4,7 +4,6 @@ import {
   useState,
   lazy,
   Suspense,
-  useCallback,
   useEffect,
   useRef,
 } from "react"
@@ -29,6 +28,10 @@ import {
   Layers,
   Info,
   Mic,
+  Clock,
+  ListTodo,
+  BookOpen,
+  ArrowLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -66,14 +69,27 @@ export const Route = createFileRoute("/questions/$questionId")({
   component: WorkspacePage,
 })
 
+function useElapsedTimer() {
+  const [elapsed, setElapsed] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setElapsed((s) => s + 1), 1000)
+    return () => clearInterval(id)
+  }, [])
+  const m = Math.floor(elapsed / 60)
+  const s = elapsed % 60
+  return `${m}:${s.toString().padStart(2, "0")}`
+}
+
 function WorkspacePage() {
   const { questionId } = Route.useParams()
   const navigate = useNavigate()
   const { toast } = useToast()
   const apiKey = useApiKey()
+  const elapsed = useElapsedTimer()
 
   // Panel state
   const [leftCollapsed, setLeftCollapsed] = useState(false)
+  const [sidebarTab, setSidebarTab] = useState<"overview" | "checklist">("overview")
   const [hintsOpen, setHintsOpen] = useState(false)
   const [checklist, setChecklist] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<"write" | "diagram">("write")
@@ -98,6 +114,8 @@ function WorkspacePage() {
 
   // Word count derived from editor
   const wordCount = answerText.trim() ? answerText.trim().split(/\s+/).length : 0
+  const checklistProgress = checklist.size
+  const checklistTotal = CHECKLIST_ITEMS.length
 
   function toggleChecklist(item: string) {
     setChecklist((prev) => {
@@ -212,7 +230,6 @@ function WorkspacePage() {
 
   function handleSendAgentMessage(msg: string) {
     setAgentMessages((prev) => [...prev, { role: "user", content: msg, timestamp: new Date() }])
-    // POST reply to backend
     fetch(`${API}/api/submissions/${currentSubmissionId}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -257,107 +274,234 @@ function WorkspacePage() {
           leftCollapsed ? "w-10" : "w-72",
         )}
       >
-        {/* Collapse toggle */}
-        <button
-          type="button"
-          onClick={() => setLeftCollapsed((v) => !v)}
-          className="flex items-center justify-end gap-1 border-b border-base-300/40 px-2 py-2.5 text-base-content/40 hover:text-base-content/70 transition-default"
-          aria-label={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {leftCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-          {!leftCollapsed && (
-            <span className="text-xs text-base-content/40">Collapse</span>
-          )}
-        </button>
-
-        {!leftCollapsed && (
-          <div className="flex-1 overflow-y-auto p-4 space-y-5">
-            {/* Question header */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <DifficultyBadge difficulty={question.difficulty} solid />
-                <span className="text-xs text-base-content/40">
-                  {question.category.replace(/-/g, " ")}
-                </span>
+        {/* Sidebar header with collapse + tabs */}
+        <div className="shrink-0 border-b border-base-300/40">
+          {leftCollapsed ? (
+            <button
+              type="button"
+              onClick={() => setLeftCollapsed(false)}
+              className="flex w-full items-center justify-center py-3 text-base-content/40 hover:text-base-content/70 transition-default"
+              aria-label="Expand sidebar"
+            >
+              <ChevronRight size={14} />
+            </button>
+          ) : (
+            <>
+              {/* Tab row + collapse button */}
+              <div className="flex items-center px-2 pt-2 gap-1">
+                <SidebarTabBtn
+                  active={sidebarTab === "overview"}
+                  onClick={() => setSidebarTab("overview")}
+                  icon={<BookOpen size={12} />}
+                  label="Problem"
+                />
+                <SidebarTabBtn
+                  active={sidebarTab === "checklist"}
+                  onClick={() => setSidebarTab("checklist")}
+                  icon={<ListTodo size={12} />}
+                  label={checklistProgress > 0 ? `Checklist ${checklistProgress}/${checklistTotal}` : "Checklist"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setLeftCollapsed(true)}
+                  className="ml-auto p-1.5 rounded-lg text-base-content/30 hover:text-base-content/60 hover:bg-base-300/30 transition-default"
+                  aria-label="Collapse sidebar"
+                >
+                  <ChevronLeft size={13} />
+                </button>
               </div>
-              <h2 className="text-base font-semibold leading-snug text-base-content">
-                {question.title}
-              </h2>
-            </div>
 
-            {/* Description */}
-            <div className="prose prose-sm prose-invert max-w-none text-xs text-base-content/60 leading-relaxed [&_p]:mb-1.5">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {question.description}
-              </ReactMarkdown>
-            </div>
-
-            {/* Hints */}
-            <div className="rounded-xl border border-base-300/40 bg-base-300/10 overflow-hidden">
-              <button
-                type="button"
-                onClick={() => setHintsOpen((v) => !v)}
-                className="flex w-full items-center justify-between px-3 py-2.5 text-sm font-medium transition-default hover:bg-base-300/20"
-              >
-                <span className="flex items-center gap-2">
-                  {hintsOpen ? (
-                    <Unlock size={13} className="text-primary" />
-                  ) : (
-                    <Lock size={13} className="text-base-content/40" />
-                  )}
-                  Hints
-                </span>
-                {hintsOpen ? <ChevronLeft size={13} className="rotate-90" /> : <ChevronRight size={13} className="-rotate-90" />}
-              </button>
-              {hintsOpen && question.rubricHints?.length > 0 && (
-                <div className="border-t border-base-300/40 px-3 py-2.5 space-y-1.5">
-                  {question.rubricHints.map((hint, i) => (
-                    <p key={i} className="text-xs text-base-content/60">
-                      • {hint}
-                    </p>
-                  ))}
+              {/* Checklist progress bar */}
+              {checklistProgress > 0 && (
+                <div className="px-3 pb-2 pt-1.5">
+                  <div className="h-0.5 w-full rounded-full bg-base-300/40 overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all duration-300"
+                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%` }}
+                    />
+                  </div>
                 </div>
               )}
-            </div>
+            </>
+          )}
+        </div>
 
-            {/* What to cover checklist */}
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/40">
-                What to cover
-              </p>
-              <div className="space-y-1.5">
-                {CHECKLIST_ITEMS.map((item) => {
-                  const checked = checklist.has(item)
-                  return (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => toggleChecklist(item)}
+        {!leftCollapsed && (
+          <div className="flex-1 overflow-y-auto">
+            {/* ── Overview tab ── */}
+            {sidebarTab === "overview" && (
+              <div className="p-4 space-y-5">
+                {/* Question header */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <DifficultyBadge difficulty={question.difficulty} solid />
+                    <span className="text-xs text-base-content/40 capitalize">
+                      {question.category.replace(/-/g, " ")}
+                    </span>
+                  </div>
+                  <h2 className="text-sm font-semibold leading-snug text-base-content">
+                    {question.title}
+                  </h2>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+                    Description
+                  </p>
+                  <div className="prose prose-sm prose-invert max-w-none text-xs text-base-content/60 leading-relaxed [&_p]:mb-1.5">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {question.description}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+
+                {/* Hints */}
+                <div className="rounded-xl border border-base-300/40 bg-base-300/10 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setHintsOpen((v) => !v)}
+                    className="flex w-full items-center justify-between px-3 py-2.5 text-xs font-medium transition-default hover:bg-base-300/20"
+                  >
+                    <span className="flex items-center gap-2">
+                      {hintsOpen ? (
+                        <Unlock size={12} className="text-primary" />
+                      ) : (
+                        <Lock size={12} className="text-base-content/40" />
+                      )}
+                      <span className={hintsOpen ? "text-base-content/70" : "text-base-content/50"}>
+                        {hintsOpen ? "Hide hints" : "Reveal hints"}
+                      </span>
+                    </span>
+                    <ChevronRight
+                      size={12}
                       className={cn(
-                        "flex items-center gap-2 text-xs w-full text-left rounded-lg px-2 py-1.5 transition-default hover:bg-base-300/30",
-                        checked ? "text-base-content/80" : "text-base-content/50",
+                        "text-base-content/30 transition-transform duration-150",
+                        hintsOpen && "rotate-90",
+                      )}
+                    />
+                  </button>
+                  {hintsOpen && question.rubricHints?.length > 0 && (
+                    <div className="border-t border-base-300/40 px-3 py-2.5 space-y-2">
+                      {question.rubricHints.map((hint, i) => (
+                        <p key={i} className="text-xs text-base-content/60 flex gap-1.5">
+                          <span className="text-primary/50 shrink-0">›</span>
+                          {hint}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* API Key at bottom of overview */}
+                <div className="pt-1">
+                  <ApiKeyInput />
+                </div>
+              </div>
+            )}
+
+            {/* ── Checklist tab ── */}
+            {sidebarTab === "checklist" && (
+              <div className="p-4 space-y-5">
+                <div>
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+                    What to cover
+                  </p>
+                  <p className="text-xs text-base-content/40 mb-3">
+                    Mark each section as you complete it.
+                  </p>
+                  <div className="space-y-1">
+                    {CHECKLIST_ITEMS.map((item) => {
+                      const checked = checklist.has(item)
+                      return (
+                        <button
+                          key={item}
+                          type="button"
+                          onClick={() => toggleChecklist(item)}
+                          className={cn(
+                            "flex items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 transition-default",
+                            checked
+                              ? "bg-primary/8 text-base-content/80 hover:bg-primary/12"
+                              : "text-base-content/50 hover:bg-base-300/30 hover:text-base-content/70",
+                          )}
+                        >
+                          {checked ? (
+                            <CheckSquare size={13} className="text-primary shrink-0" />
+                          ) : (
+                            <Square size={13} className="text-base-content/25 shrink-0" />
+                          )}
+                          <span className="text-xs">{item}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Progress summary */}
+                <div className="rounded-xl border border-base-300/40 bg-base-300/10 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+                      Progress
+                    </span>
+                    <span
+                      className={cn(
+                        "text-xs font-semibold",
+                        checklistProgress === checklistTotal
+                          ? "text-success"
+                          : "text-base-content/50",
                       )}
                     >
-                      {checked ? (
-                        <CheckSquare size={13} className="text-primary shrink-0" />
-                      ) : (
-                        <Square size={13} className="text-base-content/30 shrink-0" />
+                      {checklistProgress}/{checklistTotal}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-base-300/40 overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-500",
+                        checklistProgress === checklistTotal ? "bg-success" : "bg-primary",
                       )}
-                      {item}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%` }}
+                    />
+                  </div>
+                  {checklistProgress === checklistTotal && (
+                    <p className="mt-2 text-xs text-success/80">
+                      ✓ All sections covered — great work!
+                    </p>
+                  )}
+                </div>
 
-            {/* API Key */}
-            <ApiKeyInput />
+                {/* API Key */}
+                <ApiKeyInput />
+              </div>
+            )}
           </div>
         )}
       </aside>
 
       {/* ── Center panel ───────────────────────────────────────── */}
       <div className="flex flex-1 flex-col min-w-0 relative">
+        {/* Question context bar */}
+        <div className="flex items-center gap-3 border-b border-base-300/40 bg-base-200/30 px-4 py-2 shrink-0">
+          <Link
+            to="/questions"
+            className="flex items-center gap-1 text-xs text-base-content/35 hover:text-base-content/60 transition-default shrink-0"
+          >
+            <ArrowLeft size={11} />
+            Questions
+          </Link>
+          <span className="text-base-content/20 text-xs">/</span>
+          <span className="truncate text-xs font-medium text-base-content/70 min-w-0">
+            {question.title}
+          </span>
+          <div className="ml-auto flex items-center gap-3 shrink-0">
+            <DifficultyBadge difficulty={question.difficulty} />
+            <span className="flex items-center gap-1 text-xs text-base-content/35 font-mono tabular-nums">
+              <Clock size={11} />
+              {elapsed}
+            </span>
+          </div>
+        </div>
+
         {/* Tab bar */}
         <div className="flex items-center border-b border-base-300/40 bg-base-200/20 px-4 gap-0">
           <TabButton
@@ -419,10 +563,10 @@ function WorkspacePage() {
         </div>
 
         {/* Bottom action bar */}
-        <div className="flex items-center justify-between gap-4 border-t border-base-300/40 bg-base-200/40 px-4 py-2.5">
-          {/* Left: counts */}
-          <div className="flex items-center gap-3 text-xs text-base-content/40">
-            <span>{wordCount} words</span>
+        <div className="flex items-center justify-between gap-4 border-t border-base-300/40 bg-base-200/40 px-4 py-2.5 shrink-0">
+          {/* Left: word count + diagram indicator */}
+          <div className="flex items-center gap-3 text-xs text-base-content/40 min-w-0">
+            <span className={cn(wordCount > 0 && "text-base-content/60")}>{wordCount} words</span>
             {hasExcalidrawElements && (
               <span className="flex items-center gap-1">
                 <Layers size={10} className="text-primary/60" />
@@ -532,6 +676,36 @@ function TabButton({
         active
           ? "border-primary text-base-content"
           : "border-transparent text-base-content/50 hover:text-base-content/80",
+      )}
+    >
+      {icon}
+      {label}
+    </button>
+  )
+}
+
+// ── Sidebar tab button ─────────────────────────────────────────────────────
+
+function SidebarTabBtn({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean
+  onClick: () => void
+  icon: React.ReactNode
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-1.5 flex-1 justify-center rounded-lg px-2 py-1.5 text-[11px] font-medium transition-default",
+        active
+          ? "bg-base-300/50 text-base-content"
+          : "text-base-content/40 hover:text-base-content/70 hover:bg-base-300/20",
       )}
     >
       {icon}

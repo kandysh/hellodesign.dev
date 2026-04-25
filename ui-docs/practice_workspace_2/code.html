@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Practice Workspace - ArchMaster</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@500;600;700&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#c4e7ff",
+                      "on-primary-fixed": "#00201d",
+                      "surface-variant": "#273647",
+                      "on-tertiary-fixed-variant": "#004c69",
+                      "secondary-fixed": "#dae2fd",
+                      "primary": "#6bd8cb",
+                      "surface-container": "#122131",
+                      "secondary-container": "#3f465c",
+                      "surface-container-highest": "#273647",
+                      "error": "#ffb4ab",
+                      "outline": "#879391",
+                      "on-tertiary-fixed": "#001e2c",
+                      "on-tertiary": "#00354a",
+                      "surface-dim": "#051424",
+                      "on-error": "#690005",
+                      "inverse-primary": "#006a61",
+                      "inverse-surface": "#d4e4fa",
+                      "primary-fixed-dim": "#6bd8cb",
+                      "on-primary": "#003732",
+                      "surface-container-high": "#1c2b3c",
+                      "on-background": "#d4e4fa",
+                      "outline-variant": "#3d4947",
+                      "surface-bright": "#2c3a4c",
+                      "surface": "#051424",
+                      "on-tertiary-container": "#002d40",
+                      "inverse-on-surface": "#233143",
+                      "background": "#051424",
+                      "surface-container-lowest": "#010f1f",
+                      "primary-fixed": "#89f5e7",
+                      "tertiary-fixed-dim": "#7bd0ff",
+                      "on-surface": "#d4e4fa",
+                      "on-secondary": "#283044",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "on-error-container": "#ffdad6",
+                      "surface-tint": "#6bd8cb",
+                      "on-primary-fixed-variant": "#005049",
+                      "tertiary-container": "#009bd1",
+                      "on-secondary-container": "#adb4ce",
+                      "on-secondary-fixed": "#131b2e",
+                      "on-primary-container": "#00302b",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "primary-container": "#29a195",
+                      "error-container": "#93000a",
+                      "on-surface-variant": "#bcc9c6",
+                      "secondary": "#bec6e0",
+                      "surface-container-low": "#0d1c2d",
+                      "tertiary": "#7bd0ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "sidebar-width": "280px",
+                      "toolbar-height": "56px",
+                      "sm": "8px",
+                      "xl": "40px",
+                      "lg": "24px",
+                      "unit": "4px",
+                      "md": "16px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "code": [
+                              "monospace"
+                      ],
+                      "headline-sm": [
+                              "Manrope"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "label-md": [
+                              "Space Grotesk"
+                      ],
+                      "label-sm": [
+                              "Space Grotesk"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "headline-lg": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "code": [
+                              "13px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0.01em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "label-sm": [
+                              "11px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.08em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        /* Subtle grid background for the canvas */
+        .bg-grid-pattern {
+            background-image: radial-gradient(var(--tw-colors-outline-variant) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Hide scrollbar for clean editor */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md h-screen w-screen overflow-hidden flex">
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-0 h-full w-[280px] border-r border-slate-800 bg-slate-900 flex flex-col py-6 z-50">
+<!-- Brand -->
+<div class="px-6 mb-8 flex flex-col">
+<span class="text-xl font-bold tracking-tighter text-teal-500">ArchMaster</span>
+<span class="text-xs text-slate-400 mt-1 uppercase tracking-wider">System Design Prep</span>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex-1 flex flex-col gap-1">
+<a class="px-6 py-3 flex items-center gap-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="px-6 py-3 flex items-center gap-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+                Problem Library
+            </a>
+<a class="px-6 py-3 flex items-center gap-3 bg-teal-500/10 text-teal-500 border-r-2 border-teal-500 font-manrope text-sm font-medium tracking-tight scale-[0.98] duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="architecture">architecture</span>
+                Practice Room
+            </a>
+<a class="px-6 py-3 flex items-center gap-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                Interview Results
+            </a>
+</nav>
+<!-- Footer Tabs -->
+<div class="mt-auto flex flex-col gap-1 border-t border-slate-800 pt-4">
+<a class="px-6 py-3 flex items-center gap-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="px-6 py-3 flex items-center gap-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-colors duration-200 font-manrope text-sm font-medium tracking-tight" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Support
+            </a>
+<!-- User Profile Avatar (Simplified for footer location) -->
+<div class="px-6 py-4 mt-2 flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant flex items-center justify-center text-primary overflow-hidden">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface">User Profile</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex flex-col flex-1 ml-[280px] w-[calc(100%-280px)] h-full relative">
+<!-- TopAppBar Component -->
+<header class="sticky top-0 z-40 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-8 h-16 flex-shrink-0">
+<!-- Search Bar (on_left) -->
+<div class="flex items-center w-64">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full bg-surface-container border border-slate-800 rounded-DEFAULT py-1.5 pl-9 pr-4 font-manrope text-sm text-on-surface placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500/50 transition-all" placeholder="Search resources..." type="text"/>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="bg-primary text-on-primary font-label-md text-label-md px-4 py-2 rounded-DEFAULT hover:brightness-110 transition-all">
+                    New Session
+                </button>
+<div class="flex items-center gap-2 border-l border-slate-800 pl-4">
+<button class="text-slate-400 hover:text-teal-400 transition-all w-8 h-8 flex items-center justify-center rounded-DEFAULT hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="notifications_active">notifications_active</span>
+</button>
+<button class="text-slate-400 hover:text-teal-400 transition-all w-8 h-8 flex items-center justify-center rounded-DEFAULT hover:bg-surface-container-high">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Three-Pane Workspace -->
+<main class="flex-1 flex overflow-hidden w-full bg-background">
+<!-- LEFT PANE: Requirements -->
+<section class="w-[320px] flex-shrink-0 border-r border-outline-variant bg-surface flex flex-col h-full z-10 shadow-[4px_0_12px_rgba(0,0,0,0.1)]">
+<div class="p-md border-b border-outline-variant flex items-center justify-between bg-surface-container-lowest">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Design Twitter</h2>
+<span class="px-2 py-1 bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded-DEFAULT border border-outline-variant">EASY</span>
+</div>
+<div class="p-md overflow-y-auto flex-1 no-scrollbar flex flex-col gap-6">
+<!-- Core Prompt -->
+<div>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4">
+                            Design a simplified version of Twitter where users can post tweets, follow other users, and view a feed of tweets from users they follow.
+                        </p>
+</div>
+<!-- Functional Reqs -->
+<div class="flex flex-col gap-2">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-widest border-b border-outline-variant pb-1">Functional</h3>
+<ul class="flex flex-col gap-2 mt-2">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Post a tweet (text only).</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">Follow/Unfollow users.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">View user timeline (own tweets).</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">check_circle</span>
+<span class="font-body-sm text-body-sm text-on-surface">View home timeline (feed).</span>
+</li>
+</ul>
+</div>
+<!-- Non-Functional Reqs -->
+<div class="flex flex-col gap-2 mt-2">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-widest border-b border-outline-variant pb-1">Non-Functional</h3>
+<ul class="flex flex-col gap-2 mt-2">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline mt-0.5">speed</span>
+<span class="font-body-sm text-body-sm text-on-surface">High availability is critical.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline mt-0.5">timeline</span>
+<span class="font-body-sm text-body-sm text-on-surface">Read-heavy system (100:1 read/write ratio).</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline mt-0.5">timer</span>
+<span class="font-body-sm text-body-sm text-on-surface">Fast feed generation (under 200ms).</span>
+</li>
+</ul>
+</div>
+</div>
+</section>
+<!-- CENTER PANE: Diagramming Canvas -->
+<section class="flex-1 relative bg-surface-dim bg-grid-pattern h-full flex flex-col overflow-hidden">
+<!-- Canvas Toolbar -->
+<div class="absolute top-4 left-1/2 -translate-x-1/2 bg-surface border border-outline-variant rounded-full px-2 py-1.5 flex items-center gap-1 shadow-lg z-20 backdrop-blur-md">
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors bg-surface-container text-primary">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+</button>
+<div class="w-[1px] h-4 bg-outline-variant mx-1"></div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">rectangle</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">change_history</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">arrow_right_alt</span>
+</button>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">title</span>
+</button>
+<div class="w-[1px] h-4 bg-outline-variant mx-1"></div>
+<button class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">ink_eraser</span>
+</button>
+</div>
+<!-- Canvas Area (Mocked Nodes) -->
+<div class="relative w-full h-full p-8 flex items-center justify-center">
+<!-- Node: API Gateway -->
+<div class="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2 bg-surface-container border-2 border-primary-fixed border-dashed rounded-lg p-4 w-48 shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex flex-col items-center gap-2 group cursor-pointer hover:border-solid">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
+<span class="material-symbols-outlined">router</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-center">API Gateway</span>
+<span class="font-code text-code text-primary text-[10px] px-2 py-0.5 bg-primary/10 rounded-DEFAULT border border-primary/20">Load Balancer</span>
+</div>
+<!-- Node: Tweet Service -->
+<div class="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-surface-container border-2 border-tertiary-fixed border-dashed rounded-lg p-4 w-48 shadow-[0_4px_24px_rgba(0,0,0,0.2)] flex flex-col items-center gap-2 cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary mb-1">
+<span class="material-symbols-outlined">send</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface text-center">Write Service</span>
+<span class="font-code text-code text-tertiary text-[10px] px-2 py-0.5 bg-tertiary/10 rounded-DEFAULT border border-tertiary/20">Microservice</span>
+</div>
+<!-- Connection Line Mock (CSS) -->
+<div class="absolute top-1/3 left-[calc(25%+4rem)] w-[calc(25%-6rem)] h-[2px] bg-outline-variant border-t-2 border-dashed border-outline-variant z-0 flex items-center justify-center">
+<span class="absolute right-[-8px] text-outline-variant material-symbols-outlined text-[20px] transform translate-y-[-0.5px]">arrow_right</span>
+</div>
+</div>
+<!-- Zoom Controls -->
+<div class="absolute bottom-4 left-4 bg-surface-container border border-outline-variant rounded-DEFAULT flex items-center shadow-md">
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="font-code text-[11px] text-on-surface-variant px-2 w-12 text-center">100%</span>
+<button class="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors border-l border-outline-variant">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</section>
+<!-- RIGHT PANE: Lexical Editor -->
+<section class="w-[380px] flex-shrink-0 border-l border-outline-variant bg-surface flex flex-col h-full z-10 shadow-[-4px_0_12px_rgba(0,0,0,0.1)]">
+<!-- Editor Header/Toolbar -->
+<div class="flex flex-col border-b border-outline-variant bg-surface-container-lowest">
+<div class="p-md flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Design Doc</h2>
+<button class="text-primary hover:text-primary-fixed font-label-sm text-label-sm uppercase tracking-widest transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">save</span> Save
+                        </button>
+</div>
+<!-- Formatting Tools -->
+<div class="px-md pb-2 flex items-center gap-1">
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">format_bold</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">format_italic</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">format_underlined</span>
+</button>
+<div class="w-[1px] h-4 bg-outline-variant mx-1"></div>
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+</button>
+<button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">code</span>
+</button>
+</div>
+</div>
+<!-- Editor Content Area -->
+<div class="flex-1 p-6 overflow-y-auto outline-none" contenteditable="true">
+<h1 class="font-headline-md text-headline-md text-on-surface mb-6 border-b border-outline-variant pb-2 focus:outline-none">System Architecture: Twitter Clone</h1>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-6 mb-3 focus:outline-none">1. Data Model</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 leading-relaxed focus:outline-none">
+                        We will need primarily three tables to start: <code class="font-code text-code text-tertiary bg-surface-container px-1 py-0.5 rounded">User</code>, <code class="font-code text-code text-tertiary bg-surface-container px-1 py-0.5 rounded">Tweet</code>, and <code class="font-code text-code text-tertiary bg-surface-container px-1 py-0.5 rounded">Follower</code>.
+                    </p>
+<div class="bg-surface-container border border-outline-variant rounded-lg p-4 mb-4 font-code text-code text-on-surface-variant overflow-x-auto focus:outline-none">
+<span class="text-primary">Table</span> Tweet {<br/>
+                          id: <span class="text-tertiary">uuid</span> <span class="text-outline">PK</span><br/>
+                          user_id: <span class="text-tertiary">uuid</span> <span class="text-outline">FK</span><br/>
+                          content: <span class="text-tertiary">varchar(140)</span><br/>
+                          created_at: <span class="text-tertiary">timestamp</span><br/>
+                        }
+                    </div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-6 mb-3 focus:outline-none">2. High-Level Design</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-4 leading-relaxed focus:outline-none">
+                        Clients connect through a Load Balancer to the API Gateway. Read requests (viewing timelines) are routed to a specialized <strong>Read Service</strong> backed by Redis caches.
+                    </p>
+</div>
+</section>
+</main>
+</div>
+</body></html>

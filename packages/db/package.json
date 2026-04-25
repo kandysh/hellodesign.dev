@@ -7,21 +7,22 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "db:generate": "prisma generate",
+    "db:generate": "prisma generate ",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx src/seed.ts",
+    "db:deploy": "prisma migrate deploy",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^6.0.0",
-    "@sysdesign/shared": "workspace:*"
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@sysdesign/shared": "workspace:*",
+    "dotenv": "^17.4.2",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@sysdesign/config": "workspace:*",
     "@types/node": "^22.10.2",
-    "prisma": "^6.0.0",
+    "prisma": "^7.8.0",
     "tsx": "^4.0.0",
     "typescript": "^5.7.2"
   }
