@@ -21,11 +21,22 @@ app.get("/submissions", async (c) => {
       questionId: true,
       status: true,
       createdAt: true,
+      question: { select: { title: true, category: true } },
       result: { select: { overallScore: true } },
     },
   })
 
-  return c.json(submissions)
+  return c.json(
+    submissions.map((s) => ({
+      id: s.id,
+      questionId: s.questionId,
+      questionTitle: s.question.title,
+      questionCategory: s.question.category,
+      status: s.status.toLowerCase(),
+      createdAt: s.createdAt,
+      overallScore: s.result?.overallScore ?? null,
+    })),
+  )
 })
 
 export default app
