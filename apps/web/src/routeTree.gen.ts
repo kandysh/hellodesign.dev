@@ -10,9 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
+import { Route as CommunityIndexRouteImport } from './routes/community/index'
+import { Route as CommunityThreadIdRouteImport } from './routes/community/$threadId'
 import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId'
 import { Route as QuestionsQuestionIdRouteImport } from './routes/questions/$questionId'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
@@ -22,6 +25,11 @@ import { Route as QuestionsQuestionIdInterviewRouteImport } from './routes/quest
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeRoute = MeRouteImport.update({
@@ -37,6 +45,16 @@ const IndexRoute = IndexRouteImport.update({
 const QuestionsIndexRoute = QuestionsIndexRouteImport.update({
   id: '/questions/',
   path: '/questions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityIndexRoute = CommunityIndexRouteImport.update({
+  id: '/community/',
+  path: '/community/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommunityThreadIdRoute = CommunityThreadIdRouteImport.update({
+  id: '/community/$threadId',
+  path: '/community/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubmissionsSubmissionIdRoute = SubmissionsSubmissionIdRouteImport.update({
@@ -71,10 +89,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/settings': typeof SettingsRoute
+  '/pricing': typeof PricingRoute
   '/auth/login': typeof AuthLoginRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions/': typeof QuestionsIndexRoute
+  '/community/': typeof CommunityIndexRoute
+  '/community/$threadId': typeof CommunityThreadIdRoute
   '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
   '/questions/$questionId/interview': typeof QuestionsQuestionIdInterviewRoute
 }
@@ -82,10 +103,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/settings': typeof SettingsRoute
+  '/pricing': typeof PricingRoute
   '/auth/login': typeof AuthLoginRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions': typeof QuestionsIndexRoute
+  '/community': typeof CommunityIndexRoute
+  '/community/$threadId': typeof CommunityThreadIdRoute
   '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
   '/questions/$questionId/interview': typeof QuestionsQuestionIdInterviewRoute
 }
@@ -94,10 +118,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/settings': typeof SettingsRoute
+  '/pricing': typeof PricingRoute
   '/auth/login': typeof AuthLoginRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions/': typeof QuestionsIndexRoute
+  '/community/': typeof CommunityIndexRoute
+  '/community/$threadId': typeof CommunityThreadIdRoute
   '/questions/$questionId_/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
   '/questions/$questionId_/interview': typeof QuestionsQuestionIdInterviewRoute
 }
@@ -107,10 +134,13 @@ export interface FileRouteTypes {
     | '/'
     | '/me'
     | '/settings'
+    | '/pricing'
     | '/auth/login'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
     | '/questions/'
+    | '/community/'
+    | '/community/$threadId'
     | '/questions/$questionId/result/$submissionId'
     | '/questions/$questionId/interview'
   fileRoutesByTo: FileRoutesByTo
@@ -118,10 +148,13 @@ export interface FileRouteTypes {
     | '/'
     | '/me'
     | '/settings'
+    | '/pricing'
     | '/auth/login'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
     | '/questions'
+    | '/community'
+    | '/community/$threadId'
     | '/questions/$questionId/result/$submissionId'
     | '/questions/$questionId/interview'
   id:
@@ -129,10 +162,13 @@ export interface FileRouteTypes {
     | '/'
     | '/me'
     | '/settings'
+    | '/pricing'
     | '/auth/login'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
     | '/questions/'
+    | '/community/'
+    | '/community/$threadId'
     | '/questions/$questionId_/result/$submissionId'
     | '/questions/$questionId_/interview'
   fileRoutesById: FileRoutesById
@@ -141,10 +177,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MeRoute: typeof MeRoute
   SettingsRoute: typeof SettingsRoute
+  PricingRoute: typeof PricingRoute
   AuthLoginRoute: typeof AuthLoginRoute
   QuestionsQuestionIdRoute: typeof QuestionsQuestionIdRoute
   SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
   QuestionsIndexRoute: typeof QuestionsIndexRoute
+  CommunityIndexRoute: typeof CommunityIndexRoute
+  CommunityThreadIdRoute: typeof CommunityThreadIdRoute
   QuestionsQuestionIdResultSubmissionIdRoute: typeof QuestionsQuestionIdResultSubmissionIdRoute
   QuestionsQuestionIdInterviewRoute: typeof QuestionsQuestionIdInterviewRoute
 }
@@ -214,6 +253,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestionsQuestionIdInterviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/': {
+      id: '/community/'
+      path: '/community'
+      fullPath: '/community/'
+      preLoaderRoute: typeof CommunityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/community/$threadId': {
+      id: '/community/$threadId'
+      path: '/community/$threadId'
+      fullPath: '/community/$threadId'
+      preLoaderRoute: typeof CommunityThreadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -221,10 +281,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MeRoute: MeRoute,
   SettingsRoute: SettingsRoute,
+  PricingRoute: PricingRoute,
   AuthLoginRoute: AuthLoginRoute,
   QuestionsQuestionIdRoute: QuestionsQuestionIdRoute,
   SubmissionsSubmissionIdRoute: SubmissionsSubmissionIdRoute,
   QuestionsIndexRoute: QuestionsIndexRoute,
+  CommunityIndexRoute: CommunityIndexRoute,
+  CommunityThreadIdRoute: CommunityThreadIdRoute,
   QuestionsQuestionIdResultSubmissionIdRoute:
     QuestionsQuestionIdResultSubmissionIdRoute,
   QuestionsQuestionIdInterviewRoute: QuestionsQuestionIdInterviewRoute,

@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { BookOpen, Settings, LogOut, User, ChevronDown } from "lucide-react"
+import { BookOpen, Settings, LogOut, User, ChevronDown, Users, Zap } from "lucide-react"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -54,6 +54,24 @@ export default function Header() {
           >
             <BookOpen size={14} />
             Questions
+          </Link>
+
+          <Link
+            to="/community"
+            activeProps={{ className: "!bg-base-300/60 !text-base-content" }}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-base-content/70 transition-default hover:bg-base-300/40 hover:text-base-content focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Users size={14} />
+            Community
+          </Link>
+
+          <Link
+            to="/pricing"
+            activeProps={{ className: "!bg-base-300/60 !text-base-content" }}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-base-content/70 transition-default hover:bg-base-300/40 hover:text-base-content focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <Zap size={14} />
+            Pricing
           </Link>
 
           {user ? (
