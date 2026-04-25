@@ -1,0 +1,27 @@
+{
+  "name": "@sysdesign/db",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@sysdesign/config": "workspace:*",
+    "@types/pg": "^8.15.6",
+    "drizzle-kit": "^0.31.8",
+    "typescript": "^5.7.2"
+  }
+}

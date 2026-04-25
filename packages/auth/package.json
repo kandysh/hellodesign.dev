@@ -1,0 +1,20 @@
+{
+  "name": "@sysdesign/auth",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-auth": "^1.2.7"
+  },
+  "devDependencies": {
+    "@sysdesign/config": "workspace:*",
+    "@sysdesign/db": "workspace:*",
+    "typescript": "^5.7.2"
+  }
+}

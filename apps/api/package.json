@@ -1,0 +1,30 @@
+{
+  "name": "@sysdesign/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint ./src"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "bullmq": "^5.53.1",
+    "drizzle-orm": "^0.45.0",
+    "hono": "^4.7.7",
+    "ioredis": "^5.6.1",
+    "@sysdesign/auth": "workspace:*",
+    "@sysdesign/db": "workspace:*",
+    "@sysdesign/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.4",
+    "@sysdesign/config": "workspace:*",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.2"
+  }
+}
