@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
 import { useQuery, useMutation } from "@tanstack/react-query"
 import {
   useState,
@@ -28,6 +28,7 @@ import {
   Zap,
   Layers,
   Info,
+  Mic,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -461,8 +462,16 @@ function WorkspacePage() {
             </div>
           </div>
 
-          {/* Right: mode selector */}
+          {/* Right: mode selector + interview mode */}
           <div className="flex items-center gap-2">
+            <Link
+              to="/questions/$questionId/interview"
+              params={{ questionId }}
+              className="btn btn-ghost btn-xs rounded-lg border border-base-300/40 gap-1 text-base-content/50 hover:text-base-content transition-default"
+            >
+              <Mic size={12} />
+              Interview
+            </Link>
             <select
               value={reviewMode}
               onChange={(e) => setReviewMode(e.target.value as "quick" | "deep")}

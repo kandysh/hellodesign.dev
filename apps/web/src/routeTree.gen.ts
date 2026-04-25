@@ -17,6 +17,7 @@ import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submission
 import { Route as QuestionsQuestionIdRouteImport } from './routes/questions/$questionId'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as QuestionsQuestionIdResultSubmissionIdRouteImport } from './routes/questions/$questionId_.result.$submissionId'
+import { Route as QuestionsQuestionIdInterviewRouteImport } from './routes/questions/$questionId_.interview'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -59,6 +60,12 @@ const QuestionsQuestionIdResultSubmissionIdRoute =
     path: '/questions/$questionId/result/$submissionId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const QuestionsQuestionIdInterviewRoute =
+  QuestionsQuestionIdInterviewRouteImport.update({
+    id: '/questions/$questionId_/interview',
+    path: '/questions/$questionId/interview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions/': typeof QuestionsIndexRoute
   '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
+  '/questions/$questionId/interview': typeof QuestionsQuestionIdInterviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -79,6 +87,7 @@ export interface FileRoutesByTo {
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions': typeof QuestionsIndexRoute
   '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
+  '/questions/$questionId/interview': typeof QuestionsQuestionIdInterviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -90,6 +99,7 @@ export interface FileRoutesById {
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
   '/questions/': typeof QuestionsIndexRoute
   '/questions/$questionId_/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
+  '/questions/$questionId_/interview': typeof QuestionsQuestionIdInterviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -102,6 +112,7 @@ export interface FileRouteTypes {
     | '/submissions/$submissionId'
     | '/questions/'
     | '/questions/$questionId/result/$submissionId'
+    | '/questions/$questionId/interview'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/submissions/$submissionId'
     | '/questions'
     | '/questions/$questionId/result/$submissionId'
+    | '/questions/$questionId/interview'
   id:
     | '__root__'
     | '/'
@@ -122,6 +134,7 @@ export interface FileRouteTypes {
     | '/submissions/$submissionId'
     | '/questions/'
     | '/questions/$questionId_/result/$submissionId'
+    | '/questions/$questionId_/interview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -133,6 +146,7 @@ export interface RootRouteChildren {
   SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
   QuestionsIndexRoute: typeof QuestionsIndexRoute
   QuestionsQuestionIdResultSubmissionIdRoute: typeof QuestionsQuestionIdResultSubmissionIdRoute
+  QuestionsQuestionIdInterviewRoute: typeof QuestionsQuestionIdInterviewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -193,6 +207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestionsQuestionIdResultSubmissionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/questions/$questionId_/interview': {
+      id: '/questions/$questionId_/interview'
+      path: '/questions/$questionId/interview'
+      fullPath: '/questions/$questionId/interview'
+      preLoaderRoute: typeof QuestionsQuestionIdInterviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -206,6 +227,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestionsIndexRoute: QuestionsIndexRoute,
   QuestionsQuestionIdResultSubmissionIdRoute:
     QuestionsQuestionIdResultSubmissionIdRoute,
+  QuestionsQuestionIdInterviewRoute: QuestionsQuestionIdInterviewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
