@@ -24,7 +24,7 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
   return (
     <div
       className={cn(
-        "rounded-lg border bg-card p-4 shadow-sm transition-all",
+        "card bg-base-100 border border-base-300 p-4 shadow-sm transition-all",
         isNew && "animate-in slide-in-from-bottom-4 duration-500",
       )}
     >
@@ -34,8 +34,8 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
           <h3 className="font-semibold text-sm">{label}</h3>
           {result.strengths.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs font-medium text-green-700 mb-1">✓ Strengths</p>
-              <ul className="text-xs text-muted-foreground space-y-0.5">
+              <p className="text-xs font-medium text-success mb-1">✓ Strengths</p>
+              <ul className="text-xs text-base-content/60 space-y-0.5">
                 {result.strengths.map((s, i) => (
                   <li key={i}>• {s}</li>
                 ))}
@@ -44,8 +44,8 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
           )}
           {result.weaknesses.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs font-medium text-red-700 mb-1">✗ Gaps</p>
-              <ul className="text-xs text-muted-foreground space-y-0.5">
+              <p className="text-xs font-medium text-error mb-1">✗ Gaps</p>
+              <ul className="text-xs text-base-content/60 space-y-0.5">
                 {result.weaknesses.map((w, i) => (
                   <li key={i}>• {w}</li>
                 ))}
@@ -54,8 +54,8 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
           )}
           {result.suggestions.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs font-medium text-blue-700 mb-1">→ Suggestions</p>
-              <ul className="text-xs text-muted-foreground space-y-0.5">
+              <p className="text-xs font-medium text-info mb-1">→ Suggestions</p>
+              <ul className="text-xs text-base-content/60 space-y-0.5">
                 {result.suggestions.map((s, i) => (
                   <li key={i}>• {s}</li>
                 ))}

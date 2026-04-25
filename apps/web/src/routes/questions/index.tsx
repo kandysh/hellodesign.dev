@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import type { Question } from "@sysdesign/types"
+import { Card } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -15,10 +17,10 @@ const categoryLabels: Record<string, string> = {
   general: "General",
 }
 
-const difficultyColors: Record<string, string> = {
-  easy: "bg-green-100 text-green-800",
-  medium: "bg-yellow-100 text-yellow-800",
-  hard: "bg-red-100 text-red-800",
+const difficultyVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  easy: "secondary",
+  medium: "default",
+  hard: "destructive",
 }
 
 export const Route = createFileRoute("/questions/")({
@@ -35,7 +37,7 @@ function QuestionsPage() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Question Bank</h1>
-        <p className="text-muted-foreground">
+        <p className="text-base-content/60">
           {questions.length} questions across all categories
         </p>
       </div>
@@ -43,7 +45,7 @@ function QuestionsPage() {
       {isLoading ? (
         <div className="grid gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-28 rounded-lg border bg-muted animate-pulse" />
+            <div key={i} className="h-28 rounded-lg border border-base-300 bg-base-200 animate-pulse" />
           ))}
         </div>
       ) : (
@@ -53,28 +55,28 @@ function QuestionsPage() {
               key={q.id}
               to="/questions/$questionId"
               params={{ questionId: q.id }}
-              className="block rounded-lg border bg-card p-5 hover:border-primary/50 hover:shadow-sm transition-all group"
+              className="block group"
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-semibold group-hover:text-primary transition-colors">
-                    {q.title}
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                    {q.description}
-                  </p>
+              <Card className="p-5 hover:border-primary/50 hover:shadow-md transition-all">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-semibold group-hover:text-primary transition-colors">
+                      {q.title}
+                    </h2>
+                    <p className="text-sm text-base-content/60 mt-1 line-clamp-2">
+                      {q.description}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <Badge variant={difficultyVariant[q.difficulty] ?? "default"} className="capitalize">
+                      {q.difficulty}
+                    </Badge>
+                    <span className="text-xs text-base-content/50">
+                      {categoryLabels[q.category] ?? q.category}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${difficultyColors[q.difficulty]}`}
-                  >
-                    {q.difficulty}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {categoryLabels[q.category] ?? q.category}
-                  </span>
-                </div>
-              </div>
+              </Card>
             </Link>
           ))}
         </div>

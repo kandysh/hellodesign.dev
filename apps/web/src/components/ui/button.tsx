@@ -2,7 +2,8 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
-import { cn } from "../lib/utils.js"
+
+import { cn } from "@/lib/utils"
 
 const buttonVariants = cva("btn", {
   variants: {
@@ -34,7 +35,7 @@ export interface ButtonProps
   loading?: boolean
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
     if (asChild) {
       return (
@@ -63,4 +64,4 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-export { buttonVariants }
+export { Button, buttonVariants }

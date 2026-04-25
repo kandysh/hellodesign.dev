@@ -1,13 +1,25 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useQuery, useMutation } from "@tanstack/react-query"
-import { useState, lazy, Suspense } from "react"
+import { useState, lazy, Suspense, useCallback } from "react"
 import type { Question } from "@sysdesign/types"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { RichTextEditor } from "@/components/RichTextEditor"
 
 const Excalidraw = lazy(() =>
   import("@excalidraw/excalidraw").then((m) => ({ default: m.Excalidraw }))
 )
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+
+const EDITOR_PLACEHOLDER = `Walk through your design step by step:
+
+1. Requirements clarification
+2. Capacity estimation
+3. High-level architecture
+4. Data model
+5. API design
+6. Scalability & trade-offs`
 
 export const Route = createFileRoute("/questions/$questionId")({
   component: SolvePage,
@@ -18,6 +30,10 @@ function SolvePage() {
   const navigate = useNavigate()
   const [answerText, setAnswerText] = useState("")
   const [excalidrawData, setExcalidrawData] = useState<Record<string, unknown> | null>(null)
+
+  const handleEditorChange = useCallback((markdown: string) => {
+    setAnswerText(markdown)
+  }, [])
 
   const { data: question, isLoading } = useQuery<Question>({
     queryKey: ["question", questionId],
@@ -46,7 +62,7 @@ function SolvePage() {
 
   if (isLoading) {
     return (
-      <div className="h-96 flex items-center justify-center text-muted-foreground">
+      <div className="h-96 flex items-center justify-center text-base-content/60">
         Loading question...
       </div>
     )
@@ -54,7 +70,7 @@ function SolvePage() {
 
   if (!question) {
     return (
-      <div className="h-96 flex items-center justify-center text-muted-foreground">
+      <div className="h-96 flex items-center justify-center text-base-content/60">
         Question not found.
       </div>
     )
@@ -63,66 +79,66 @@ function SolvePage() {
   return (
     <div className="flex flex-col gap-4 h-[calc(100vh-8rem)]">
       {/* Question header */}
-      <div className="rounded-lg border bg-card p-4">
+      <Card className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold">{question.title}</h1>
-            <p className="text-sm text-muted-foreground mt-1">{question.description}</p>
+            <p className="text-sm text-base-content/60 mt-1">{question.description}</p>
           </div>
-          <button
+          <Button
             onClick={() => submitMutation.mutate()}
-            disabled={!answerText.trim() || submitMutation.isPending}
-            className="shrink-0 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={!answerText.trim()}
+            loading={submitMutation.isPending}
+            className="shrink-0"
           >
-            {submitMutation.isPending ? "Submitting..." : "Submit for Review"}
-          </button>
+            Submit for Review
+          </Button>
         </div>
         {submitMutation.isError && (
-          <p className="text-sm text-destructive mt-2">
+          <p className="text-sm text-error mt-2">
             {submitMutation.error.message}
           </p>
         )}
-      </div>
+      </Card>
 
       {/* Split editor */}
       <div className="flex flex-1 gap-4 min-h-0">
         {/* Diagram — left */}
-        <div className="flex-1 rounded-lg border bg-card overflow-hidden">
-          <div className="px-3 py-2 border-b text-xs font-medium text-muted-foreground">
+        <Card className="flex-1 overflow-hidden">
+          <div className="px-3 py-2 border-b border-base-300 text-xs font-medium text-base-content/60">
             Architecture Diagram (Excalidraw)
           </div>
           <div className="h-[calc(100%-2.25rem)]">
             <Suspense
               fallback={
-                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                <div className="h-full flex items-center justify-center text-base-content/60 text-sm">
                   Loading canvas...
                 </div>
               }
             >
               <Excalidraw
-                onChange={(elements, appState, files) => {
+                onChange={(elements, appState) => {
                   setExcalidrawData({ elements, appState })
                 }}
               />
             </Suspense>
           </div>
-        </div>
+        </Card>
 
-        {/* Answer text — right */}
-        <div className="w-[420px] flex flex-col rounded-lg border bg-card overflow-hidden shrink-0">
-          <div className="px-3 py-2 border-b text-xs font-medium text-muted-foreground">
+        {/* Rich text answer — right */}
+        <Card className="w-[420px] flex flex-col overflow-hidden shrink-0">
+          <div className="px-3 py-2 border-b border-base-300 text-xs font-medium text-base-content/60">
             Written Explanation
           </div>
-          <textarea
-            value={answerText}
-            onChange={(e) => setAnswerText(e.target.value)}
-            placeholder={`Walk through your design step by step:\n\n1. Requirements clarification\n2. Capacity estimation\n3. High-level architecture\n4. Data model\n5. API design\n6. Scalability & trade-offs`}
-            className="flex-1 resize-none p-3 text-sm bg-transparent focus:outline-none font-mono leading-relaxed"
+          <RichTextEditor
+            onChange={handleEditorChange}
+            placeholder={EDITOR_PLACEHOLDER}
+            className="flex-1 min-h-0"
           />
-          <div className="px-3 py-2 border-t text-xs text-muted-foreground text-right">
+          <div className="px-3 py-2 border-t border-base-300 text-xs text-base-content/50 text-right">
             {answerText.length} chars
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   )
