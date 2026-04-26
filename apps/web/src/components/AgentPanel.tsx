@@ -65,6 +65,7 @@ export function AgentPanel({
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll trace
+  // biome-ignore lint/correctness/useExhaustiveDependencies: traceRef is a stable ref, state is the trigger
   useEffect(() => {
     if (traceRef.current) {
       traceRef.current.scrollTop = traceRef.current.scrollHeight
@@ -72,6 +73,7 @@ export function AgentPanel({
   }, [state])
 
   // Auto-scroll messages
+  // biome-ignore lint/correctness/useExhaustiveDependencies: messagesEndRef is a stable ref
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
@@ -164,14 +166,10 @@ export function AgentPanel({
         {/* ── Messages (follow-up chat + done) ── */}
         {(state.phase === "follow-up" || state.phase === "done") && messages.length > 0 && (
           <div className="space-y-3 px-4 pb-4">
-            {messages.map((msg, i) => (
-              <ChatBubble
-                key={i}
-                message={msg}
-                userInitials={userInitials}
-                userAvatar={userAvatar}
-              />
-            ))}
+            {messages.map((msg, i) => {
+              // biome-ignore lint/suspicious/noArrayIndexKey: messages are append-only
+              return <ChatBubble key={i} message={msg} userInitials={userInitials} userAvatar={userAvatar} />
+            })}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -237,8 +235,8 @@ function StatusPill({ phase }: { phase: AgentPanelState["phase"] }) {
     evaluating:  { label: "Evaluating",  classes: "bg-info/10 text-info" },
     done:        { label: "Done",        classes: "bg-success/10 text-success" },
   }
-  const pill = (config[phase] ?? config["idle"])!
-  const { label, classes } = pill
+  const pill = config[phase as keyof typeof config] ?? config.idle
+  const { label, classes } = pill!
   return (
     <span
       className={cn(
@@ -271,9 +269,10 @@ const ReasoningTrace = ({ trace, ref }: { trace: string[]; ref: React.RefObject<
       {trace.length === 0 ? (
         <span className="opacity-50">Initializing…</span>
       ) : (
-        trace.map((line, i) => (
-          <div key={i}>{line}</div>
-        ))
+        trace.map((line, i) => {
+          // biome-ignore lint/suspicious/noArrayIndexKey: trace lines are append-only
+          return <div key={i}>{line}</div>
+        })
       )}
       {/* Blinking cursor */}
       <span

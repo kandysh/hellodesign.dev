@@ -45,11 +45,39 @@ import {
 import { cn } from "@/lib/utils"
 import { $getSelection, $isRangeSelection } from "lexical"
 
+// ── Toolbar button ─────────────────────────────────────────────────────────
+
+function ToolbarBtn({
+  onClick,
+  title,
+  active,
+  children,
+}: {
+  onClick: () => void
+  title: string
+  active?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      aria-pressed={active}
+      className={cn(
+        "btn btn-ghost btn-xs rounded px-1.5 py-1 text-base-content/50 transition-default hover:bg-base-300/60 hover:text-base-content focus-visible:ring-1 focus-visible:ring-primary",
+        active && "bg-base-300/60 text-base-content",
+      )}
+    >
+      {children}
+    </button>
+  )
+}
+
 // ── Toolbar ────────────────────────────────────────────────────────────────
 
 function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext()
-  const [activeFormats, setActiveFormats] = useState<Set<string>>(new Set())
 
   const format = useCallback(
     (type: "bold" | "italic" | "code") => {
@@ -84,40 +112,6 @@ function ToolbarPlugin() {
       )
     },
     [editor],
-  )
-
-  const insertDivider = useCallback(() => {
-    editor.update(() => {
-      const selection = $getSelection()
-      if ($isRangeSelection(selection)) {
-        // Insert a horizontal rule via markdown
-      }
-    })
-  }, [editor])
-
-  const ToolbarBtn = ({
-    onClick,
-    title,
-    active,
-    children,
-  }: {
-    onClick: () => void
-    title: string
-    active?: boolean
-    children: React.ReactNode
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      aria-pressed={active}
-      className={cn(
-        "btn btn-ghost btn-xs rounded px-1.5 py-1 text-base-content/50 transition-default hover:bg-base-300/60 hover:text-base-content focus-visible:ring-1 focus-visible:ring-primary",
-        active && "bg-base-300/60 text-base-content",
-      )}
-    >
-      {children}
-    </button>
   )
 
   return (

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hello Design - Community Thread</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#4edea3",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "on-primary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "surface-container-low": "#131b2e",
+                      "background": "#0b1326",
+                      "secondary": "#b9c8de",
+                      "on-primary": "#1000a9",
+                      "surface": "#0b1326",
+                      "surface-dim": "#0b1326",
+                      "on-tertiary-container": "#000703",
+                      "surface-container": "#171f33",
+                      "surface-tint": "#c0c1ff",
+                      "outline": "#908fa0",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "tertiary-fixed": "#6ffbbe",
+                      "surface-variant": "#2d3449",
+                      "secondary-fixed": "#d4e4fa",
+                      "on-primary-container": "#0d0096",
+                      "surface-container-lowest": "#060e20",
+                      "on-secondary": "#233143",
+                      "on-tertiary": "#003824",
+                      "tertiary-container": "#00885d",
+                      "secondary-container": "#39485a",
+                      "on-surface": "#dae2fd",
+                      "inverse-on-surface": "#283044",
+                      "on-surface-variant": "#c7c4d7",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "primary-fixed": "#e1e0ff",
+                      "primary": "#c0c1ff",
+                      "surface-container-high": "#222a3d",
+                      "primary-container": "#8083ff",
+                      "on-error-container": "#ffdad6",
+                      "outline-variant": "#464554",
+                      "error-container": "#93000a",
+                      "on-secondary-container": "#a7b6cc",
+                      "inverse-surface": "#dae2fd",
+                      "error": "#ffb4ab",
+                      "inverse-primary": "#494bd6",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-error": "#690005",
+                      "on-tertiary-fixed": "#002113",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-background": "#dae2fd",
+                      "surface-container-highest": "#2d3449",
+                      "surface-bright": "#31394d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin": "24px",
+                      "gutter": "16px",
+                      "container-max": "1440px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "body-base": [
+                              "Manrope"
+                      ],
+                      "code-inline": [
+                              "Space Grotesk"
+                      ],
+                      "body-sm": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "label-caps": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-inline": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-background min-h-screen pt-[64px] font-body-base text-body-base">
+<!-- TopNavBar Component -->
+<header class="bg-slate-950/90 backdrop-blur-md text-indigo-500 font-manrope tracking-tight antialiased fixed top-0 w-full z-50 border-b border-slate-800">
+<div class="flex justify-between items-center h-16 px-6 max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<div class="text-xl font-black tracking-tighter text-slate-50">Hello Design</div>
+<div class="hidden md:flex items-center bg-surface-container-high rounded border border-surface-container-highest focus-within:border-primary focus-within:shadow-[0_0_8px_rgba(192,193,255,0.3)] transition-all px-3 py-1.5 h-9">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px] mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-on-surface font-body-sm text-body-sm focus:ring-0 p-0 placeholder-on-surface-variant/50 w-64" placeholder="Search..." type="text"/>
+</div>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150 font-body-sm text-body-sm" href="#">Explore</a>
+<a class="text-indigo-400 border-b-2 border-indigo-500 pb-1 hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150 font-body-sm text-body-sm h-full flex items-center mt-[2px]" href="#">Community</a>
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150 font-body-sm text-body-sm" href="#">Solutions</a>
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150 font-body-sm text-body-sm" href="#">Pricing</a>
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150 font-body-sm text-body-sm" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="text-slate-400 hover:text-indigo-400 transition-colors duration-150 active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-indigo-400 transition-colors duration-150 active:scale-95">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+<button class="bg-primary text-on-primary font-body-sm text-body-sm font-bold px-4 py-2 rounded hover:bg-primary-fixed transition-colors active:scale-95 ml-2">Get Started</button>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-gutter md:px-margin py-8">
+<!-- Breadcrumb & Header -->
+<div class="mb-8">
+<div class="flex items-center gap-2 font-body-sm text-body-sm text-on-surface-variant mb-4">
+<a class="hover:text-primary transition-colors" href="#">Community</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Architecture Patterns</a>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-on-surface">Global Event Streaming</span>
+</div>
+<div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="bg-tertiary-container/20 text-tertiary border border-tertiary/30 px-2 py-0.5 rounded text-label-caps font-label-caps">PROPOSED</span>
+<span class="bg-surface-container-high text-on-surface-variant border border-surface-container-highest px-2 py-0.5 rounded text-label-caps font-label-caps">HIGH DENSITY</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">Global Event Streaming Architecture</h1>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-3xl">A high-throughput, low-latency pattern for distributing state across distributed edge clusters. Optimizing for partition tolerance and eventual consistency in a 99.999% SLA environment.</p>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<button class="flex items-center gap-2 border border-primary text-primary px-4 py-2 rounded hover:bg-primary/10 transition-colors active:scale-95 font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[20px]" data-icon="fork_right">fork_right</span>
+                        Fork Solution
+                    </button>
+<button class="flex items-center gap-2 bg-surface-container border border-surface-container-highest text-on-surface px-4 py-2 rounded hover:bg-surface-container-high transition-colors active:scale-95 font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[20px]" data-icon="bookmark">bookmark</span>
+                        Save
+                    </button>
+</div>
+</div>
+<div class="flex items-center gap-4 mt-6 pt-6 border-t border-surface-container-highest">
+<div class="flex items-center gap-3">
+<img alt="Avatar" class="w-10 h-10 rounded-full border-2 border-surface-container" data-alt="headshot of a young professional man in a dark grey tech t-shirt against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8bKMeqKiiMWONcJTFYDz76gPKG_mIjKFRmvkzp-1qg-U8xC0jl9pproA47QXp68uE7FiYdPgD6ycR_P2_G4fZuMGtbjIwQoD0_XW-w5l9-EIy5z9HCKY0BhD-dWI_V8GM4Zg7R3zsptuntxNXqn_itbOlSJM-tgbH2MAFT7HlrG52n5a7beEDwEjEzEwJ_kZZBNBCnFUSqfdpPF6mHZ2gS3TZH6Z3wWIg5Ygu0Q4I-s2W1tfXWB1nf-EuphUUsjr1s4t7_YEUsAJU"/>
+<div>
+<div class="font-body-sm text-body-sm font-bold text-on-surface">Alex Mercer</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant">Principal Systems Engineer</div>
+</div>
+</div>
+<div class="w-px h-8 bg-surface-container-highest"></div>
+<div class="flex gap-6 text-on-surface-variant font-body-sm text-body-sm">
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">calendar_today</span> Oct 24, 2024</div>
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">visibility</span> 4.2k Views</div>
+<div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[18px]">forum</span> 128 Comments</div>
+</div>
+</div>
+</div>
+<!-- Main Layout: Content + Sidebar -->
+<div class="flex flex-col lg:flex-row gap-8">
+<!-- Main Content Area -->
+<div class="flex-1 space-y-8">
+<!-- Architecture Diagram Canvas -->
+<div class="bg-surface-container border border-surface-container-highest rounded-lg p-1 overflow-hidden relative">
+<div class="absolute top-4 left-4 z-10 flex gap-2">
+<button class="bg-surface/80 backdrop-blur border border-surface-container-highest text-on-surface p-1.5 rounded hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">zoom_in</span>
+</button>
+<button class="bg-surface/80 backdrop-blur border border-surface-container-highest text-on-surface p-1.5 rounded hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">zoom_out</span>
+</button>
+<button class="bg-surface/80 backdrop-blur border border-surface-container-highest text-on-surface p-1.5 rounded hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">fullscreen</span>
+</button>
+</div>
+<!-- Simulated Diagram Area with subtle grid background -->
+<div class="aspect-[16/9] bg-surface-container-lowest rounded relative flex items-center justify-center overflow-hidden" style="background-image: radial-gradient(circle at 1px 1px, var(--tw-colors-surface-container-highest) 1px, transparent 0); background-size: 24px 24px;">
+<!-- High tech diagram visualization overlay -->
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-tertiary/5 mix-blend-screen pointer-events-none"></div>
+<img alt="System Diagram" class="w-full h-full object-cover opacity-60 mix-blend-screen" data-alt="abstract tech visualization showing network nodes connecting with glowing blue and green lines against a dark background, representing data flow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpQ3kpNvXRnILAcVYVjZtt9p7iBei22jrF528v-wnhV83BuFm2xpAWuwrWybz_dhKwcMettYRb2euzJCNo2GmzVwEFkwAaNC2ZwCh0CuylT-xyxskiDMrSLbo3CwMDpIliBkZrTSNxNlDKwS9L3A9gGNSF2iNbm8LLb0N6UerfsmbTJLVWTna45PjA1ZVp8nFIjTXyqpDK_sd7T1DSZu85CbXs3Kz26DMzySwxG8H5pSM0_MHCd1rs5W5lPQY937gHchebXi1Lv8ht"/>
+<!-- Overlay UI components to make it look like an embedded tool -->
+<div class="absolute bottom-4 right-4 bg-surface/90 backdrop-blur border border-surface-container-highest rounded p-2 flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(192,193,255,0.6)] animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-primary">LIVE TELEMETRY</span>
+</div>
+<div class="w-px h-4 bg-surface-container-highest"></div>
+<span class="font-code-inline text-code-inline text-on-surface-variant">Throughput: 4.2M msgs/s</span>
+</div>
+</div>
+</div>
+<!-- Technical Description -->
+<div class="prose prose-invert prose-slate max-w-none">
+<h2 class="font-headline-md text-headline-md text-on-surface border-b border-surface-container-highest pb-2 mb-4">Core Implementation</h2>
+<p class="font-body-base text-body-base text-on-surface-variant mb-6 leading-relaxed">
+                        The proposed architecture leverages a distributed commit log pattern. Edge clusters ingest events and replicate them asynchronously to the central hub using a customized replication protocol optimized for high-latency WAN links. The hub cluster then fans out the streams to consumer services.
+                    </p>
+<div class="bg-surface-container border border-surface-container-highest rounded-lg overflow-hidden mb-6">
+<div class="bg-surface-container-high border-b border-surface-container-highest px-4 py-2 flex justify-between items-center">
+<span class="font-code-inline text-code-inline text-on-surface-variant">cluster-config.yaml</span>
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+</div>
+<div class="p-4 overflow-x-auto">
+<pre class="font-code-inline text-code-inline text-on-surface leading-loose"><code><span class="text-primary">apiVersion:</span> streaming.core/v1alpha1
+<span class="text-primary">kind:</span> ClusterTopology
+<span class="text-primary">metadata:</span>
+  <span class="text-secondary">name:</span> global-hub-primary
+<span class="text-primary">spec:</span>
+  <span class="text-primary">replicationFactor:</span> 5
+  <span class="text-primary">partitions:</span> 256
+  <span class="text-primary">storage:</span>
+    <span class="text-primary">tier:</span> nvme-direct
+    <span class="text-primary">retentionPolicy:</span>
+      <span class="text-secondary">size:</span> 500TB
+      <span class="text-secondary">time:</span> 72h
+  <span class="text-primary">network:</span>
+    <span class="text-primary">compression:</span> zstd
+    <span class="text-primary">batchSize:</span> 16384</code></pre>
+</div>
+</div>
+</div>
+</div>
+<!-- Discussion Sidebar -->
+<div class="w-full lg:w-[320px] shrink-0 space-y-6">
+<div class="flex items-center justify-between border-b border-surface-container-highest pb-2">
+<h3 class="font-headline-md text-headline-md text-on-surface">Discussion</h3>
+<span class="bg-surface-container text-on-surface-variant font-label-caps text-label-caps px-2 py-1 rounded">128</span>
+</div>
+<div class="flex gap-2">
+<img alt="Current User" class="w-8 h-8 rounded-full border border-surface-container mt-1" data-alt="headshot of a female software engineer smiling slightly, wearing glasses, dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgpHBmZPvCa4SAjIN0kzOMYKBoy0GI3zctoCi48W8AWslc5gcRUte2ux_nDCL3Xnu2caojyY9Ir6ogTTE1aoI67Kc6v71sWSNX76ktIMHIwqJFW7kSctfhZnIAVIKbyJ-B8XaFORHkWzTCYJXiMfdq0EHlE_Ltn1xlX_FZfvstGiP0sMN7e16oue6JrJ-CE45WtAMsSFj-e2S2Jj1usuYoEm2yvtHNsfkI3JVY2006Aj3NvAc8CmFGvaMfieDpW3i9wXT3pnaC7HVQ"/>
+<div class="flex-1">
+<textarea class="w-full bg-surface-container border border-surface-container-highest rounded focus:border-primary focus:ring-1 focus:ring-primary p-3 font-body-sm text-body-sm text-on-surface placeholder-on-surface-variant/50 min-h-[100px] resize-y" placeholder="Add a technical comment or suggest a change..."></textarea>
+<div class="flex justify-between items-center mt-2">
+<div class="flex gap-1 text-on-surface-variant">
+<button class="p-1 hover:text-primary transition-colors rounded"><span class="material-symbols-outlined text-[18px]">code</span></button>
+<button class="p-1 hover:text-primary transition-colors rounded"><span class="material-symbols-outlined text-[18px]">attach_file</span></button>
+</div>
+<button class="bg-primary text-on-primary font-label-caps text-label-caps px-3 py-1.5 rounded hover:bg-primary-fixed transition-colors active:scale-95">POST</button>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<!-- Comment 1 -->
+<div class="bg-surface-container border border-surface-container-highest rounded p-4">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary font-label-caps text-[10px]">JD</div>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">J. Doe</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">2h ago</span>
+</div>
+<button class="text-on-surface-variant hover:text-primary"><span class="material-symbols-outlined text-[16px]">more_vert</span></button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-3">Have we considered the impact of ZSTD compression on CPU overhead at the edge? For low-power IoT gateways, LZ4 might offer a better tradeoff between compression ratio and throughput.</p>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="flex items-center gap-1 hover:text-tertiary transition-colors font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">thumb_up</span> 14</button>
+<button class="flex items-center gap-1 hover:text-primary transition-colors font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">reply</span> Reply</button>
+</div>
+</div>
+<!-- Comment 2 (Reply) -->
+<div class="bg-surface border-l-2 border-primary pl-4 ml-2">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full border border-surface-container" data-alt="headshot of a young professional man in a dark grey tech t-shirt against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpK0eTYYyV3Pkwr25iGIEhphDzfnAjskbpDDxS06HVnOOw2y8vuzxZyAGp31gXu5gcKd1HcRyhJGefgPN6tfV4InAb8ig3nn4Ohb-PFvWAlB3_BI3-YRB98QL4-mf4d8FaE5DEPBTwhBAP9F-dopzmhaPVnrS2R5ykHDr5FYUcIkYML0Wzi76I9ZUi3TOJ6PIfOaZnzb2yrVDJYSR-tlaDitJLu6HgzAdDKr7Y5lmTcHaI85kOIYBoNaAjy_5f1jvYvb21ejnX463l"/>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">Alex Mercer</span>
+<span class="bg-primary/20 text-primary px-1.5 py-[1px] rounded text-[9px] font-label-caps">AUTHOR</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2">Good point. We benchmarked this. See the <a class="text-primary hover:underline" href="#">Compression Metrics</a> section. LZ4 is an option in the spec via `compression: lz4` for specific node pools.</p>
+</div>
+<!-- Comment 3 -->
+<div class="bg-surface-container border border-surface-container-highest rounded p-4">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary font-label-caps text-[10px]">SK</div>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">S. Kim</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">5h ago</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-3">The `retentionPolicy` size of 500TB seems aggressive for the direct NVMe tier. What's the cost modeling look like for that volume across 5 replicas?</p>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="flex items-center gap-1 hover:text-tertiary transition-colors font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">thumb_up</span> 8</button>
+<button class="flex items-center gap-1 hover:text-primary transition-colors font-body-sm text-body-sm"><span class="material-symbols-outlined text-[16px]">reply</span> Reply</button>
+</div>
+</div>
+</div>
+<button class="w-full py-2 border border-surface-container-highest text-on-surface-variant font-body-sm text-body-sm rounded hover:bg-surface-container transition-colors">Load More Comments</button>
+</div>
+</div>
+</main>
+<!-- Footer Component -->
+<footer class="bg-slate-950 text-indigo-500 font-manrope text-sm w-full border-t border-slate-800 mt-12">
+<div class="flex flex-col md:flex-row justify-between items-center py-12 px-8 max-w-[1440px] mx-auto space-y-4 md:space-y-0">
+<div class="text-lg font-bold text-slate-200">Hello Design</div>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100 font-body-sm text-body-sm" href="#">Documentation</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100 font-body-sm text-body-sm" href="#">API Reference</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100 font-body-sm text-body-sm" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100 font-body-sm text-body-sm" href="#">Privacy Policy</a>
+</div>
+<div class="text-slate-500 font-body-sm text-body-sm">© 2024 Hello Design. Technical Precision in System Design.</div>
+</div>
+</footer>
+</body></html>

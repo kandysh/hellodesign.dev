@@ -6,8 +6,21 @@ import remarkGfm from "remark-gfm"
 import { ScoreRing } from "@sysdesign/ui"
 import { DEFAULT_RUBRIC, extractLexicalText } from "@sysdesign/shared"
 import type { ComponentScore } from "@sysdesign/shared"
-import { ArrowRight, RefreshCw, MessageCircle, FileText, BarChart3 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import {
+  ArrowRight,
+  RefreshCw,
+  MessageCircle,
+  FileText,
+  BarChart3,
+  Layers,
+  Database,
+  Shield,
+  Code2,
+  ClipboardList,
+  Zap,
+  GitBranch,
+  Activity,
+} from "lucide-react"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -15,6 +28,45 @@ const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 const dimensionLabel = Object.fromEntries(
   DEFAULT_RUBRIC.dimensions.map((d) => [d.id, d.label]),
 )
+
+// Map dimensionId → lucide icon element
+const dimensionIcon: Record<string, React.ReactNode> = {
+  requirements: <ClipboardList size={18} />,
+  scalability: <Layers size={18} />,
+  db_design: <Database size={18} />,
+  fault_tolerance: <Shield size={18} />,
+  api_design: <Code2 size={18} />,
+  caching: <Zap size={18} />,
+  trade_offs: <GitBranch size={18} />,
+  observability: <Activity size={18} />,
+}
+
+// ── Design system color tokens ─────────────────────────────────────────────
+const DS = {
+  pageBg: "#0b1326",
+  cardBg: "#171f33",
+  cardBorder: "1px solid #2d3449",
+  elevatedBg: "#131b2e",
+  codeBg: "#060e20",
+  textPrimary: "#dae2fd",
+  textSecondary: "#908fa0",
+  textMuted: "#464554",
+  textBody: "#c7c4d7",
+  indigo: "#8083ff",
+  indigoPale: "#c0c1ff",
+  green: "#4edea3",
+  red: "#ffb4ab",
+  amber: "#fbbf24",
+  surfaceHigh: "#222a3d",
+  surfaceVariant: "#2d3449",
+} as const
+
+/** Returns the accent colour for a given 0-100 score */
+function scoreColor(score: number): string {
+  if (score >= 75) return DS.green
+  if (score >= 50) return DS.indigoPale
+  return DS.red
+}
 
 interface EvalResult {
   id: string
@@ -68,61 +120,289 @@ function ResultPage() {
 
   const answerText = extractLexicalText(submission?.lexicalState ?? {})
 
-  return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      {/* ── Header ── */}
-      <div className="mb-8">
-        <Link
-          to="/questions/$questionId"
-          params={{ questionId }}
-          className="mb-4 flex items-center gap-1.5 text-xs text-base-content/40 hover:text-base-content/70 transition-default"
-        >
-          ← Back to question
-        </Link>
+  const statusLabel =
+    overallScore == null
+      ? "Evaluating…"
+      : overallScore >= 75
+        ? "Excellent"
+        : overallScore >= 50
+          ? "Good"
+          : "Needs Work"
 
-        <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-          {/* Score ring */}
+  const statusColor = overallScore == null ? DS.amber : scoreColor(overallScore)
+
+  return (
+    <div
+      className="mx-auto max-w-5xl px-4 py-8 font-[Manrope,sans-serif]"
+      style={{ color: DS.textPrimary }}
+    >
+      {/* ── Back link ── */}
+      <Link
+        to="/questions/$questionId"
+        params={{ questionId }}
+        style={{ color: DS.textSecondary }}
+        className="flex items-center gap-1.5 text-xs mb-6 hover:text-slate-200 transition-colors"
+      >
+        ← Back to question
+      </Link>
+
+      {/* ── Scorecard header ── */}
+      <header
+        className="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between pb-8 mb-8"
+        style={{ borderBottom: `1px solid ${DS.surfaceVariant}` }}
+      >
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight mb-1" style={{ color: DS.textPrimary }}>
+            Evaluation Results
+          </h1>
+          <p className="text-sm" style={{ color: DS.textSecondary }}>
+            Review your pillar scores, AI feedback, and improvement opportunities.
+          </p>
+        </div>
+
+        <div
+          className="flex items-center gap-6 p-6 rounded-lg shrink-0"
+          style={{ background: DS.cardBg, border: DS.cardBorder }}
+        >
+          {/* Score ring or spinner */}
           {overallScore != null ? (
-            <ScoreRing score={Math.round(overallScore)} size={100} label="Overall" />
+            <ScoreRing score={Math.round(overallScore)} size={88} label="Overall" />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-base-300/40">
+            <div
+              className="flex h-[88px] w-[88px] items-center justify-center rounded-full"
+              style={{ border: `2px solid ${DS.surfaceVariant}` }}
+            >
               {isLoading || isEvaluating ? (
-                <div className="loading loading-spinner loading-md text-primary" />
+                <span className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" />
               ) : (
-                <span className="text-base-content/30 text-xs">N/A</span>
+                <span className="text-xs" style={{ color: DS.textMuted }}>N/A</span>
               )}
             </div>
           )}
 
-          {/* Dimension score pills */}
-          {componentScores.length > 0 && (
-            <div className="flex-1">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/40">
-                Dimension scores
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {componentScores.map((cs) => (
-                  <ScorePill key={cs.dimensionId} score={cs} />
-                ))}
+          <div
+            className="h-14 w-px"
+            style={{ background: DS.surfaceVariant }}
+          />
+
+          <div className="flex flex-col gap-3">
+            {/* Numeric score */}
+            <div className="flex flex-col">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                style={{ color: DS.textSecondary }}
+              >
+                Overall Score
+              </span>
+              <div className="flex items-baseline gap-1">
+                <span
+                  className="text-4xl font-extrabold leading-none"
+                  style={{ color: overallScore != null ? scoreColor(overallScore) : DS.textMuted }}
+                >
+                  {overallScore != null ? Math.round(overallScore) : "—"}
+                </span>
+                <span className="text-lg font-semibold" style={{ color: DS.textMuted }}>/100</span>
               </div>
             </div>
-          )}
+            {/* Status */}
+            <div className="flex flex-col">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                style={{ color: DS.textSecondary }}
+              >
+                Status
+              </span>
+              <span className="flex items-center gap-2 text-sm font-medium" style={{ color: statusColor }}>
+                <span
+                  className="w-2 h-2 rounded-full animate-pulse inline-block"
+                  style={{
+                    background: statusColor,
+                    boxShadow: `0 0 8px ${statusColor}99`,
+                  }}
+                />
+                {statusLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
 
-          {(isLoading || isEvaluating) && componentScores.length === 0 && (
-            <div className="flex-1 space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="skeleton h-6 w-24 rounded-full" />
+      {/* ── Pillar Breakdown grid ── */}
+      {(componentScores.length > 0 || isLoading || isEvaluating) && (
+        <section className="mb-10">
+          <h2
+            className="text-base font-bold mb-4 flex items-center gap-2"
+            style={{ color: DS.textPrimary }}
+          >
+            <BarChart3 size={16} style={{ color: DS.indigoPale }} />
+            Pillar Breakdown
+          </h2>
+
+          {isLoading || (isEvaluating && componentScores.length === 0) ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse rounded-lg h-44"
+                  style={{ background: DS.elevatedBg, border: DS.cardBorder }}
+                />
               ))}
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {componentScores.map((cs) => {
+                const pct = Math.round(cs.score)
+                const color = scoreColor(pct)
+                const icon = dimensionIcon[cs.dimensionId] ?? <BarChart3 size={18} />
+                const label = dimensionLabel[cs.dimensionId] ?? cs.dimensionId
+                return (
+                  <div
+                    key={cs.dimensionId}
+                    className="flex flex-col gap-4 p-5 rounded-lg transition-colors"
+                    style={{ background: DS.cardBg, border: DS.cardBorder }}
+                  >
+                    {/* Icon + score row */}
+                    <div className="flex justify-between items-start">
+                      <div
+                        className="w-10 h-10 rounded flex items-center justify-center"
+                        style={{
+                          background: DS.surfaceHigh,
+                          border: `1px solid ${DS.surfaceVariant}`,
+                          color: DS.indigoPale,
+                        }}
+                      >
+                        {icon}
+                      </div>
+                      <span className="text-sm font-bold" style={{ color }}>
+                        {pct}/100
+                      </span>
+                    </div>
+
+                    {/* Label + reasoning */}
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold mb-1" style={{ color: DS.textPrimary }}>
+                        {label}
+                      </h3>
+                      {cs.reasoning ? (
+                        <p
+                          className="text-xs leading-relaxed line-clamp-3"
+                          style={{ color: DS.textSecondary }}
+                        >
+                          {cs.reasoning}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {/* Progress bar */}
+                    <div
+                      className="w-full h-1 rounded-full overflow-hidden mt-auto"
+                      style={{ background: DS.surfaceHigh }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${pct}%`, background: color }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           )}
-        </div>
-      </div>
+        </section>
+      )}
+
+      {/* ── AI Insights (feedback + improvements) ── */}
+      {result && (result.feedback || result.improvements?.length > 0) && (
+        <section className="mb-10">
+          <h2
+            className="text-base font-bold mb-4 flex items-center gap-2"
+            style={{ color: DS.textPrimary }}
+          >
+            <Activity size={16} style={{ color: DS.indigoPale }} />
+            AI Insights
+          </h2>
+          <div
+            className="rounded-lg overflow-hidden flex flex-col lg:flex-row"
+            style={{ background: DS.cardBg, border: DS.cardBorder }}
+          >
+            {/* 1/3 — Summary */}
+            {result.feedback && (
+              <div
+                className="p-6 lg:w-1/3 flex flex-col gap-3"
+                style={{ borderRight: `1px solid ${DS.surfaceVariant}` }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className="w-2 h-2 rounded-full inline-block"
+                    style={{ background: DS.indigoPale }}
+                  />
+                  <span className="text-sm font-bold" style={{ color: DS.textPrimary }}>
+                    Summary
+                  </span>
+                </div>
+                <div
+                  className="text-sm leading-relaxed flex-1"
+                  style={{ color: DS.textBody, lineHeight: "1.6" }}
+                >
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{result.feedback}</ReactMarkdown>
+                </div>
+              </div>
+            )}
+
+            {/* 2/3 — Improvements list */}
+            {result.improvements?.length > 0 && (
+              <div
+                className="lg:flex-1 p-6 relative overflow-x-auto"
+                style={{ background: DS.codeBg }}
+              >
+                <div
+                  className="absolute top-0 right-0 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-bl"
+                  style={{
+                    background: `${DS.surfaceVariant}80`,
+                    borderBottom: `1px solid ${DS.surfaceVariant}`,
+                    borderLeft: `1px solid ${DS.surfaceVariant}`,
+                    color: DS.textSecondary,
+                  }}
+                >
+                  Key Improvements
+                </div>
+                <ul className="mt-6 space-y-3">
+                  {result.improvements.map((item, i) => (
+                    <li key={i} className="flex gap-3 text-sm" style={{ color: DS.textBody }}>
+                      <span className="shrink-0 font-bold" style={{ color: DS.indigo }}>→</span>
+                      <span style={{ lineHeight: "1.5" }}>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* ── Tabs ── */}
-      <div role="tablist" className="tabs tabs-bordered mb-6">
-        <TabBtn active={activeTab === "feedback"} onClick={() => setActiveTab("feedback")} icon={<BarChart3 size={13} />} label="Feedback" />
-        <TabBtn active={activeTab === "answer"} onClick={() => setActiveTab("answer")} icon={<FileText size={13} />} label="Your Answer" />
-        <TabBtn active={activeTab === "conversation"} onClick={() => setActiveTab("conversation")} icon={<MessageCircle size={13} />} label="Conversation" />
+      <div
+        className="flex gap-1 mb-6"
+        style={{ borderBottom: `1px solid ${DS.surfaceVariant}` }}
+      >
+        <TabBtn
+          active={activeTab === "feedback"}
+          onClick={() => setActiveTab("feedback")}
+          icon={<BarChart3 size={13} />}
+          label="Feedback"
+        />
+        <TabBtn
+          active={activeTab === "answer"}
+          onClick={() => setActiveTab("answer")}
+          icon={<FileText size={13} />}
+          label="Your Answer"
+        />
+        <TabBtn
+          active={activeTab === "conversation"}
+          onClick={() => setActiveTab("conversation")}
+          icon={<MessageCircle size={13} />}
+          label="Conversation"
+        />
       </div>
 
       {/* ── Feedback tab ── */}
@@ -131,80 +411,104 @@ function ResultPage() {
           {isLoading || (isEvaluating && !result) ? (
             <div className="space-y-3">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="skeleton h-24 w-full rounded-xl" />
+                <div
+                  key={i}
+                  className="animate-pulse rounded-lg h-24"
+                  style={{ background: DS.elevatedBg }}
+                />
               ))}
             </div>
           ) : result ? (
             <>
-              {/* Overall feedback */}
-              {result.feedback && (
-                <section>
-                  <h3 className="mb-3 text-sm font-semibold text-base-content/70">Summary</h3>
-                  <div className="rounded-xl border border-base-300/40 bg-base-200/50 p-5">
-                    <div className="prose prose-sm prose-invert max-w-none text-base-content/80">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{result.feedback}</ReactMarkdown>
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              {/* Top improvements */}
-              {result.improvements?.length > 0 && (
-                <section>
-                  <h3 className="mb-3 text-sm font-semibold text-base-content/70">
-                    Key improvements
-                  </h3>
-                  <div className="rounded-xl border border-base-300/40 bg-base-200/50 p-5">
-                    <ul className="space-y-2">
-                      {result.improvements.map((item, i) => (
-                        <li key={i} className="flex gap-2 text-sm text-base-content/70">
-                          <span className="text-warning shrink-0">→</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-              )}
-
               {/* Per-dimension breakdowns */}
               {componentScores.length > 0 && (
                 <section>
-                  <h3 className="mb-3 text-sm font-semibold text-base-content/70">
+                  <h3
+                    className="mb-3 text-xs font-bold uppercase tracking-widest"
+                    style={{ color: DS.textSecondary }}
+                  >
                     Improvements by dimension
                   </h3>
                   <div className="space-y-2">
-                    {componentScores.map((cs) => (
-                      <details
-                        key={cs.dimensionId}
-                        className="collapse collapse-arrow rounded-xl border border-base-300/40 bg-base-200/50"
-                      >
-                        <summary className="collapse-title text-sm font-medium flex items-center gap-2">
-                          <ScorePill score={cs} />
-                          {dimensionLabel[cs.dimensionId] ?? cs.dimensionId}
-                        </summary>
-                        <div className="collapse-content pt-2 space-y-3">
-                          {cs.reasoning && (
-                            <p className="text-xs text-base-content/60">{cs.reasoning}</p>
-                          )}
-                          {cs.improvements?.length > 0 && (
-                            <ul className="space-y-1">
-                              {cs.improvements.map((s, i) => (
-                                <li key={i} className="text-xs text-base-content/60">
-                                  → {s}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </div>
-                      </details>
-                    ))}
+                    {componentScores.map((cs) => {
+                      const pct = Math.round(cs.score)
+                      const color = scoreColor(pct)
+                      return (
+                        <details
+                          key={cs.dimensionId}
+                          className="group rounded-lg"
+                          style={{ background: DS.cardBg, border: DS.cardBorder }}
+                        >
+                          <summary
+                            className="flex items-center gap-3 px-4 py-3 text-sm font-medium cursor-pointer select-none list-none"
+                            style={{ color: DS.textPrimary }}
+                          >
+                            {/* Chevron */}
+                            <svg
+                              className="w-3.5 h-3.5 shrink-0 transition-transform group-open:rotate-90"
+                              style={{ color: DS.textSecondary }}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                            >
+                              <path d="M9 18l6-6-6-6" />
+                            </svg>
+
+                            {/* Score badge */}
+                            <span
+                              className="rounded-full px-2.5 py-0.5 text-xs font-bold shrink-0"
+                              style={{
+                                color,
+                                background: `${color}18`,
+                                border: `1px solid ${color}40`,
+                              }}
+                            >
+                              {pct}
+                            </span>
+
+                            {dimensionLabel[cs.dimensionId] ?? cs.dimensionId}
+                          </summary>
+
+                          <div
+                            className="px-4 pb-4 pt-2 space-y-3"
+                            style={{ borderTop: `1px solid ${DS.surfaceVariant}` }}
+                          >
+                            {cs.reasoning && (
+                              <p className="text-xs leading-relaxed" style={{ color: DS.textSecondary }}>
+                                {cs.reasoning}
+                              </p>
+                            )}
+                            {cs.improvements?.length > 0 && (
+                              <ul className="space-y-1.5">
+                                {cs.improvements.map((s, i) => (
+                                  <li
+                                    key={i}
+                                    className="flex gap-2 text-xs"
+                                    style={{ color: DS.textBody }}
+                                  >
+                                    <span className="shrink-0" style={{ color: DS.indigo }}>→</span>
+                                    {s}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        </details>
+                      )
+                    })}
                   </div>
                 </section>
               )}
             </>
           ) : (
-            <div className="rounded-xl border border-dashed border-base-300/40 py-12 text-center text-base-content/30">
+            <div
+              className="rounded-lg py-14 text-center text-sm"
+              style={{
+                border: `1px dashed ${DS.surfaceVariant}`,
+                color: DS.textMuted,
+              }}
+            >
               {submission?.status === "FAILED" ? "Evaluation failed." : "No evaluation data yet."}
             </div>
           )}
@@ -215,15 +519,30 @@ function ResultPage() {
       {activeTab === "answer" && (
         <div className="space-y-4">
           {isLoading ? (
-            <div className="skeleton h-40 w-full rounded-xl" />
+            <div
+              className="animate-pulse rounded-lg h-40"
+              style={{ background: DS.elevatedBg }}
+            />
           ) : answerText ? (
-            <div className="rounded-xl border border-base-300/40 bg-base-200/50 p-5">
-              <div className="prose prose-sm prose-invert max-w-none text-base-content/80">
+            <div
+              className="rounded-lg p-5"
+              style={{ background: DS.cardBg, border: DS.cardBorder }}
+            >
+              <div
+                className="text-sm max-w-none"
+                style={{ color: DS.textBody, lineHeight: "1.6" }}
+              >
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{answerText}</ReactMarkdown>
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-base-300/40 py-12 text-center text-base-content/30 text-sm">
+            <div
+              className="rounded-lg py-14 text-center text-sm"
+              style={{
+                border: `1px dashed ${DS.surfaceVariant}`,
+                color: DS.textMuted,
+              }}
+            >
               Answer text not available.
             </div>
           )}
@@ -232,23 +551,47 @@ function ResultPage() {
 
       {/* ── Conversation tab ── */}
       {activeTab === "conversation" && (
-        <div className="rounded-xl border border-dashed border-base-300/40 py-12 text-center text-base-content/30">
-          <MessageCircle size={24} className="mx-auto mb-2 opacity-30" />
-          <p className="text-sm">Conversation history will appear here.</p>
+        <div
+          className="rounded-lg py-14 text-center"
+          style={{ border: `1px dashed ${DS.surfaceVariant}` }}
+        >
+          <MessageCircle
+            size={24}
+            className="mx-auto mb-2"
+            style={{ color: DS.textMuted }}
+          />
+          <p className="text-sm" style={{ color: DS.textMuted }}>
+            Conversation history will appear here.
+          </p>
         </div>
       )}
 
       {/* ── Bottom actions ── */}
-      <div className="mt-8 flex items-center justify-between border-t border-base-300/40 pt-6">
+      <div
+        className="mt-8 flex items-center justify-between pt-6"
+        style={{ borderTop: `1px solid ${DS.surfaceVariant}` }}
+      >
         <Link
           to="/questions/$questionId"
           params={{ questionId }}
-          className="btn btn-ghost btn-sm rounded-lg gap-1.5 text-base-content/60"
+          className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-2 transition-colors hover:text-slate-200"
+          style={{
+            color: DS.textSecondary,
+            background: DS.elevatedBg,
+            border: `1px solid ${DS.surfaceVariant}`,
+          }}
         >
           <RefreshCw size={13} />
           Try again
         </Link>
-        <Link to="/questions" className="btn btn-primary btn-sm rounded-lg gap-1.5">
+        <Link
+          to="/questions"
+          className="flex items-center gap-1.5 text-xs font-bold rounded-lg px-4 py-2 transition-opacity hover:opacity-90"
+          style={{
+            background: DS.indigo,
+            color: "#ffffff",
+          }}
+        >
           Next question <ArrowRight size={13} />
         </Link>
       </div>
@@ -258,21 +601,11 @@ function ResultPage() {
 
 // ── Helper components ──────────────────────────────────────────────────────
 
-function ScorePill({ score: cs }: { score: ComponentScore }) {
-  const pct = Math.round(cs.score)
-  const color =
-    pct >= 75 ? "text-success border-success/30 bg-success/10" :
-    pct >= 50 ? "text-warning border-warning/30 bg-warning/10" :
-                "text-error border-error/30 bg-error/10"
-  return (
-    <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-medium", color)}>
-      {dimensionLabel[cs.dimensionId] ?? cs.dimensionId} {pct}
-    </span>
-  )
-}
-
 function TabBtn({
-  active, onClick, icon, label,
+  active,
+  onClick,
+  icon,
+  label,
 }: {
   active: boolean
   onClick: () => void
@@ -285,7 +618,13 @@ function TabBtn({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={cn("tab gap-1.5", active ? "tab-active" : "text-base-content/50")}
+      className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-colors"
+      style={{
+        color: active ? DS.indigoPale : DS.textSecondary,
+        borderBottom: active ? `2px solid ${DS.indigo}` : "2px solid transparent",
+        marginBottom: "-1px",
+        background: "transparent",
+      }}
     >
       {icon}
       {label}

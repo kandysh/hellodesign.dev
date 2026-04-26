@@ -13,7 +13,6 @@ import {
   BarChart3,
   CheckCircle2,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/community/$threadId")({ component: CommunityThreadPage })
 
@@ -208,16 +207,16 @@ const FALLBACK_THREAD: ThreadData = {
   comments: [],
 }
 
-function scoreColor(score: number) {
-  if (score >= 85) return "text-success"
-  if (score >= 70) return "text-warning"
-  return "text-error"
+function scoreColor(score: number): string {
+  if (score >= 85) return "#4edea3"
+  if (score >= 70) return "#fbbf24"
+  return "#ffb4ab"
 }
 
-function scoreBarColor(score: number) {
-  if (score >= 85) return "bg-success"
-  if (score >= 70) return "bg-warning"
-  return "bg-error"
+function scoreBarColor(score: number): string {
+  if (score >= 85) return "#4edea3"
+  if (score >= 70) return "#fbbf24"
+  return "#ffb4ab"
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -247,134 +246,228 @@ function CommunityThreadPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 16px" }}>
       {/* ── Breadcrumb ───────────────────────────────────────── */}
-      <nav className="mb-6 flex items-center gap-1.5 text-sm text-base-content/50">
-        <Link to="/community" className="hover:text-primary transition-default flex items-center gap-1">
+      <nav style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
+        <Link
+          to="/community"
+          style={{ display: "flex", alignItems: "center", gap: 4, color: "#908fa0", textDecoration: "none" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#8083ff" }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#908fa0" }}
+        >
           <ArrowLeft size={13} />
           Community Solutions
         </Link>
-        <ChevronRight size={12} className="text-base-content/30" />
-        <span className="text-base-content/70 truncate max-w-[300px]">{thread.title}</span>
+        <ChevronRight size={12} style={{ color: "#464554" }} />
+        <span style={{ color: "#c7c4d7", maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {thread.title}
+        </span>
       </nav>
 
       {/* ── Article Header ───────────────────────────────────── */}
-      <div className="mb-6">
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span className="badge badge-xs badge-outline font-mono tracking-wider">{thread.category}</span>
-          <span className="text-xs text-base-content/40">{thread.timeAgo}</span>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 12, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8 }}>
+          <span style={{
+            background: "rgba(192,193,255,0.08)",
+            border: "1px solid rgba(192,193,255,0.15)",
+            color: "#c0c1ff",
+            borderRadius: 6,
+            padding: "2px 10px",
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: "monospace",
+            letterSpacing: "0.08em",
+          }}>
+            {thread.category}
+          </span>
+          <span style={{ fontSize: 12, color: "#464554" }}>{thread.timeAgo}</span>
         </div>
 
-        <h1 className="mb-4 text-2xl font-bold tracking-tight md:text-3xl">{thread.title}</h1>
+        <h1 style={{ color: "#dae2fd", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 16 }}>
+          {thread.title}
+        </h1>
 
-        <div className="flex flex-wrap items-center gap-4">
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 16 }}>
           {/* Author */}
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: "50%",
+              background: "rgba(99,102,241,0.15)",
+              border: "1px solid rgba(99,102,241,0.3)",
+              color: "#8083ff",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 11, fontWeight: 700, flexShrink: 0,
+            }}>
               {thread.authorInitials}
             </div>
             <div>
-              <p className="text-sm font-semibold">{thread.author}</p>
-              <p className="text-xs text-base-content/40">{thread.authorRole}</p>
+              <p style={{ fontSize: 13, fontWeight: 600, color: "#dae2fd" }}>{thread.author}</p>
+              <p style={{ fontSize: 11, color: "#464554" }}>{thread.authorRole}</p>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-3 text-xs text-base-content/50 ml-2">
-            <button type="button" className="flex items-center gap-1.5 hover:text-primary transition-default">
+          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12, color: "#464554", marginLeft: 8 }}>
+            <button
+              type="button"
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: "#464554", cursor: "pointer", padding: 0, fontSize: 12 }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+            >
               <ThumbsUp size={12} />
               {thread.upvotes}
             </button>
-            <span className="flex items-center gap-1.5">
+            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <MessageSquare size={12} />
               {localComments.length}
             </span>
-            <button type="button" className="flex items-center gap-1.5 hover:text-primary transition-default">
+            <button
+              type="button"
+              style={{ display: "flex", alignItems: "center", gap: 6, background: "none", border: "none", color: "#464554", cursor: "pointer", padding: 0, fontSize: 12 }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+            >
               <GitFork size={12} />
               Fork
             </button>
           </div>
 
           {/* AI Score */}
-          <div className="ml-auto flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-sm">
-            <Sparkles size={12} className="text-success" />
-            <span className={cn("font-bold", scoreColor(thread.aiScore))}>{thread.aiScore}</span>
-            <span className="text-base-content/40 text-xs">/ 100</span>
+          <div style={{
+            marginLeft: "auto",
+            display: "flex", alignItems: "center", gap: 6,
+            borderRadius: 99, border: "1px solid rgba(78,222,163,0.3)",
+            background: "rgba(78,222,163,0.08)",
+            padding: "6px 14px", fontSize: 13,
+          }}>
+            <Sparkles size={12} style={{ color: "#4edea3" }} />
+            <span style={{ fontWeight: 700, color: scoreColor(thread.aiScore) }}>{thread.aiScore}</span>
+            <span style={{ color: "#464554", fontSize: 11 }}>/ 100</span>
           </div>
         </div>
       </div>
 
       {/* ── Two-column layout ────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_300px]">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 24 }} className="lg:grid-cols-[1fr_300px]">
         {/* ── Left: Solution Content ── */}
-        <div className="space-y-6">
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           {/* Diagram placeholder */}
-          <section className="rounded-xl border border-base-300/40 bg-base-200 overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-base-300/40 px-5 py-3">
-              <BarChart3 size={14} className="text-base-content/50" />
-              <span className="text-sm font-semibold">System Diagram</span>
+          <section style={{ background: "#171f33", border: "1px solid #2d3449", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              borderBottom: "1px solid #1e2a3d",
+              padding: "12px 20px",
+            }}>
+              <BarChart3 size={14} style={{ color: "#908fa0" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#dae2fd" }}>System Diagram</span>
             </div>
-            <div
-              className="flex items-center justify-center bg-base-300/20 text-base-content/20 text-sm italic"
-              style={{ height: 180 }}
-            >
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#131b2e", color: "#464554",
+              fontSize: 13, fontStyle: "italic", height: 180,
+            }}>
               Architecture diagram (canvas view)
             </div>
           </section>
 
           {/* Design Overview */}
-          <section className="rounded-xl border border-base-300/40 bg-base-200 overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-base-300/40 px-5 py-3">
-              <span className="text-sm font-semibold">Design Overview</span>
+          <section style={{ background: "#171f33", border: "1px solid #2d3449", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              borderBottom: "1px solid #1e2a3d",
+              padding: "12px 20px",
+            }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#dae2fd" }}>Design Overview</span>
             </div>
-            <div className="p-5 prose prose-sm max-w-none prose-invert prose-p:text-base-content/80 prose-strong:text-base-content prose-headings:text-base-content prose-li:text-base-content/80">
+            <div style={{ padding: 20, color: "#c7c4d7", lineHeight: "1.7", fontSize: 14 }}>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{thread.overview}</ReactMarkdown>
             </div>
           </section>
 
           {/* Code Snippet */}
-          <section className="rounded-xl border border-base-300/40 bg-base-200 overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-base-300/40 px-5 py-3">
-              <span className="text-sm font-semibold">Implementation Example</span>
+          <section style={{ background: "#171f33", border: "1px solid #2d3449", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              borderBottom: "1px solid #1e2a3d",
+              padding: "12px 20px",
+            }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#dae2fd" }}>Implementation Example</span>
             </div>
-            <pre className="p-5 overflow-x-auto text-xs leading-relaxed text-success/80 bg-base-300/20">
+            <pre style={{
+              padding: 20, overflowX: "auto", fontSize: 12,
+              lineHeight: 1.7, color: "rgba(78,222,163,0.85)",
+              background: "#131b2e", margin: 0,
+            }}>
               <code>{thread.codeSnippet}</code>
             </pre>
           </section>
 
           {/* ── Comments ── */}
           <section>
-            <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
+            <h2 style={{
+              marginBottom: 16, display: "flex", alignItems: "center", gap: 8,
+              fontSize: 14, fontWeight: 600, color: "#dae2fd",
+            }}>
               <MessageSquare size={15} />
               Technical Discussion
-              <span className="text-xs font-normal text-base-content/40">{localComments.length} comments</span>
+              <span style={{ fontSize: 12, fontWeight: 400, color: "#464554" }}>{localComments.length} comments</span>
             </h2>
 
-            <div className="space-y-4 mb-6">
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
               {localComments.map((comment) => (
                 <CommentCard key={comment.id} comment={comment} />
               ))}
 
               {localComments.length === 0 && (
-                <p className="text-sm text-base-content/40 italic">No comments yet. Be the first to contribute!</p>
+                <p style={{ fontSize: 13, color: "#464554", fontStyle: "italic" }}>
+                  No comments yet. Be the first to contribute!
+                </p>
               )}
             </div>
 
             {/* Comment form */}
-            <div className="rounded-xl border border-base-300/40 bg-base-200 p-4">
+            <div style={{
+              background: "#171f33", border: "1px solid #2d3449",
+              borderRadius: 12, padding: 16,
+            }}>
               <textarea
                 rows={3}
                 placeholder="Share your thoughts, ask questions, or suggest improvements…"
                 value={commentDraft}
                 onChange={(e) => setCommentDraft(e.target.value)}
-                className="textarea textarea-sm w-full resize-none rounded-lg border-base-300/50 bg-base-300/20 text-sm focus-visible:ring-1 focus-visible:ring-primary"
+                style={{
+                  background: "#131b2e",
+                  border: "1px solid #2d3449",
+                  borderRadius: 10,
+                  color: "#dae2fd",
+                  padding: "10px 16px",
+                  fontSize: 14,
+                  outline: "none",
+                  width: "100%",
+                  resize: "none",
+                  height: 100,
+                  boxSizing: "border-box",
+                  fontFamily: "inherit",
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(128,131,255,0.5)" }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
               />
-              <div className="mt-2.5 flex justify-end">
+              <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
                 <button
                   type="button"
                   onClick={handleSubmitComment}
                   disabled={!commentDraft.trim()}
-                  className="btn btn-primary btn-sm rounded-lg gap-1.5"
+                  style={{
+                    background: commentDraft.trim() ? "#6366f1" : "rgba(99,102,241,0.3)",
+                    border: "1px solid rgba(99,102,241,0.5)",
+                    color: commentDraft.trim() ? "#fff" : "#908fa0",
+                    borderRadius: 10,
+                    padding: "8px 20px",
+                    fontWeight: 600,
+                    fontSize: 13,
+                    cursor: commentDraft.trim() ? "pointer" : "not-allowed",
+                    display: "flex", alignItems: "center", gap: 6,
+                  }}
                 >
                   <Send size={12} />
                   Post Comment
@@ -385,46 +478,54 @@ function CommunityThreadPage() {
         </div>
 
         {/* ── Right: AI Analysis ── */}
-        <aside className="space-y-5">
-          <div className="rounded-xl border border-base-300/40 bg-base-200 overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-base-300/40 px-5 py-3">
-              <Sparkles size={13} className="text-primary" />
-              <span className="text-sm font-semibold">AI Analysis</span>
+        <aside style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div style={{ background: "#171f33", border: "1px solid #2d3449", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              borderBottom: "1px solid #1e2a3d",
+              padding: "12px 20px",
+            }}>
+              <Sparkles size={13} style={{ color: "#8083ff" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#dae2fd" }}>AI Analysis</span>
             </div>
-            <div className="p-5 space-y-4">
+            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
               {/* Overall score ring */}
-              <div className="flex flex-col items-center py-2">
-                <div className="relative mb-2">
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 8, paddingBottom: 8 }}>
+                <div style={{ position: "relative", marginBottom: 8 }}>
                   <svg width={72} height={72}>
-                    <circle cx={36} cy={36} r={28} fill="none" stroke="oklch(22% 0.027 273)" strokeWidth={6} />
+                    <circle cx={36} cy={36} r={28} fill="none" stroke="#1e2a3d" strokeWidth={6} />
                     <circle
                       cx={36} cy={36} r={28} fill="none"
-                      stroke="oklch(74% 0.169 154)" strokeWidth={6}
+                      stroke="#4edea3" strokeWidth={6}
                       strokeDasharray={175.93}
                       strokeDashoffset={175.93 * (1 - thread.aiScore / 100)}
                       strokeLinecap="round"
                       transform="rotate(-90 36 36)"
                     />
-                    <text x={36} y={40} textAnchor="middle" fontSize={14} fontWeight="bold" fill="oklch(74% 0.169 154)">
+                    <text x={36} y={40} textAnchor="middle" fontSize={14} fontWeight="bold" fill="#4edea3">
                       {thread.aiScore}
                     </text>
                   </svg>
                 </div>
-                <p className="text-xs text-base-content/50">Overall Score</p>
+                <p style={{ fontSize: 11, color: "#464554" }}>Overall Score</p>
               </div>
 
               {/* Dimension scores */}
-              <div className="space-y-2.5">
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {thread.dimensions.map((d) => (
                   <div key={d.label}>
-                    <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs text-base-content/70">{d.label}</span>
-                      <span className={cn("text-xs font-semibold", scoreColor(d.score))}>{d.score}</span>
+                    <div style={{ marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 12, color: "#908fa0" }}>{d.label}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: scoreColor(d.score) }}>{d.score}</span>
                     </div>
-                    <div className="h-1.5 w-full rounded-full bg-base-300/60">
+                    <div style={{ height: 6, width: "100%", borderRadius: 99, background: "#1e2a3d" }}>
                       <div
-                        className={cn("h-1.5 rounded-full transition-all", scoreBarColor(d.score))}
-                        style={{ width: `${d.score}%` }}
+                        style={{
+                          height: 6, borderRadius: 99,
+                          background: scoreBarColor(d.score),
+                          width: `${d.score}%`,
+                          transition: "width 0.4s ease",
+                        }}
                       />
                     </div>
                   </div>
@@ -434,15 +535,19 @@ function CommunityThreadPage() {
           </div>
 
           {/* Top Strengths */}
-          <div className="rounded-xl border border-base-300/40 bg-base-200 overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-base-300/40 px-5 py-3">
-              <CheckCircle2 size={13} className="text-success" />
-              <span className="text-sm font-semibold">Strengths</span>
+          <div style={{ background: "#171f33", border: "1px solid #2d3449", borderRadius: 12, overflow: "hidden" }}>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 8,
+              borderBottom: "1px solid #1e2a3d",
+              padding: "12px 20px",
+            }}>
+              <CheckCircle2 size={13} style={{ color: "#4edea3" }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#dae2fd" }}>Strengths</span>
             </div>
-            <ul className="space-y-2 p-5">
+            <ul style={{ display: "flex", flexDirection: "column", gap: 8, padding: 20, listStyle: "none", margin: 0 }}>
               {["Multi-tier cache hierarchy", "Global PoP distribution", "Adaptive bitrate strategy"].map((s) => (
-                <li key={s} className="flex items-start gap-2 text-xs text-base-content/70">
-                  <span className="mt-0.5 shrink-0 text-success">✓</span>
+                <li key={s} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12, color: "#908fa0" }}>
+                  <span style={{ marginTop: 1, flexShrink: 0, color: "#4edea3" }}>✓</span>
                   {s}
                 </li>
               ))}
@@ -452,10 +557,28 @@ function CommunityThreadPage() {
           {/* Try this question */}
           <Link
             to="/questions"
-            className="block rounded-xl border border-primary/20 bg-primary/5 p-4 hover:border-primary/40 hover:bg-primary/10 transition-default"
+            style={{
+              display: "block",
+              background: "rgba(99,102,241,0.06)",
+              border: "1px solid rgba(99,102,241,0.2)",
+              borderRadius: 12,
+              padding: 16,
+              textDecoration: "none",
+              transition: "border-color 0.15s, background 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement
+              el.style.borderColor = "rgba(99,102,241,0.4)"
+              el.style.background = "rgba(99,102,241,0.1)"
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement
+              el.style.borderColor = "rgba(99,102,241,0.2)"
+              el.style.background = "rgba(99,102,241,0.06)"
+            }}
           >
-            <p className="mb-1 text-xs font-semibold text-primary">Practice this pattern</p>
-            <p className="text-xs text-base-content/50">Try a similar question in the Question Bank →</p>
+            <p style={{ marginBottom: 4, fontSize: 12, fontWeight: 600, color: "#8083ff" }}>Practice this pattern</p>
+            <p style={{ fontSize: 12, color: "#464554" }}>Try a similar question in the Question Bank →</p>
           </Link>
         </aside>
       </div>
@@ -467,33 +590,37 @@ function CommunityThreadPage() {
 
 function CommentCard({ comment }: { comment: Comment }) {
   return (
-    <div className="rounded-xl border border-base-300/40 bg-base-200 p-4">
+    <div className="rounded-xl p-4" style={{ border: "1px solid #2d3449", background: "#131b2e" }}>
       <div className="mb-2 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div
-            className={cn(
-              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold",
-              comment.isAuthor ? "bg-primary/20 text-primary" : "bg-base-300/60 text-base-content/60",
-            )}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+            style={comment.isAuthor
+              ? { background: "rgba(99,102,241,0.2)", color: "#8083ff" }
+              : { background: "rgba(255,255,255,0.06)", color: "#908fa0" }
+            }
           >
             {comment.authorInitials}
           </div>
           <div>
-            <span className="text-sm font-medium">{comment.author}</span>
+            <span className="text-sm font-medium" style={{ color: "#dae2fd" }}>{comment.author}</span>
             {comment.isAuthor && (
-              <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary uppercase tracking-wide">
+              <span className="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide" style={{ background: "rgba(128,131,255,0.15)", color: "#8083ff" }}>
                 Author
               </span>
             )}
-            {comment.role && <p className="text-xs text-base-content/40">{comment.role}</p>}
+            {comment.role && <p className="text-xs" style={{ color: "#464554" }}>{comment.role}</p>}
           </div>
         </div>
-        <span className="text-xs text-base-content/40 shrink-0">{comment.timeAgo}</span>
+        <span className="text-xs shrink-0" style={{ color: "#464554" }}>{comment.timeAgo}</span>
       </div>
-      <p className="text-sm leading-relaxed text-base-content/80">{comment.content}</p>
+      <p className="text-sm leading-relaxed" style={{ color: "#c7c4d7" }}>{comment.content}</p>
       <button
         type="button"
-        className="mt-2.5 flex items-center gap-1.5 text-xs text-base-content/40 hover:text-primary transition-default"
+        className="mt-2.5 flex items-center gap-1.5 text-xs transition-colors"
+        style={{ color: "#464554" }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = "#8083ff")}
+        onMouseLeave={(e) => (e.currentTarget.style.color = "#464554")}
       >
         <ThumbsUp size={11} />
         {comment.upvotes}

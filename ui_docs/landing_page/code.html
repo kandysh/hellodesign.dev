@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hello Design - Technical Precision in System Design</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#4edea3",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "on-primary-fixed": "#07006c",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "surface-container-low": "#131b2e",
+                        "background": "#0b1326",
+                        "secondary": "#b9c8de",
+                        "on-primary": "#1000a9",
+                        "surface": "#0b1326",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-container": "#000703",
+                        "surface-container": "#171f33",
+                        "surface-tint": "#c0c1ff",
+                        "outline": "#908fa0",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "tertiary-fixed": "#6ffbbe",
+                        "surface-variant": "#2d3449",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-primary-container": "#0d0096",
+                        "surface-container-lowest": "#060e20",
+                        "on-secondary": "#233143",
+                        "on-tertiary": "#003824",
+                        "tertiary-container": "#00885d",
+                        "secondary-container": "#39485a",
+                        "on-surface": "#dae2fd",
+                        "inverse-on-surface": "#283044",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "primary-fixed": "#e1e0ff",
+                        "primary": "#c0c1ff",
+                        "surface-container-high": "#222a3d",
+                        "primary-container": "#8083ff",
+                        "on-error-container": "#ffdad6",
+                        "outline-variant": "#464554",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#a7b6cc",
+                        "inverse-surface": "#dae2fd",
+                        "error": "#ffb4ab",
+                        "inverse-primary": "#494bd6",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#002113",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-background": "#dae2fd",
+                        "surface-container-highest": "#2d3449",
+                        "surface-bright": "#31394d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin": "24px",
+                        "gutter": "16px",
+                        "container-max": "1440px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "body-base": ["Manrope"],
+                        "code-inline": ["Space Grotesk"],
+                        "body-sm": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "label-caps": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-base": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "code-inline": ["14px", { "lineHeight": "1", "letterSpacing": "0em", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0F172A; /* Setting the base corporate modern dark background */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased min-h-screen flex flex-col pt-16">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-slate-950/90 backdrop-blur-md fixed top-0 w-full z-50 border-b border-slate-800 font-manrope tracking-tight antialiased">
+<div class="flex justify-between items-center h-16 px-6 max-w-[1440px] mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-2 text-xl font-black tracking-tighter text-slate-50">
+<span class="material-symbols-outlined text-indigo-500" data-icon="polyline" style="font-variation-settings: 'FILL' 1;">polyline</span>
+                Hello Design
+            </div>
+<!-- Navigation Links (Web) -->
+<div class="hidden md:flex items-center gap-8">
+<a class="text-indigo-400 border-b-2 border-indigo-500 pb-1 font-body-base text-body-base hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Explore</a>
+<a class="text-slate-400 font-medium font-body-base text-body-base hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Community</a>
+<a class="text-slate-400 font-medium font-body-base text-body-base hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Solutions</a>
+<a class="text-slate-400 font-medium font-body-base text-body-base hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Pricing</a>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center gap-3">
+<button aria-label="notifications" class="text-slate-400 hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button aria-label="account_circle" class="text-slate-400 hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+<button class="bg-indigo-600 hover:bg-indigo-500 text-white font-body-sm text-body-sm px-4 py-2 rounded-DEFAULT active:scale-95 transition-transform duration-150 shadow-[0_0_8px_rgba(99,102,241,0.4)] border border-indigo-400">
+                    Get Started
+                </button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col w-full max-w-container-max mx-auto px-6 py-12 gap-24">
+<!-- Hero Section -->
+<section class="flex flex-col lg:flex-row items-center gap-12 pt-12">
+<div class="flex-1 flex flex-col gap-6 z-10">
+<div class="inline-flex items-center gap-2 bg-surface-container px-3 py-1.5 rounded-full border border-surface-container-high w-fit">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+<span class="font-code-inline text-code-inline text-on-surface-variant">System Design V2.0 is Live</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-on-background">
+                    Master Technical Interviews with <span class="text-primary-container">AI-Led Precision.</span>
+</h1>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl">
+                    High-density environments for data-driven architects. Simulate real-world system design constraints with our Excalidraw-style canvas and Lexical-style technical editor.
+                </p>
+<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<button class="bg-indigo-600 hover:bg-indigo-500 text-white font-body-base text-body-base px-6 py-3 rounded-DEFAULT border border-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.5)] active:scale-95 transition-all duration-150 flex items-center justify-center gap-2">
+                        Start Interview Simulation
+                        <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="bg-transparent hover:bg-surface-container text-primary font-body-base text-body-base px-6 py-3 rounded-DEFAULT border border-outline-variant active:scale-95 transition-all duration-150 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="terminal">terminal</span>
+                        View Documentation
+                    </button>
+</div>
+</div>
+<!-- Hero Graphic (Bento/Abstract) -->
+<div class="flex-1 w-full relative h-[400px] lg:h-[500px]">
+<!-- Abstract glowing background element -->
+<div class="absolute inset-0 bg-gradient-to-tr from-primary-container/10 to-transparent blur-3xl rounded-full"></div>
+<div class="relative w-full h-full bg-surface-container border border-surface-container-highest rounded-xl overflow-hidden flex flex-col">
+<!-- Faux Mac Header -->
+<div class="h-8 border-b border-surface-container-highest bg-surface-container-low flex items-center px-4 gap-2">
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Mock Canvas Area -->
+<div class="flex-1 p-4 bg-[#0F172A] relative" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 20px 20px;">
+<!-- Mock Node 1 -->
+<div class="absolute top-8 left-8 bg-surface border border-surface-container-highest rounded-lg p-3 shadow-lg w-40 flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container/20 flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-sm" data-icon="dns">dns</span>
+</div>
+<div>
+<div class="font-label-caps text-label-caps text-on-surface">LOAD BALANCER</div>
+<div class="text-[10px] text-tertiary">Active • 99.9%</div>
+</div>
+</div>
+<!-- Connection Line -->
+<svg class="absolute top-[60px] left-[180px] w-[120px] h-[80px]" style="overflow: visible;">
+<path class="animate-[dash_20s_linear_infinite]" d="M0,0 C60,0 60,80 120,80" fill="none" stroke="#6366F1" stroke-dasharray="4" stroke-width="2"></path>
+</svg>
+<!-- Mock Node 2 -->
+<div class="absolute top-24 left-[300px] bg-surface border border-primary-container rounded-lg p-3 shadow-[0_0_8px_rgba(99,102,241,0.3)] w-48 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="font-label-caps text-label-caps text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary-container" data-icon="database">database</span>
+                                    MASTER DB
+                                </div>
+<span class="material-symbols-outlined text-sm text-outline" data-icon="more_horiz">more_horiz</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[75%]"></div>
+</div>
+<div class="text-[10px] text-on-surface-variant text-right">75% Load</div>
+</div>
+<!-- Lexical Editor Preview Panel overlay -->
+<div class="absolute bottom-4 right-4 bg-surface-container-low border border-surface-container-highest rounded-lg w-64 shadow-2xl overflow-hidden">
+<div class="px-3 py-2 border-b border-surface-container-highest bg-surface-container flex items-center justify-between">
+<span class="font-code-inline text-code-inline text-on-surface-variant">schema.sql</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="content_copy">content_copy</span>
+</div>
+<div class="p-3 font-code-inline text-[12px] text-secondary leading-relaxed">
+<span class="text-primary-container">CREATE TABLE</span> users (<br/>
+                                  id <span class="text-tertiary">UUID</span> PRIMARY KEY,<br/>
+                                  email <span class="text-tertiary">VARCHAR(255)</span><br/>
+                                );
+                            </div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Feature Grid (Bento Style) -->
+<section class="flex flex-col gap-8">
+<div class="flex flex-col gap-2">
+<h2 class="font-headline-md text-headline-md text-on-background">Technical Tooling for Architects</h2>
+<p class="font-body-base text-body-base text-on-surface-variant">High-fidelity components designed for rigorous system planning.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Feature 1: Canvas -->
+<div class="md:col-span-2 bg-surface-container border border-surface-container-highest rounded-xl p-6 flex flex-col gap-4 group hover:border-outline transition-colors">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-surface-container-highest group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary-container" data-icon="draw">draw</span>
+</div>
+<span class="font-label-caps text-label-caps bg-surface-container-highest px-2 py-1 rounded text-on-surface-variant">CANVAS V2</span>
+</div>
+<div class="flex flex-col gap-1 mt-2">
+<h3 class="font-headline-md text-headline-md text-on-background text-lg">Infinite Excalidraw-Style Canvas</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Map out complex microservices architectures with low-latency rendering and snap-to-grid precision. Native support for AWS, GCP, and Azure iconography.</p>
+</div>
+<!-- Minimal visual representation -->
+<div class="mt-4 h-32 rounded-lg bg-[#0F172A] border border-surface-container-highest relative overflow-hidden flex items-center justify-center" style="background-image: radial-gradient(#334155 1px, transparent 1px); background-size: 16px 16px;">
+<div class="flex items-center gap-4">
+<div class="px-3 py-1.5 border border-primary-container bg-surface rounded text-primary-container font-code-inline text-[12px]">Client</div>
+<div class="w-8 h-[1px] bg-primary-container"></div>
+<div class="px-3 py-1.5 border border-outline bg-surface rounded text-on-surface font-code-inline text-[12px]">API Gateway</div>
+</div>
+</div>
+</div>
+<!-- Feature 2: Editor -->
+<div class="bg-surface-container border border-surface-container-highest rounded-xl p-6 flex flex-col gap-4 group hover:border-outline transition-colors">
+<div class="w-10 h-10 rounded-lg bg-surface flex items-center justify-center border border-surface-container-highest group-hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-primary-container" data-icon="data_object">data_object</span>
+</div>
+<div class="flex flex-col gap-1 mt-2">
+<h3 class="font-headline-md text-headline-md text-on-background text-lg">Lexical Technical Editor</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Write API contracts and schema definitions with rich syntax highlighting and inline validation.</p>
+</div>
+<!-- Minimal visual representation -->
+<div class="mt-auto bg-surface-container-low border border-surface-container-highest rounded p-3 font-code-inline text-[10px] text-secondary">
+<div class="flex items-center gap-2 mb-2 border-b border-surface-container-highest pb-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+</div>
+<div><span class="text-primary-container">type</span> <span class="text-tertiary">User</span> = {</div>
+<div class="pl-2">id: string;</div>
+<div class="pl-2">role: 'ADMIN' | 'USER';</div>
+<div>}</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Shared Component) -->
+<footer class="bg-slate-950 w-full border-t border-slate-800 font-manrope text-sm mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center py-12 px-8 max-w-[1440px] mx-auto space-y-4 md:space-y-0">
+<!-- Brand Logo -->
+<div class="text-lg font-bold text-slate-200 flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-indigo-500" data-icon="polyline" style="font-variation-settings: 'FILL' 1;">polyline</span>
+                Hello Design
+            </div>
+<!-- Links -->
+<div class="flex gap-6">
+<a class="text-indigo-400 font-semibold hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">Documentation</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">API Reference</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+</div>
+<!-- Copyright -->
+<div class="text-slate-500 opacity-80">
+                © 2024 Hello Design. Technical Precision in System Design.
+            </div>
+</div>
+</footer>
+</body></html>

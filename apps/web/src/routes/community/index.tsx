@@ -9,7 +9,6 @@ import {
   Filter,
   GitFork,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/community/")({ component: CommunityPage })
 
@@ -120,16 +119,40 @@ const CATEGORIES = [
   { slug: "distributed-systems", label: "Distributed Systems" },
 ]
 
-function difficultyColor(d: string) {
-  if (d === "Hard") return "badge-error"
-  if (d === "Medium") return "badge-warning"
-  return "badge-success"
+function difficultyStyle(d: string): React.CSSProperties {
+  if (d === "Hard") return {
+    background: "rgba(255,180,171,0.1)",
+    color: "#ffb4ab",
+    border: "1px solid rgba(255,180,171,0.2)",
+    borderRadius: 6,
+    padding: "2px 10px",
+    fontSize: 11,
+    fontWeight: 600,
+  }
+  if (d === "Medium") return {
+    background: "rgba(251,191,36,0.1)",
+    color: "#fbbf24",
+    border: "1px solid rgba(251,191,36,0.2)",
+    borderRadius: 6,
+    padding: "2px 10px",
+    fontSize: 11,
+    fontWeight: 600,
+  }
+  return {
+    background: "rgba(78,222,163,0.1)",
+    color: "#4edea3",
+    border: "1px solid rgba(78,222,163,0.2)",
+    borderRadius: 6,
+    padding: "2px 10px",
+    fontSize: 11,
+    fontWeight: 600,
+  }
 }
 
-function scoreColor(score: number) {
-  if (score >= 85) return "text-success"
-  if (score >= 70) return "text-warning"
-  return "text-error"
+function scoreColor(score: number): string {
+  if (score >= 85) return "#4edea3"
+  if (score >= 70) return "#fbbf24"
+  return "#ffb4ab"
 }
 
 function matchesFilters(
@@ -158,55 +181,97 @@ function CommunityPage() {
   const filtered = POSTS.filter((p) => matchesFilters(p, query, difficulty, category))
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
+    <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 16px" }}>
       {/* ── Page Header ──────────────────────────────────────── */}
-      <div className="mb-8">
-        <h1 className="mb-1 text-3xl font-bold tracking-tight">Community Solutions</h1>
-        <p className="text-base-content/50 text-sm max-w-2xl">
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ color: "#dae2fd", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 6 }}>
+          Community Solutions
+        </h1>
+        <p style={{ color: "#908fa0", fontSize: 14, maxWidth: 560 }}>
           Explore real-world system designs reviewed by AI and peer architects. Discover patterns for
           scaling, fault tolerance, and data engineering.
         </p>
       </div>
 
       {/* ── Search + Filters ─────────────────────────────────── */}
-      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40" />
+      <div style={{ marginBottom: 24, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: 240 }}>
+          <Search
+            size={14}
+            style={{
+              position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
+              color: "#464554", pointerEvents: "none",
+            }}
+          />
           <input
             type="text"
             placeholder="Search architectures (e.g. Rate Limiter, Kafka…)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="input input-sm w-full rounded-xl pl-9 border-base-300/50 bg-base-200"
+            style={{
+              background: "#131b2e",
+              border: "1px solid #2d3449",
+              borderRadius: 10,
+              color: "#dae2fd",
+              padding: "10px 16px 10px 36px",
+              fontSize: 14,
+              outline: "none",
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(128,131,255,0.5)" }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Filter size={13} className="text-base-content/40 shrink-0" />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Filter size={13} style={{ color: "#464554", flexShrink: 0 }} />
+
           {/* Difficulty filter */}
-          <div className="flex gap-1">
-            {DIFFICULTIES.map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setDifficulty(difficulty === d ? null : d)}
-                className={cn(
-                  "badge badge-sm rounded-full transition-default cursor-pointer select-none",
-                  difficulty === d
-                    ? difficultyColor(d)
-                    : "badge-ghost text-base-content/50 hover:text-base-content",
-                )}
-              >
-                {d}
-              </button>
-            ))}
+          <div style={{ display: "flex", gap: 4 }}>
+            {DIFFICULTIES.map((d) => {
+              const active = difficulty === d
+              const base = difficultyStyle(d)
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDifficulty(difficulty === d ? null : d)}
+                  style={{
+                    ...(active ? base : {
+                      background: "transparent",
+                      border: "1px solid #2d3449",
+                      color: "#908fa0",
+                      borderRadius: 6,
+                      padding: "2px 10px",
+                      fontSize: 11,
+                      fontWeight: 600,
+                    }),
+                    cursor: "pointer",
+                    userSelect: "none",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {d}
+                </button>
+              )
+            })}
           </div>
 
           {/* Category filter */}
           <select
             value={category ?? ""}
             onChange={(e) => setCategory(e.target.value || null)}
-            className="select select-sm rounded-xl border-base-300/50 bg-base-200 text-sm"
+            style={{
+              background: "#131b2e",
+              border: "1px solid #2d3449",
+              borderRadius: 10,
+              color: "#dae2fd",
+              padding: "8px 12px",
+              fontSize: 13,
+              outline: "none",
+              cursor: "pointer",
+            }}
           >
             <option value="">All Categories</option>
             {CATEGORIES.map((c) => (
@@ -219,25 +284,33 @@ function CommunityPage() {
       </div>
 
       {/* ── Stats bar ────────────────────────────────────────── */}
-      <p className="mb-6 text-xs text-base-content/40">
+      <p style={{ marginBottom: 24, fontSize: 12, color: "#464554" }}>
         {filtered.length} solution{filtered.length !== 1 ? "s" : ""}{" "}
         {difficulty || category || query ? "matching filters" : "from the community"}
       </p>
 
       {/* ── Grid ─────────────────────────────────────────────── */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-base-300/50 py-16 text-center">
-          <p className="text-base-content/40 mb-2">No solutions match your filters</p>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          borderRadius: 12, border: "1px dashed #2d3449",
+          padding: "64px 24px", textAlign: "center",
+        }}>
+          <p style={{ color: "#464554", marginBottom: 8, fontSize: 14 }}>No solutions match your filters</p>
           <button
             type="button"
             onClick={() => { setQuery(""); setDifficulty(null); setCategory(null) }}
-            className="text-sm text-primary hover:underline"
+            style={{
+              background: "transparent", border: "none",
+              color: "#8083ff", fontSize: 13, cursor: "pointer",
+              textDecoration: "underline", padding: 0,
+            }}
           >
             Clear filters
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
           {filtered.map((post) => (
             <PostCard key={post.id} post={post} />
           ))}
@@ -251,48 +324,83 @@ function CommunityPage() {
 
 function PostCard({ post }: { post: CommunityPost }) {
   return (
-    <article className="group flex flex-col rounded-xl border border-base-300/40 bg-base-200 overflow-hidden hover:border-primary/30 hover:shadow-lg hover:shadow-indigo-950/40 transition-default">
-      <div className="flex flex-col gap-4 p-5 flex-1">
+    <article
+      style={{
+        background: "#171f33",
+        border: "1px solid #2d3449",
+        borderRadius: 12,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        transition: "border-color 0.15s",
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#464554" }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "20px 24px", flex: 1 }}>
         {/* Author + Score */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: "50%",
+              background: "rgba(99,102,241,0.15)",
+              border: "1px solid rgba(99,102,241,0.3)",
+              color: "#8083ff",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 11, fontWeight: 700, flexShrink: 0,
+            }}>
               {post.authorInitials}
             </div>
             <div>
-              <p className="text-sm font-medium leading-none">{post.author}</p>
-              <p className="mt-0.5 text-xs text-base-content/40">{post.timeAgo}</p>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#dae2fd", lineHeight: 1 }}>{post.author}</p>
+              <p style={{ marginTop: 3, fontSize: 11, color: "#464554" }}>{post.timeAgo}</p>
             </div>
           </div>
 
           {/* AI Score */}
-          <div className="flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-xs">
-            <Sparkles size={10} className="text-success" />
-            <span className={cn("font-semibold", scoreColor(post.aiScore))}>{post.aiScore}</span>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6,
+            borderRadius: 99, border: "1px solid rgba(78,222,163,0.3)",
+            background: "rgba(78,222,163,0.08)",
+            padding: "4px 10px", fontSize: 11,
+          }}>
+            <Sparkles size={10} style={{ color: "#4edea3" }} />
+            <span style={{ fontWeight: 700, color: scoreColor(post.aiScore) }}>{post.aiScore}</span>
           </div>
         </div>
 
         {/* Difficulty + Category */}
-        <div className="flex items-center gap-2">
-          <span className={cn("badge badge-xs rounded-full", difficultyColor(post.difficulty))}>
-            {post.difficulty}
-          </span>
-          <span className="text-xs text-base-content/40 capitalize">
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={difficultyStyle(post.difficulty)}>{post.difficulty}</span>
+          <span style={{ fontSize: 12, color: "#464554", textTransform: "capitalize" }}>
             {CATEGORIES.find((c) => c.slug === post.category)?.label ?? post.category}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="font-semibold leading-snug text-base-content group-hover:text-primary transition-default line-clamp-2">
+        <h3 style={{
+          fontWeight: 600, lineHeight: 1.35, color: "#dae2fd", fontSize: 14,
+          display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}>
           {post.title}
         </h3>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-1.5 mt-auto">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: "auto" }}>
           {post.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded border border-base-300/50 bg-base-300/40 px-2 py-0.5 text-[11px] font-mono text-base-content/60"
+              style={{
+                background: "rgba(192,193,255,0.08)",
+                border: "1px solid rgba(192,193,255,0.15)",
+                color: "#c0c1ff",
+                borderRadius: 6,
+                padding: "2px 10px",
+                fontSize: 11,
+                fontWeight: 600,
+                fontFamily: "monospace",
+              }}
             >
               {tag}
             </span>
@@ -301,25 +409,36 @@ function PostCard({ post }: { post: CommunityPost }) {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between border-t border-base-300/40 bg-base-300/20 px-5 py-3">
-        <div className="flex items-center gap-4">
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        borderTop: "1px solid #1e2a3d",
+        background: "#131b2e",
+        padding: "12px 24px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button
             type="button"
-            className="flex items-center gap-1.5 text-xs text-base-content/50 hover:text-primary transition-default"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#464554", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
           >
             <ThumbsUp size={12} />
             {post.upvotes}
           </button>
           <button
             type="button"
-            className="flex items-center gap-1.5 text-xs text-base-content/50 hover:text-primary transition-default"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#464554", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
           >
             <MessageSquare size={12} />
             {post.comments}
           </button>
           <button
             type="button"
-            className="flex items-center gap-1.5 text-xs text-base-content/50 hover:text-primary transition-default"
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#464554", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
           >
             <GitFork size={12} />
             Fork
@@ -329,7 +448,7 @@ function PostCard({ post }: { post: CommunityPost }) {
         <Link
           to="/community/$threadId"
           params={{ threadId: post.id }}
-          className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-default"
+          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: "#8083ff", textDecoration: "none" }}
         >
           View
           <ArrowRight size={11} />

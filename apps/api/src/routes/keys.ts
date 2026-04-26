@@ -1,6 +1,6 @@
 import { Hono } from "hono"
-import { db, encryptKey, decryptKey } from "@sysdesign/db"
-import { validateMistralKey } from "@sysdesign/ai"
+import { db, encryptKey } from "@sysdesign/db"
+import { validateOpenAIKey } from "@sysdesign/ai"
 import type { AppEnv } from "../lib/types.js"
 
 const app = new Hono<AppEnv>()
@@ -20,15 +20,15 @@ app.post("/", async (c) => {
     return c.json({ error: "provider and key are required" }, 400)
   }
 
-  if (body.provider !== "mistral") {
-    return c.json({ error: "Only 'mistral' provider is currently supported" }, 400)
+  if (body.provider !== "openai") {
+    return c.json({ error: "Only 'openai' provider is currently supported" }, 400)
   }
 
   const keyTrimmed = body.key.trim()
 
   // Validate before storing if requested
   if (body.validate !== false) {
-    const valid = await validateMistralKey(keyTrimmed)
+    const valid = await validateOpenAIKey(keyTrimmed)
     if (!valid) {
       return c.json({ error: "API key validation failed — check the key and try again" }, 422)
     }
@@ -44,30 +44,27 @@ app.post("/", async (c) => {
       : { sessionId, provider: body.provider },
   })
 
-  let record
-  if (existing) {
-    record = await db.userApiKey.update({
-      where: { id: existing.id },
-      data: {
-        encryptedKey,
-        iv,
-        keyHint,
-        validatedAt: body.validate !== false ? new Date() : null,
-      },
-    })
-  } else {
-    record = await db.userApiKey.create({
-      data: {
-        userId: user?.id ?? null,
-        sessionId: user ? null : sessionId,
-        provider: body.provider,
-        encryptedKey,
-        iv,
-        keyHint,
-        validatedAt: body.validate !== false ? new Date() : null,
-      },
-    })
-  }
+  const record = existing
+    ? await db.userApiKey.update({
+        where: { id: existing.id },
+        data: {
+          encryptedKey,
+          iv,
+          keyHint,
+          validatedAt: body.validate !== false ? new Date() : null,
+        },
+      })
+    : await db.userApiKey.create({
+        data: {
+          userId: user?.id ?? null,
+          sessionId: user ? null : sessionId,
+          provider: body.provider,
+          encryptedKey,
+          iv,
+          keyHint,
+          validatedAt: body.validate !== false ? new Date() : null,
+        },
+      })
 
   return c.json(
     {

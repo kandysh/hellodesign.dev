@@ -32,7 +32,7 @@ app.post("/", async (c) => {
   // Extract plain text — prefer answerText, fall back to Lexical JSON extraction
   const lexicalContent = body.answerText?.trim()
     ? body.answerText.trim()
-    : extractLexicalText(body.lexicalState!)
+    : extractLexicalText(body.lexicalState ?? {})
 
   // Build a minimal Lexical document from plain text so we can display it on the result page
   const makeLexicalDoc = (text: string): object => ({

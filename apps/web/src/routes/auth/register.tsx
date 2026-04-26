@@ -1,10 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useId } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { Eye, EyeOff, Mail, Lock, User, Github, ArrowRight } from "lucide-react";
+import { BrandingPanel, SocialButton, Divider, Field, GoogleIcon } from "@/components/auth-shared";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -15,13 +13,9 @@ function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const nameId = useId();
-  const emailId = useId();
-  const passwordId = useId();
-  const confirmPasswordId = useId();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,114 +28,137 @@ function RegisterPage() {
 
     setLoading(true);
 
-    const { error: authError } = await authClient.signUp.email(
-      { name, email, password },
-      {
-        onSuccess: () => { window.location.href = "/"; },
-        onError: (ctx) => { setError(ctx.error.message ?? "Registration failed"); },
-      },
-    );
+    const { data, error: authError } = await authClient.signUp.email({ name, email, password });
 
-    if (authError) setError(authError.message ?? "Registration failed");
-    setLoading(false);
+    if (authError) {
+      setError(authError.message ?? "Registration failed");
+      setLoading(false);
+    } else if (data) {
+      window.location.href = "/me";
+    }
   }
 
+  const googleHref = `${API}/api/auth/sign-in/social?provider=google&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/me` : "/me")}`;
+  const githubHref = `${API}/api/auth/sign-in/social?provider=github&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/me` : "/me")}`;
+
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="pb-2">
-          <h1 className="text-xl font-bold text-center">Create account</h1>
-        </CardHeader>
-        <CardContent>
+    <div className="min-h-screen flex" style={{ background: "#0b1326" }}>
+      <BrandingPanel />
+
+      <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 py-16">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h1
+              className="text-2xl font-bold mb-1.5"
+              style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}
+            >
+              Initialize Account
+            </h1>
+            <p className="text-sm" style={{ color: "#908fa0" }}>
+              Deploy your workspace and join the Hello Design ecosystem.
+            </p>
+          </div>
+
+          <div className="flex gap-3 mb-6">
+            <SocialButton href={googleHref} label="Google" icon={<GoogleIcon />} />
+            <SocialButton href={githubHref} label="GitHub" icon={<Github size={15} />} />
+          </div>
+
+          <Divider />
+
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor={nameId}>Name</Label>
-              <Input
-                id={nameId}
+            <Field label="Full Name" icon={<User size={15} style={{ color: "#464554" }} />}>
+              <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
                 autoComplete="name"
-                placeholder="Your full name"
+                placeholder="System Admin"
+                className="auth-input"
               />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <Label htmlFor={emailId}>Email</Label>
-              <Input
-                id={emailId}
+            <Field label="Email Address" icon={<Mail size={15} style={{ color: "#464554" }} />}>
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="email"
+                placeholder="admin@hellodesign.io"
+                className="auth-input"
               />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <Label htmlFor={passwordId}>Password</Label>
-              <Input
-                id={passwordId}
-                type="password"
+            <Field
+              label="Password"
+              icon={<Lock size={15} style={{ color: "#464554" }} />}
+              trailingAction={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              }
+            >
+              <input
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="new-password"
                 minLength={8}
+                placeholder="Min 8 characters"
+                className="auth-input"
               />
-            </div>
+            </Field>
 
-            <div className="space-y-1.5">
-              <Label htmlFor={confirmPasswordId}>Confirm password</Label>
-              <Input
-                id={confirmPasswordId}
+            <Field label="Confirm Password" icon={<Lock size={15} style={{ color: "#464554" }} />}>
+              <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 autoComplete="new-password"
+                placeholder="••••••••"
+                className="auth-input"
               />
-            </div>
+            </Field>
 
-            {error && <p className="text-sm text-error">{error}</p>}
+            {error && (
+              <p
+                className="text-sm rounded px-3 py-2"
+                style={{ color: "#ffb4ab", background: "rgba(147,0,10,0.2)", border: "1px solid rgba(255,180,171,0.2)" }}
+              >
+                {error}
+              </p>
+            )}
 
-            <Button type="submit" className="w-full" loading={loading}>
-              Create account
-            </Button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 transition-all duration-150 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              style={{ boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}
+            >
+              {loading ? (
+                <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              ) : (
+                <>Create Account <ArrowRight size={14} /></>
+              )}
+            </button>
           </form>
 
-          <div className="relative my-4 flex items-center gap-3">
-            <div className="flex-1 border-t border-base-300/40" />
-            <span className="text-xs text-base-content/40">or</span>
-            <div className="flex-1 border-t border-base-300/40" />
-          </div>
-
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" asChild>
-              <a
-                href={`${API}/api/auth/sign-in/social?provider=google&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? window.location.origin : "")}`}
-              >
-                Google
-              </a>
-            </Button>
-            <Button variant="outline" className="flex-1" asChild>
-              <a
-                href={`${API}/api/auth/sign-in/social?provider=github&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? window.location.origin : "")}`}
-              >
-                GitHub
-              </a>
-            </Button>
-          </div>
-
-          <p className="mt-4 text-center text-xs text-base-content/50">
+          <p className="mt-6 text-center text-xs" style={{ color: "#464554" }}>
             Already have an account?{" "}
-            <a href="/auth/login" className="text-primary hover:underline">
+            <Link to="/auth/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
               Sign in
-            </a>
+            </Link>
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

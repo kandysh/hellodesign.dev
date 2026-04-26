@@ -6,7 +6,7 @@ const app = new Hono()
 /** Extract a short description from the first line of the prompt. */
 function shortDescription(prompt: string): string {
   const first = prompt.split("\n").find((l) => l.trim().length > 0) ?? ""
-  return first.length > 120 ? first.slice(0, 117) + "…" : first
+  return first.length > 120 ? `${first.slice(0, 117)}…` : first
 }
 
 app.get("/", async (c) => {

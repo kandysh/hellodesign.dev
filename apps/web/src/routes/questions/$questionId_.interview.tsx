@@ -154,7 +154,6 @@ function InterviewPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages, phase])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scroll whenever logs change
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [evalLogs])
@@ -238,6 +237,13 @@ function InterviewPage() {
         setPhase("done")
         es.close()
         sseRef.current = null
+        // Auto-navigate to results after a short delay
+        setTimeout(() => {
+          navigate({
+            to: "/questions/$questionId/result/$submissionId",
+            params: { questionId, submissionId: evt.submissionId },
+          } as never)
+        }, 2500)
       })
 
       es.addEventListener("error", (e) => {
@@ -374,14 +380,14 @@ function InterviewPage() {
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-56px)] items-center justify-center">
-        <div className="loading loading-spinner loading-md text-primary" />
+        <span className="w-5 h-5 rounded-full border-2 animate-spin inline-block" style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }} />
       </div>
     )
   }
 
   if (!question) {
     return (
-      <div className="flex h-[calc(100vh-56px)] items-center justify-center text-base-content/40">
+      <div className="flex h-[calc(100vh-56px)] items-center justify-center" style={{ color: "#464554" }}>
         Question not found.
       </div>
     )
@@ -393,24 +399,27 @@ function InterviewPage() {
     <div className="flex flex-col h-[calc(100vh-56px)] overflow-hidden">
 
       {/* ─── Interview Header ──────────────────────────────────────────── */}
-      <header className="flex h-12 shrink-0 items-center gap-4 border-b border-base-300/40 bg-base-200/40 px-4">
+      <header className="flex h-12 shrink-0 items-center gap-4 px-4" style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}>
 
         {/* Left: title + live badge */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             to="/questions/$questionId"
             params={{ questionId }}
-            className="text-base-content/30 hover:text-base-content/60 transition-default"
+            className="transition-colors"
+            style={{ color: "#464554" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#908fa0" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
             aria-label="Back to workspace"
           >
             ←
           </Link>
-          <h1 className="text-sm font-semibold text-base-content truncate max-w-[300px]">
+          <h1 className="text-sm font-semibold truncate max-w-[300px]" style={{ color: "#dae2fd" }}>
             {question.title}
           </h1>
           {isLive && (
-            <span className="flex items-center gap-1 shrink-0 text-[10px] font-bold uppercase tracking-wider text-error">
-              <span className="h-1.5 w-1.5 rounded-full bg-error animate-pulse" />
+            <span className="flex items-center gap-1 shrink-0 text-[10px] font-bold uppercase tracking-wider" style={{ color: phase === "evaluating" ? "#fbbf24" : "#ffb4ab" }}>
+              <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: phase === "evaluating" ? "#fbbf24" : "#ffb4ab" }} />
               {phase === "evaluating" ? "Evaluating" : "Live"}
             </span>
           )}
@@ -418,19 +427,24 @@ function InterviewPage() {
 
         {/* Center: canvas controls */}
         <div className="flex items-center gap-1 ml-4">
-          <button type="button" className="btn btn-ghost btn-xs rounded px-1.5" disabled title="Undo">
-            <Undo2 size={13} />
-          </button>
-          <button type="button" className="btn btn-ghost btn-xs rounded px-1.5" disabled title="Redo">
-            <Redo2 size={13} />
-          </button>
-          <div className="h-3.5 w-px bg-base-300/50 mx-1" />
-          <button type="button" className="btn btn-ghost btn-xs rounded px-1.5" disabled title="Zoom in">
-            <ZoomIn size={13} />
-          </button>
-          <button type="button" className="btn btn-ghost btn-xs rounded px-1.5" disabled title="Zoom out">
-            <ZoomOut size={13} />
-          </button>
+          {[{ Icon: Undo2, title: "Undo" }, { Icon: Redo2, title: "Redo" }, null, { Icon: ZoomIn, title: "Zoom in" }, { Icon: ZoomOut, title: "Zoom out" }].map((item, idx) => {
+            if (item === null) {
+              // biome-ignore lint/suspicious/noArrayIndexKey: static list, separator uses index
+              return <div key={idx} className="h-3.5 w-px mx-1" style={{ background: "#2d3449" }} />
+            }
+            return (
+              <button
+                key={item.title}
+                type="button"
+                className="flex items-center justify-center rounded px-1.5 py-1 transition-colors"
+                style={{ color: "#464554", background: "transparent" }}
+                disabled
+                title={item.title}
+              >
+                <item.Icon size={13} />
+              </button>
+            )
+          })}
         </div>
 
         {/* Spacer */}
@@ -439,35 +453,34 @@ function InterviewPage() {
         {/* Right: timer + tabs + end session */}
         <div className="flex items-center gap-3 shrink-0">
           {isLive && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-base-300/50 bg-base-300/20 px-2.5 py-1 font-mono text-xs text-base-content/50">
+            <div className="flex items-center gap-1.5 rounded-lg px-2.5 py-1 font-mono text-xs" style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.03)", color: "#908fa0" }}>
               <Clock size={12} />
               {elapsedStr}
             </div>
           )}
 
           {/* Right panel tabs */}
-          <div className="flex items-center rounded-lg border border-base-300/40 overflow-hidden text-[10px] font-bold tracking-wider uppercase">
+          <div className="flex items-center rounded-lg overflow-hidden text-[10px] font-bold tracking-wider uppercase" style={{ border: "1px solid #2d3449" }}>
             <button
               type="button"
               onClick={() => setRightTab("chat")}
-              className={cn(
-                "px-3 py-1.5 transition-default",
-                rightTab === "chat"
-                  ? "bg-primary text-primary-content"
-                  : "text-base-content/40 hover:text-base-content/70 hover:bg-base-300/30",
-              )}
+              className="px-3 py-1.5 transition-all"
+              style={{
+                background: rightTab === "chat" ? "#6366f1" : "transparent",
+                color: rightTab === "chat" ? "#fff" : "#908fa0",
+              }}
             >
               Interview Chat
             </button>
             <button
               type="button"
               onClick={() => setRightTab("hints")}
-              className={cn(
-                "px-3 py-1.5 border-l border-base-300/40 transition-default",
-                rightTab === "hints"
-                  ? "bg-primary text-primary-content"
-                  : "text-base-content/40 hover:text-base-content/70 hover:bg-base-300/30",
-              )}
+              className="px-3 py-1.5 transition-all"
+              style={{
+                borderLeft: "1px solid #2d3449",
+                background: rightTab === "hints" ? "#6366f1" : "transparent",
+                color: rightTab === "hints" ? "#fff" : "#908fa0",
+              }}
             >
               Hints &amp; Docs
             </button>
@@ -477,7 +490,10 @@ function InterviewPage() {
             <button
               type="button"
               onClick={handleEndSession}
-              className="btn btn-ghost btn-xs rounded-lg border border-error/40 text-error hover:bg-error/10 gap-1.5"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all"
+              style={{ border: "1px solid rgba(255,180,171,0.3)", color: "#ffb4ab", background: "transparent" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,180,171,0.08)" }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
             >
               <X size={12} />
               End Session
@@ -496,8 +512,8 @@ function InterviewPage() {
           <div className="relative flex-1 overflow-hidden" role="region" aria-label="Architecture diagram canvas">
             <Suspense
               fallback={
-                <div className="flex h-full items-center justify-center gap-2 text-sm text-base-content/30">
-                  <div className="loading loading-spinner loading-sm text-primary" />
+                <div className="flex h-full items-center justify-center gap-2 text-sm" style={{ color: "#464554" }}>
+                  <span className="w-4 h-4 rounded-full border-2 animate-spin inline-block" style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }} />
                   Loading canvas…
                 </div>
               }
@@ -513,7 +529,7 @@ function InterviewPage() {
 
             {/* Setup overlay — shown before interview starts */}
             {(phase === "setup" || phase === "starting") && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-base-300/5 backdrop-blur-[1px]">
+              <div className="absolute inset-0 z-20 flex items-center justify-center" style={{ background: "rgba(11,19,38,0.7)", backdropFilter: "blur(2px)" }}>
                 <SetupCard
                   apiKey={apiKey}
                   isStarting={phase === "starting"}
@@ -526,28 +542,25 @@ function InterviewPage() {
         </div>
 
         {/* ── Right panel ──────────────────────────────────────────── */}
-        <div className="flex w-[380px] shrink-0 flex-col border-l border-base-300/40 bg-base-200/20">
+        <div className="flex w-[380px] shrink-0 flex-col" style={{ borderLeft: "1px solid #1e2a3d", background: "#0b1326" }}>
 
           {/* ── INTERVIEW CHAT tab ── */}
           {rightTab === "chat" && (
             <>
               {/* Agent header */}
               {isLive && (
-                <div className="flex items-center gap-3 border-b border-base-300/30 px-4 py-3 shrink-0">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <div className="flex items-center gap-3 px-4 py-3 shrink-0" style={{ borderBottom: "1px solid #1e2a3d" }}>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(99,102,241,0.15)", color: "#8083ff" }}>
                     <Sparkles size={16} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-base-content">ArchMaster AI</p>
+                    <p className="text-sm font-semibold" style={{ color: "#dae2fd" }}>ArchMaster AI</p>
                     {agentStatus && (
-                      <p className={cn(
-                        "flex items-center gap-1.5 text-[11px]",
-                        phase === "waiting" ? "text-success" : "text-base-content/40",
-                      )}>
-                        <span className={cn(
-                          "h-1.5 w-1.5 rounded-full",
-                          phase === "waiting" ? "bg-success" : "bg-base-content/30 animate-pulse",
-                        )} />
+                      <p className="flex items-center gap-1.5 text-[11px]" style={{ color: phase === "waiting" ? "#4edea3" : "#464554" }}>
+                        <span
+                          className={phase !== "waiting" ? "animate-pulse" : ""}
+                          style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: phase === "waiting" ? "#4edea3" : "#464554" }}
+                        />
                         {agentStatus}
                       </p>
                     )}
@@ -558,33 +571,33 @@ function InterviewPage() {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-3 space-y-3">
                 {!isLive && (
-                  <div className="flex flex-col items-center justify-center h-full gap-3 text-base-content/30">
-                    <Mic size={24} className="text-primary/50" />
+                  <div className="flex flex-col items-center justify-center h-full gap-3" style={{ color: "#464554" }}>
+                    <Mic size={24} style={{ color: "rgba(128,131,255,0.4)" }} />
                     <p className="text-xs text-center">Start the interview to begin<br/>your design session</p>
                   </div>
                 )}
 
-                {/* biome-ignore lint/suspicious/noArrayIndexKey: messages are append-only */}
-                {messages.map((msg, i) => (
-                  <ChatBubble key={i} message={msg} onChipClick={handleSendReply} phase={phase} />
-                ))}
+                {messages.map((msg, i) => {
+                  // biome-ignore lint/suspicious/noArrayIndexKey: messages are append-only
+                  return <ChatBubble key={i} message={msg} onChipClick={handleSendReply} phase={phase} />
+                })}
 
                 {/* Typing indicator */}
                 {(phase === "thinking" || phase === "replying") && (
                   <div className="flex items-start gap-2">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ background: "rgba(99,102,241,0.15)", color: "#8083ff" }}>
                       <Sparkles size={12} />
                     </div>
-                    <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-base-200 px-3 py-2.5">
-                      <span className="text-[10px] text-base-content/30 italic">
+                    <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm px-3 py-2.5" style={{ background: "#131b2e" }}>
+                      <span className="text-[10px] italic" style={{ color: "#464554" }}>
                         {phase === "thinking" ? "Analyzing architecture…" : "Processing response…"}
                       </span>
                       <span className="flex gap-0.5 ml-1">
                         {[0, 150, 300].map((delay) => (
                           <span
                             key={delay}
-                            className="h-1 w-1 rounded-full bg-base-content/30 animate-bounce"
-                            style={{ animationDelay: `${delay}ms` }}
+                            className="h-1 w-1 rounded-full animate-bounce"
+                            style={{ background: "#464554", animationDelay: `${delay}ms` }}
                           />
                         ))}
                       </span>
@@ -607,29 +620,31 @@ function InterviewPage() {
 
               {/* Evaluation Stream */}
               {isLive && evalLogs.length > 0 && (
-                <div className="shrink-0 border-t border-base-300/30 bg-base-300/10">
-                  <div className="flex items-center gap-2 px-3 py-2 border-b border-base-300/20">
-                    <BarChart3 size={11} className="text-base-content/30" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-base-content/30">
+                <div className="shrink-0" style={{ borderTop: "1px solid #1e2a3d", background: "#0a1020" }}>
+                  <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid #1e2a3d" }}>
+                    <BarChart3 size={11} style={{ color: "#464554" }} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
                       Evaluation Stream
                     </span>
                     <div className="ml-auto flex gap-1">
                       {(["STRUCT", "LINK", "RISK"] as const).map((t) => (
-                        <span key={t} className={cn("h-1.5 w-1.5 rounded-sm", tagColor(t, "dot"))} />
+                        <span key={t} className="h-1.5 w-1.5 rounded-sm" style={{ background: t === "STRUCT" ? "#8083ff" : t === "LINK" ? "#38bdf8" : "#ffb4ab" }} />
                       ))}
                     </div>
                   </div>
                   <div className="max-h-[120px] overflow-y-auto p-2 space-y-1 font-mono text-[10px]">
-                    {/* biome-ignore lint/suspicious/noArrayIndexKey: eval logs are append-only */}
-                    {evalLogs.slice(-20).map((entry, i) => (
-                      <div key={i} className="flex items-start gap-1.5 leading-relaxed">
-                        <span className="shrink-0 text-base-content/25">{entry.time}</span>
-                        <span className={cn("shrink-0 font-bold", tagColor(entry.tag, "text"))}>
-                          [{entry.tag}]
-                        </span>
-                        <span className="text-base-content/50 break-all">{entry.text}</span>
-                      </div>
-                    ))}
+                    {evalLogs.slice(-20).map((entry, i) => {
+                      // biome-ignore lint/suspicious/noArrayIndexKey: eval logs are append-only
+                      return (
+                        <div key={i} className="flex items-start gap-1.5 leading-relaxed">
+                          <span className="shrink-0" style={{ color: "#464554" }}>{entry.time}</span>
+                          <span className="shrink-0 font-bold" style={{ color: entry.tag === "STRUCT" ? "#8083ff" : entry.tag === "LINK" ? "#38bdf8" : entry.tag === "RISK" ? "#ffb4ab" : "#464554" }}>
+                            [{entry.tag}]
+                          </span>
+                          <span className="break-all" style={{ color: "#908fa0" }}>{entry.text}</span>
+                        </div>
+                      )
+                    })}
                     <div ref={logsEndRef} />
                   </div>
                 </div>
@@ -637,7 +652,7 @@ function InterviewPage() {
 
               {/* Input */}
               {isLive && phase !== "done" && (
-                <div className="shrink-0 border-t border-base-300/30 p-3">
+                <div className="shrink-0 p-3" style={{ borderTop: "1px solid #1e2a3d" }}>
                   <div className="flex items-end gap-2">
                     <textarea
                       ref={inputRef}
@@ -651,12 +666,16 @@ function InterviewPage() {
                       }
                       disabled={phase !== "waiting"}
                       rows={2}
-                      className="flex-1 resize-none rounded-xl border border-base-300/40 bg-base-300/20 px-3 py-2 text-xs text-base-content placeholder:text-base-content/25 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:opacity-40 disabled:cursor-not-allowed transition-default"
+                      className="flex-1 resize-none rounded-xl px-3 py-2 text-xs outline-none transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ background: "#131b2e", border: "1px solid #2d3449", color: "#dae2fd" }}
+                      onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(128,131,255,0.5)" }}
+                      onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
                     />
                     <div className="flex flex-col gap-1.5">
                       <button
                         type="button"
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-base-300/40 text-base-content/30 hover:text-base-content/60 transition-default"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
+                        style={{ border: "1px solid #2d3449", color: "#464554", background: "transparent" }}
                         title="Voice input (not available)"
                         disabled
                       >
@@ -666,7 +685,8 @@ function InterviewPage() {
                         type="button"
                         onClick={() => handleSendReply()}
                         disabled={!canSend}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-content disabled:opacity-30 transition-default hover:brightness-110"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg transition-all disabled:opacity-30 hover:brightness-110"
+                        style={{ background: "#6366f1", color: "#fff" }}
                         aria-label="Send"
                       >
                         <Send size={13} />
@@ -702,14 +722,14 @@ function SetupCard({
   questionTitle: string
 }) {
   return (
-    <div className="w-[420px] rounded-2xl border border-base-300/40 bg-base-200/90 p-8 text-center shadow-2xl backdrop-blur-md">
+    <div className="w-[420px] rounded-2xl p-8 text-center shadow-2xl" style={{ border: "1px solid #2d3449", background: "#131b2e", backdropFilter: "blur(12px)" }}>
       <div className="mb-5 flex justify-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20">
-          <Mic size={26} className="text-primary" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
+          <Mic size={26} style={{ color: "#8083ff" }} />
         </div>
       </div>
-      <h2 className="mb-1 text-lg font-bold">Interview Mode</h2>
-      <p className="mb-5 text-sm text-base-content/50 leading-relaxed">
+      <h2 className="mb-1 text-lg font-bold" style={{ color: "#dae2fd" }}>Interview Mode</h2>
+      <p className="mb-5 text-sm leading-relaxed" style={{ color: "#908fa0" }}>
         {questionTitle}
       </p>
       <div className="mb-6 space-y-2.5 text-left">
@@ -717,30 +737,34 @@ function SetupCard({
           "Draw your architecture on the canvas — the AI observes your diagram",
           "Answer the AI's probing questions to explain your design decisions",
           "Receive structured feedback across 7 evaluation dimensions",
-        ].map((step, i) => (
-          <div key={i} className="flex items-start gap-2.5 rounded-xl border border-base-300/30 bg-base-300/20 px-3 py-2.5">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
-              {i + 1}
-            </span>
-            <p className="text-xs text-base-content/60 leading-relaxed">{step}</p>
-          </div>
-        ))}
+        ].map((step, i) => {
+          // biome-ignore lint/suspicious/noArrayIndexKey: static ordered list
+          return (
+            <div key={i} className="flex items-start gap-2.5 rounded-xl px-3 py-2.5" style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "rgba(99,102,241,0.15)", color: "#8083ff" }}>
+                {i + 1}
+              </span>
+              <p className="text-xs leading-relaxed" style={{ color: "#908fa0" }}>{step}</p>
+            </div>
+          )
+        })}
       </div>
       {!apiKey && (
-        <div className="mb-4 rounded-xl border border-warning/30 bg-warning/5 px-3 py-2.5 text-left">
-          <p className="text-xs text-warning">⚠ Add your OpenAI API key in Settings before starting.</p>
+        <div className="mb-4 rounded-xl px-3 py-2.5 text-left" style={{ border: "1px solid rgba(251,191,36,0.3)", background: "rgba(251,191,36,0.05)" }}>
+          <p className="text-xs" style={{ color: "#fbbf24" }}>⚠ Add your OpenAI API key in Settings before starting.</p>
         </div>
       )}
       <button
         type="button"
         onClick={onStart}
         disabled={!apiKey || isStarting}
-        className="btn btn-primary btn-wide rounded-xl gap-2"
+        className="inline-flex items-center justify-center gap-2 w-full rounded-xl px-6 py-3 font-semibold text-sm text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ background: "#6366f1", border: "1px solid rgba(99,102,241,0.5)", boxShadow: "0 0 16px rgba(99,102,241,0.3)" }}
       >
         {isStarting ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
         Begin Interview
       </button>
-      <p className="mt-3 text-[11px] text-base-content/25">Typically 10–20 minutes</p>
+      <p className="mt-3 text-[11px]" style={{ color: "#464554" }}>Typically 10–20 minutes</p>
     </div>
   )
 }
@@ -762,27 +786,31 @@ function ChatBubble({
   return (
     <div className={cn("flex items-start gap-2", !isAgent && "flex-row-reverse")}>
       {/* Avatar */}
-      <div className={cn(
-        "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-        isAgent ? "bg-primary/15 text-primary" : "bg-base-300/60 text-base-content/50",
-      )}>
+      <div
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+        style={isAgent
+          ? { background: "rgba(99,102,241,0.15)", color: "#8083ff" }
+          : { background: "rgba(255,255,255,0.06)", color: "#908fa0" }
+        }
+      >
         {isAgent ? <Sparkles size={12} /> : "You"}
       </div>
 
       <div className={cn("flex flex-col gap-1 max-w-[82%]", !isAgent && "items-end")}>
         {/* Agent name */}
         {isAgent && (
-          <span className="text-[10px] font-medium text-base-content/40 px-1">ArchMaster AI</span>
+          <span className="text-[10px] font-medium px-1" style={{ color: "#464554" }}>ArchMaster AI</span>
         )}
 
-        <div className={cn(
-          "rounded-2xl px-3 py-2.5 text-xs leading-relaxed",
-          isAgent
-            ? "rounded-tl-sm bg-base-200 text-base-content"
-            : "rounded-tr-sm bg-primary/15 text-base-content",
-        )}>
+        <div
+          className="rounded-2xl px-3 py-2.5 text-xs leading-relaxed"
+          style={isAgent
+            ? { background: "#131b2e", border: "1px solid rgba(128,131,255,0.12)", borderRadius: "16px 16px 16px 4px", color: "#c7c4d7" }
+            : { background: "#1e2a42", border: "1px solid #2d3449", borderRadius: "16px 16px 4px 16px", color: "#c7c4d7" }
+          }
+        >
           {isAgent ? (
-            <div className="prose prose-sm prose-invert max-w-none text-xs [&_code]:bg-base-300/60 [&_code]:px-1 [&_code]:rounded [&_code]:text-accent">
+            <div className="max-w-none text-xs [&_code]:px-1 [&_code]:rounded" style={{ lineHeight: 1.6, color: "#c7c4d7" }}>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
             </div>
           ) : (
@@ -798,7 +826,10 @@ function ChatBubble({
                 key={chip}
                 type="button"
                 onClick={() => onChipClick(chip)}
-                className="rounded-full border border-base-300/50 bg-base-300/20 px-2.5 py-1 text-[10px] font-medium text-base-content/60 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-default"
+                className="rounded-full px-2.5 py-1 text-[10px] font-medium transition-all"
+                style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.03)", color: "#908fa0" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(99,102,241,0.1)"; e.currentTarget.style.borderColor = "rgba(128,131,255,0.3)"; e.currentTarget.style.color = "#8083ff" }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.borderColor = "#2d3449"; e.currentTarget.style.color = "#908fa0" }}
               >
                 {chip}
               </button>
@@ -806,7 +837,7 @@ function ChatBubble({
           </div>
         )}
 
-        <span className="text-[9px] text-base-content/20 px-1">{time}</span>
+        <span className="text-[9px] px-1" style={{ color: "#464554" }}>{time}</span>
       </div>
     </div>
   )
@@ -826,10 +857,10 @@ const DIM_LABELS: Record<string, string> = {
 
 function EvalProgressRow({ dims, done }: { dims: string[]; done: string[] }) {
   return (
-    <div className="rounded-xl border border-base-300/30 bg-base-200/60 p-3">
+    <div className="rounded-xl p-3" style={{ border: "1px solid #2d3449", background: "#0f1729" }}>
       <div className="flex items-center gap-1.5 mb-2.5">
-        <Loader2 size={11} className="animate-spin text-primary" />
-        <span className="text-xs font-medium text-base-content/50">Evaluating dimensions…</span>
+        <Loader2 size={11} className="animate-spin" style={{ color: "#8083ff" }} />
+        <span className="text-xs font-medium" style={{ color: "#908fa0" }}>Evaluating dimensions…</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {dims.map((dim) => {
@@ -837,12 +868,11 @@ function EvalProgressRow({ dims, done }: { dims: string[]; done: string[] }) {
           return (
             <span
               key={dim}
-              className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-medium border transition-all duration-500",
-                finished
-                  ? "border-success/40 bg-success/10 text-success"
-                  : "border-base-300/30 bg-base-300/10 text-base-content/25",
-              )}
+              className="rounded-full px-2 py-0.5 text-[10px] font-medium transition-all duration-500"
+              style={finished
+                ? { border: "1px solid rgba(78,222,163,0.4)", background: "rgba(78,222,163,0.1)", color: "#4edea3" }
+                : { border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)", color: "#464554" }
+              }
             >
               {finished ? "✓ " : ""}{DIM_LABELS[dim] ?? dim}
             </span>
@@ -857,20 +887,21 @@ function EvalProgressRow({ dims, done }: { dims: string[]; done: string[] }) {
 
 function DoneCard({ onViewFeedback }: { onViewFeedback: () => void }) {
   return (
-    <div className="rounded-2xl border border-success/30 bg-success/5 p-4 text-center">
+    <div className="rounded-2xl p-4 text-center" style={{ border: "1px solid rgba(78,222,163,0.25)", background: "rgba(78,222,163,0.06)" }}>
       <div className="flex justify-center mb-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/15 text-success">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: "rgba(78,222,163,0.12)", color: "#4edea3" }}>
           <CheckCircle2 size={20} />
         </div>
       </div>
-      <h3 className="text-sm font-semibold mb-1">Interview Complete!</h3>
-      <p className="text-xs text-base-content/40 mb-3">
+      <h3 className="text-sm font-semibold mb-1" style={{ color: "#dae2fd" }}>Interview Complete!</h3>
+      <p className="text-xs mb-3" style={{ color: "#908fa0" }}>
         Your design has been fully evaluated. View your detailed scores and recommendations.
       </p>
       <button
         type="button"
         onClick={onViewFeedback}
-        className="btn btn-success btn-sm rounded-xl gap-1.5 w-full"
+        className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl px-4 py-2 text-sm font-semibold transition-all active:scale-95"
+        style={{ background: "#4edea3", color: "#0b1326", border: "none" }}
       >
         <BarChart3 size={13} />
         View Full Feedback →
@@ -885,28 +916,29 @@ function HintsTab({ question }: { question: QuestionDetail }) {
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <div>
-        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-base-content/30">
+        <p className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
           Problem
         </p>
-        <h3 className="text-sm font-semibold mb-2">{question.title}</h3>
-        <div className="prose prose-sm prose-invert max-w-none text-xs text-base-content/50 leading-relaxed">
+        <h3 className="text-sm font-semibold mb-2" style={{ color: "#dae2fd" }}>{question.title}</h3>
+        <div className="max-w-none text-xs leading-relaxed" style={{ color: "#908fa0" }}>
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.prompt}</ReactMarkdown>
         </div>
       </div>
 
       {(question.hints?.length ?? 0) > 0 && (
         <div>
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-base-content/30">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
             Key Areas to Cover
           </p>
           <div className="space-y-1.5">
             {question.hints!.map((hint, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2 rounded-lg border border-base-300/30 bg-base-300/10 px-3 py-2"
+                className="flex items-start gap-2 rounded-lg px-3 py-2"
+                style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}
               >
-                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/50" />
-                <p className="text-xs text-base-content/50">{hint}</p>
+                <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "rgba(128,131,255,0.5)" }} />
+                <p className="text-xs" style={{ color: "#908fa0" }}>{hint}</p>
               </div>
             ))}
           </div>
@@ -914,27 +946,4 @@ function HintsTab({ question }: { question: QuestionDetail }) {
       )}
     </div>
   )
-}
-
-// ── Tag color helper ──────────────────────────────────────────────────────────
-
-function tagColor(tag: EvalLogEntry["tag"], mode: "text" | "dot"): string {
-  if (mode === "dot") {
-    const map: Record<EvalLogEntry["tag"], string> = {
-      STRUCT: "bg-primary",
-      LINK:   "bg-info",
-      RISK:   "bg-error",
-      AUDIO:  "bg-base-content/40",
-      INFO:   "bg-base-content/20",
-    }
-    return map[tag] ?? "bg-base-content/20"
-  }
-  const map: Record<EvalLogEntry["tag"], string> = {
-    STRUCT: "text-primary",
-    LINK:   "text-info",
-    RISK:   "text-error",
-    AUDIO:  "text-base-content/40",
-    INFO:   "text-base-content/30",
-  }
-  return map[tag] ?? "text-base-content/30"
 }

@@ -22,13 +22,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: RootLayout,
 })
 
-// QueryClientProvider is already injected by setupRouterSsrQueryIntegration
-// (via router.options.Wrap in router.tsx) — no need to add it here.
 function RootLayout() {
   return (
     <ToastProvider>
       <Header />
-      <main>
+      <main className="pt-16">
         <Outlet />
       </main>
     </ToastProvider>
@@ -37,7 +35,7 @@ function RootLayout() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="sysdesign">
+    <html lang="en" data-theme="sysdesign" className="dark">
       <head>
         <HeadContent />
       </head>

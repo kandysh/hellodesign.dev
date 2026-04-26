@@ -9,7 +9,6 @@ import {
 } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import type { QuestionDetail } from "@sysdesign/types"
 import { RichTextEditor } from "@/components/RichTextEditor"
 import { ApiKeyInput, useApiKey } from "@/components/ApiKeyInput"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
@@ -102,6 +101,8 @@ function WorkspacePage() {
   const [answerText, setAnswerText] = useState("")
   const [excalidrawData, setExcalidrawData] = useState<Record<string, unknown> | null>(null)
   const [hasExcalidrawElements, setHasExcalidrawElements] = useState(false)
+  // Track if diagram tab has ever been visited so we mount Excalidraw lazily
+  const [diagramMounted, setDiagramMounted] = useState(false)
 
   // Agent panel state
   const [agentVisible, setAgentVisible] = useState(false)
@@ -184,7 +185,7 @@ function WorkspacePage() {
       })
 
       es.addEventListener("eval_start", () => {
-        setAgentState((prev) => ({
+        setAgentState((_prev) => ({
           phase: "evaluating",
           agentResults: [],
         }))
@@ -259,16 +260,16 @@ function WorkspacePage() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 space-y-4">
-        <div className="skeleton h-8 w-64 rounded-lg" />
-        <div className="skeleton h-4 w-96 rounded" />
-        <div className="skeleton h-[500px] w-full rounded-xl" />
+        <div className="animate-pulse rounded-lg" style={{ background: "#1e2a3d", height: 32, width: 256 }} />
+        <div className="animate-pulse rounded" style={{ background: "#1e2a3d", height: 16, width: 384, marginTop: 8 }} />
+        <div className="animate-pulse rounded-xl" style={{ background: "#1e2a3d", height: 500, width: "100%", marginTop: 16 }} />
       </div>
     )
   }
 
   if (!question) {
     return (
-      <div className="flex h-64 items-center justify-center text-base-content/40">
+      <div className="flex h-64 items-center justify-center" style={{ color: "#464554" }}>
         Question not found.
       </div>
     )
@@ -281,17 +282,21 @@ function WorkspacePage() {
       {/* ── Left panel ─────────────────────────────────────────── */}
       <aside
         className={cn(
-          "flex flex-col border-r border-base-300/40 bg-base-200/30 transition-all duration-200 ease-in-out overflow-hidden shrink-0",
+          "flex flex-col transition-all duration-200 ease-in-out overflow-hidden shrink-0",
           leftCollapsed ? "w-10" : "w-72",
         )}
+        style={{ background: "#0f1729", borderRight: "1px solid #1e2a3d" }}
       >
         {/* Sidebar header with collapse + tabs */}
-        <div className="shrink-0 border-b border-base-300/40">
+        <div className="shrink-0" style={{ borderBottom: "1px solid #1e2a3d" }}>
           {leftCollapsed ? (
             <button
               type="button"
               onClick={() => setLeftCollapsed(false)}
-              className="flex w-full items-center justify-center py-3 text-base-content/40 hover:text-base-content/70 transition-default"
+              className="flex w-full items-center justify-center py-3 transition-colors"
+              style={{ color: "#464554" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#908fa0")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#464554")}
               aria-label="Expand sidebar"
             >
               <ChevronRight size={14} />
@@ -315,7 +320,10 @@ function WorkspacePage() {
                 <button
                   type="button"
                   onClick={() => setLeftCollapsed(true)}
-                  className="ml-auto p-1.5 rounded-lg text-base-content/30 hover:text-base-content/60 hover:bg-base-300/30 transition-default"
+                  className="ml-auto p-1.5 rounded-lg transition-colors"
+                  style={{ color: "#464554" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#908fa0"; e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#464554"; e.currentTarget.style.background = "transparent" }}
                   aria-label="Collapse sidebar"
                 >
                   <ChevronLeft size={13} />
@@ -325,10 +333,10 @@ function WorkspacePage() {
               {/* Checklist progress bar */}
               {checklistProgress > 0 && (
                 <div className="px-3 pb-2 pt-1.5">
-                  <div className="h-0.5 w-full rounded-full bg-base-300/40 overflow-hidden">
+                  <div className="h-0.5 w-full rounded-full overflow-hidden" style={{ background: "#2d3449" }}>
                     <div
-                      className="h-full bg-primary rounded-full transition-all duration-300"
-                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%` }}
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%`, background: "#8083ff" }}
                     />
                   </div>
                 </div>
@@ -346,21 +354,21 @@ function WorkspacePage() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <DifficultyBadge difficulty={question.difficulty} solid />
-                    <span className="text-xs text-base-content/40 capitalize">
+                    <span className="text-xs capitalize" style={{ color: "#464554" }}>
                       {question.category.replace(/-/g, " ")}
                     </span>
                   </div>
-                  <h2 className="text-sm font-semibold leading-snug text-base-content">
+                  <h2 className="text-sm font-semibold leading-snug" style={{ color: "#dae2fd" }}>
                     {question.title}
                   </h2>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#464554" }}>
                     Description
                   </p>
-                  <div className="prose prose-sm prose-invert max-w-none text-xs text-base-content/60 leading-relaxed [&_p]:mb-1.5">
+                  <div className="max-w-none text-xs leading-relaxed [&_p]:mb-1.5" style={{ color: "#908fa0" }}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {question.prompt}
                     </ReactMarkdown>
@@ -368,35 +376,33 @@ function WorkspacePage() {
                 </div>
 
                 {/* Hints */}
-                <div className="rounded-xl border border-base-300/40 bg-base-300/10 overflow-hidden">
+                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}>
                   <button
                     type="button"
                     onClick={() => setHintsOpen((v) => !v)}
-                    className="flex w-full items-center justify-between px-3 py-2.5 text-xs font-medium transition-default hover:bg-base-300/20"
+                    className="flex w-full items-center justify-between px-3 py-2.5 text-xs font-medium transition-colors hover:bg-white/5"
                   >
                     <span className="flex items-center gap-2">
                       {hintsOpen ? (
-                        <Unlock size={12} className="text-primary" />
+                        <Unlock size={12} style={{ color: "#8083ff" }} />
                       ) : (
-                        <Lock size={12} className="text-base-content/40" />
+                        <Lock size={12} style={{ color: "#464554" }} />
                       )}
-                      <span className={hintsOpen ? "text-base-content/70" : "text-base-content/50"}>
+                      <span style={{ color: hintsOpen ? "#c7c4d7" : "#908fa0" }}>
                         {hintsOpen ? "Hide hints" : "Reveal hints"}
                       </span>
                     </span>
                     <ChevronRight
                       size={12}
-                      className={cn(
-                        "text-base-content/30 transition-transform duration-150",
-                        hintsOpen && "rotate-90",
-                      )}
+                      className={cn("transition-transform duration-150", hintsOpen && "rotate-90")}
+                      style={{ color: "#464554" }}
                     />
                   </button>
                   {hintsOpen && (question.hints?.length ?? 0) > 0 && (
-                    <div className="border-t border-base-300/40 px-3 py-2.5 space-y-2">
-                      {question.hints!.map((hint, i) => (
-                        <p key={i} className="text-xs text-base-content/60 flex gap-1.5">
-                          <span className="text-primary/50 shrink-0">›</span>
+                    <div className="px-3 py-2.5 space-y-2" style={{ borderTop: "1px solid #2d3449" }}>
+                    {question.hints?.map((hint, i) => (
+                        <p key={i} className="text-xs flex gap-1.5" style={{ color: "#908fa0" }}>
+                          <span className="shrink-0" style={{ color: "rgba(128,131,255,0.5)" }}>›</span>
                           {hint}
                         </p>
                       ))}
@@ -415,10 +421,8 @@ function WorkspacePage() {
             {sidebarTab === "checklist" && (
               <div className="p-4 space-y-5">
                 <div>
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
-                    What to cover
-                  </p>
-                  <p className="text-xs text-base-content/40 mb-3">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#464554" }}>What to cover</p>
+                  <p className="text-xs mb-3" style={{ color: "#464554" }}>
                     Mark each section as you complete it.
                   </p>
                   <div className="space-y-1">
@@ -429,17 +433,15 @@ function WorkspacePage() {
                           key={item}
                           type="button"
                           onClick={() => toggleChecklist(item)}
-                          className={cn(
-                            "flex items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 transition-default",
-                            checked
-                              ? "bg-primary/8 text-base-content/80 hover:bg-primary/12"
-                              : "text-base-content/50 hover:bg-base-300/30 hover:text-base-content/70",
-                          )}
+                          className="flex items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 transition-all"
+                          style={{ background: checked ? "rgba(99,102,241,0.08)" : "transparent", color: checked ? "#c7c4d7" : "#908fa0" }}
+                          onMouseEnter={(e) => { if (!checked) e.currentTarget.style.background = "rgba(255,255,255,0.04)" }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = checked ? "rgba(99,102,241,0.08)" : "transparent" }}
                         >
                           {checked ? (
-                            <CheckSquare size={13} className="text-primary shrink-0" />
+                            <CheckSquare size={13} style={{ color: "#8083ff" }} className="shrink-0" />
                           ) : (
-                            <Square size={13} className="text-base-content/25 shrink-0" />
+                            <Square size={13} style={{ color: "#2d3449" }} className="shrink-0" />
                           )}
                           <span className="text-xs">{item}</span>
                         </button>
@@ -449,33 +451,26 @@ function WorkspacePage() {
                 </div>
 
                 {/* Progress summary */}
-                <div className="rounded-xl border border-base-300/40 bg-base-300/10 p-3">
+                <div className="rounded-xl p-3" style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#464554" }}>
                       Progress
                     </span>
                     <span
-                      className={cn(
-                        "text-xs font-semibold",
-                        checklistProgress === checklistTotal
-                          ? "text-success"
-                          : "text-base-content/50",
-                      )}
+                      className="text-xs font-semibold"
+                      style={{ color: checklistProgress === checklistTotal ? "#4edea3" : "#908fa0" }}
                     >
                       {checklistProgress}/{checklistTotal}
                     </span>
                   </div>
-                  <div className="h-1.5 w-full rounded-full bg-base-300/40 overflow-hidden">
+                  <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "#2d3449" }}>
                     <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-500",
-                        checklistProgress === checklistTotal ? "bg-success" : "bg-primary",
-                      )}
-                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%` }}
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%`, background: checklistProgress === checklistTotal ? "#4edea3" : "#8083ff" }}
                     />
                   </div>
                   {checklistProgress === checklistTotal && (
-                    <p className="mt-2 text-xs text-success/80">
+                    <p className="mt-2 text-xs" style={{ color: "#4edea3" }}>
                       ✓ All sections covered — great work!
                     </p>
                   )}
@@ -492,21 +487,22 @@ function WorkspacePage() {
       {/* ── Center panel ───────────────────────────────────────── */}
       <div className="flex flex-1 flex-col min-w-0 relative">
         {/* Question context bar */}
-        <div className="flex items-center gap-3 border-b border-base-300/40 bg-base-200/30 px-4 py-2 shrink-0">
+        <div className="flex items-center gap-3 px-4 py-2 shrink-0" style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}>
           <Link
             to="/questions"
-            className="flex items-center gap-1 text-xs text-base-content/35 hover:text-base-content/60 transition-default shrink-0"
+            className="flex items-center gap-1 text-xs transition-colors shrink-0"
+            style={{ color: "#464554" }}
           >
             <ArrowLeft size={11} />
             Questions
           </Link>
-          <span className="text-base-content/20 text-xs">/</span>
-          <span className="truncate text-xs font-medium text-base-content/70 min-w-0">
+          <span className="text-xs" style={{ color: "#2d3449" }}>/</span>
+          <span className="truncate text-xs font-medium min-w-0" style={{ color: "#908fa0" }}>
             {question.title}
           </span>
           <div className="ml-auto flex items-center gap-3 shrink-0">
             <DifficultyBadge difficulty={question.difficulty} />
-            <span className="flex items-center gap-1 text-xs text-base-content/35 font-mono tabular-nums">
+            <span className="flex items-center gap-1 text-xs font-mono tabular-nums" style={{ color: "#464554" }}>
               <Clock size={11} />
               {elapsed}
             </span>
@@ -514,7 +510,7 @@ function WorkspacePage() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex items-center border-b border-base-300/40 bg-base-200/20 px-4 gap-0">
+        <div className="flex items-center px-4 gap-0" style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}>
           <TabButton
             active={activeTab === "write"}
             onClick={() => setActiveTab("write")}
@@ -523,22 +519,24 @@ function WorkspacePage() {
           />
           <TabButton
             active={activeTab === "diagram"}
-            onClick={() => setActiveTab("diagram")}
+            onClick={() => { setActiveTab("diagram"); setDiagramMounted(true); }}
             icon={<Map size={13} />}
             label="Diagram"
           />
           {hasExcalidrawElements && activeTab !== "diagram" && (
-            <span className="ml-auto text-xs text-base-content/40 flex items-center gap-1">
-              <Layers size={11} className="text-primary/60" />
+            <span className="ml-auto text-xs flex items-center gap-1" style={{ color: "#464554" }}>
+              <Layers size={11} style={{ color: "rgba(128,131,255,0.6)" }} />
               Diagram will be included
             </span>
           )}
         </div>
 
         {/* Editor / Diagram content */}
-        <div className="flex-1 overflow-hidden">
-          {/* Write tab */}
-          <div className={cn("h-full", activeTab !== "write" && "hidden")}>
+        <div className="flex-1 overflow-hidden relative">
+          {/* Write tab — always rendered */}
+          <div
+            style={{ display: activeTab === "write" ? "block" : "none", height: "100%" }}
+          >
             <RichTextEditor
               onChange={setAnswerText}
               placeholder={EDITOR_PLACEHOLDER}
@@ -546,41 +544,43 @@ function WorkspacePage() {
             />
           </div>
 
-          {/* Diagram tab */}
-          <div
-            className={cn("h-full", activeTab !== "diagram" && "hidden")}
-            aria-label="Architecture diagram canvas"
-          >
-            <Suspense
-              fallback={
-                <div className="flex h-full items-center justify-center text-base-content/40 text-sm gap-2">
-                  <div className="loading loading-spinner loading-sm text-primary" />
-                  Loading canvas…
-                </div>
-              }
+          {/* Diagram tab — mounted on first visit, then kept alive */}
+          {diagramMounted && (
+            <div
+              style={{ display: activeTab === "diagram" ? "block" : "none", height: "100%" }}
+              aria-label="Architecture diagram canvas"
             >
-              <Excalidraw
-                theme="dark"
-                UIOptions={{ canvasActions: { export: false } }}
-                onChange={(elements, appState) => {
-                  setExcalidrawData({ elements, appState })
-                  setHasExcalidrawElements(
-                    Array.isArray(elements) && elements.length > 0,
-                  )
-                }}
-              />
-            </Suspense>
-          </div>
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center text-sm gap-2" style={{ color: "#464554" }}>
+                    <span className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }} />
+                    Loading canvas…
+                  </div>
+                }
+              >
+                <Excalidraw
+                  theme="dark"
+                  UIOptions={{ canvasActions: { export: false } }}
+                  onChange={(elements, appState) => {
+                    setExcalidrawData({ elements, appState })
+                    setHasExcalidrawElements(
+                      Array.isArray(elements) && elements.length > 0,
+                    )
+                  }}
+                />
+              </Suspense>
+            </div>
+          )}
         </div>
 
         {/* Bottom action bar */}
-        <div className="flex items-center justify-between gap-4 border-t border-base-300/40 bg-base-200/40 px-4 py-2.5 shrink-0">
+        <div className="flex items-center justify-between gap-4 px-4 py-2.5 shrink-0" style={{ borderTop: "1px solid #1e2a3d", background: "#0b1326" }}>
           {/* Left: word count + diagram indicator */}
-          <div className="flex items-center gap-3 text-xs text-base-content/40 min-w-0">
-            <span className={cn(wordCount > 0 && "text-base-content/60")}>{wordCount} words</span>
+          <div className="flex items-center gap-3 text-xs min-w-0" style={{ color: "#464554" }}>
+            <span style={{ color: wordCount > 0 ? "#908fa0" : "#464554" }}>{wordCount} words</span>
             {hasExcalidrawElements && (
               <span className="flex items-center gap-1">
-                <Layers size={10} className="text-primary/60" />
+                <Layers size={10} style={{ color: "rgba(128,131,255,0.6)" }} />
                 Diagram
               </span>
             )}
@@ -605,10 +605,11 @@ function WorkspacePage() {
                 type="button"
                 onClick={() => submitMutation.mutate()}
                 disabled={!canSubmit || submitMutation.isPending}
-                className="btn btn-primary btn-wide rounded-xl gap-2 transition-default"
+                className="inline-flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl font-semibold text-sm text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ background: "#6366f1", border: "1px solid rgba(99,102,241,0.5)", boxShadow: "0 0 12px rgba(99,102,241,0.25)" }}
               >
                 {submitMutation.isPending ? (
-                  <div className="loading loading-spinner loading-xs" />
+                  <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                 ) : (
                   <Zap size={15} />
                 )}
@@ -622,7 +623,10 @@ function WorkspacePage() {
             <Link
               to="/questions/$questionId/interview"
               params={{ questionId }}
-              className="btn btn-ghost btn-xs rounded-lg border border-base-300/40 gap-1 text-base-content/50 hover:text-base-content transition-default"
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
+              style={{ color: "#908fa0", border: "1px solid #2d3449" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#dae2fd"; e.currentTarget.style.borderColor = "#464554" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#908fa0"; e.currentTarget.style.borderColor = "#2d3449" }}
             >
               <Mic size={12} />
               Interview
@@ -630,7 +634,8 @@ function WorkspacePage() {
             <select
               value={reviewMode}
               onChange={(e) => setReviewMode(e.target.value as "quick" | "deep")}
-              className="select select-xs rounded-lg border-base-300/40 bg-base-300/20 text-xs focus-visible:ring-1 focus-visible:ring-primary"
+              className="rounded text-xs px-2 py-1.5 outline-none transition-all cursor-pointer"
+              style={{ background: "#131b2e", border: "1px solid #2d3449", color: "#908fa0" }}
               aria-label="Review mode"
             >
               <option value="quick">Quick Review</option>
@@ -640,7 +645,7 @@ function WorkspacePage() {
               className="tooltip tooltip-left cursor-default"
               data-tip="Deep review takes ~30s — the agent may ask follow-up questions"
             >
-              <Info size={13} className="text-base-content/30 hover:text-base-content/60 transition-default" />
+              <Info size={13} style={{ color: "#464554" }} />
             </span>
           </div>
         </div>
@@ -682,12 +687,11 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-default focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset",
-        active
-          ? "border-primary text-base-content"
-          : "border-transparent text-base-content/50 hover:text-base-content/80",
-      )}
+      className="flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-inset"
+      style={{
+        borderBottomColor: active ? "#8083ff" : "transparent",
+        color: active ? "#dae2fd" : "#908fa0",
+      }}
     >
       {icon}
       {label}
@@ -712,12 +716,11 @@ function SidebarTabBtn({
     <button
       type="button"
       onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 flex-1 justify-center rounded-lg px-2 py-1.5 text-[11px] font-medium transition-default",
-        active
-          ? "bg-base-300/50 text-base-content"
-          : "text-base-content/40 hover:text-base-content/70 hover:bg-base-300/20",
-      )}
+      className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-all"
+      style={{
+        borderBottom: active ? "2px solid #8083ff" : "2px solid transparent",
+        color: active ? "#dae2fd" : "#464554",
+      }}
     >
       {icon}
       {label}

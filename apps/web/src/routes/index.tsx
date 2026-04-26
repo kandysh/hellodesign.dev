@@ -8,20 +8,21 @@ import {
   Search,
   Gauge,
   Sparkles,
-  CheckCircle,
   PenLine,
   Github,
+  Layers,
+  Activity,
 } from "lucide-react"
 
 export const Route = createFileRoute("/")({ component: HomePage })
 
 const CATEGORIES = [
-  { slug: "messaging",      label: "Messaging",     icon: MessageSquare, count: 4 },
-  { slug: "storage",        label: "Storage",       icon: Database,      count: 6 },
-  { slug: "networking",     label: "CDN & Networks",icon: Globe,         count: 3 },
-  { slug: "caching",        label: "Rate Limiting", icon: Gauge,         count: 5 },
-  { slug: "api-design",     label: "Search Systems",icon: Search,        count: 4 },
-  { slug: "distributed-systems", label: "Auth & Security", icon: Shield, count: 5 },
+  { slug: "messaging",           label: "Messaging",          icon: MessageSquare, count: 4 },
+  { slug: "storage",             label: "Storage",            icon: Database,      count: 6 },
+  { slug: "networking",          label: "CDN & Networks",     icon: Globe,         count: 3 },
+  { slug: "caching",             label: "Rate Limiting",      icon: Gauge,         count: 5 },
+  { slug: "api-design",          label: "Search Systems",     icon: Search,        count: 4 },
+  { slug: "distributed-systems", label: "Auth & Security",    icon: Shield,        count: 5 },
 ]
 
 const STEPS = [
@@ -47,99 +48,159 @@ const STEPS = [
 
 function HomePage() {
   return (
-    <div className="flex flex-col">
-      {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="mx-auto w-full max-w-7xl px-4 py-20 md:py-28">
-        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2">
+    <div className="flex flex-col min-h-screen" style={{ background: "#0b1326" }}>
+      {/* ── Hero ──────────────────────────────────────────────── */}
+      <section className="w-full max-w-[1440px] mx-auto px-6 py-20 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           {/* Left */}
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs text-primary">
-              <Sparkles size={12} />
-              Multi-agent AI evaluation on every answer
-            </div>
-            <h1 className="mb-4 text-5xl font-extrabold leading-[1.1] tracking-tight md:text-6xl">
-              Design systems.
-              <br />
-              <span className="text-primary">Get evaluated</span>
-              <br />
-              by AI.
-            </h1>
-            <p className="mb-8 max-w-md text-lg text-base-content/60 leading-relaxed">
-              Practice real system design questions. Draw your architecture. Receive
-              deep, structured feedback across 7 dimensions — instantly.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                to="/questions"
-                className="btn btn-primary btn-lg rounded-lg gap-2 shadow-lg shadow-primary/20 transition-default hover:shadow-primary/40"
-              >
-                Start solving <ArrowRight size={16} />
-              </Link>
-              <Link
-                to="/questions"
-                className="btn btn-ghost btn-lg rounded-lg border border-base-300/50 transition-default hover:border-base-300"
-              >
-                Browse questions
-              </Link>
-            </div>
-          </div>
-
-          {/* Right — animated preview card */}
-          <div className="relative hidden md:block">
-            <div className="absolute -inset-4 rounded-3xl bg-primary/5 blur-3xl" />
-            <PreviewCard />
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ─────────────────────────────────────────── */}
-      <section className="border-t border-base-300/40 bg-base-200/40 py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="mb-2 text-center text-3xl font-bold tracking-tight">How it works</h2>
-          <p className="mb-12 text-center text-base-content/50">
-            Three steps to better system design skills
-          </p>
-
-          <div className="relative grid grid-cols-1 gap-6 md:grid-cols-3">
-            {/* Connector line (desktop) */}
+          <div className="flex flex-col gap-6 z-10">
+            {/* Live badge */}
             <div
-              className="absolute top-8 left-1/4 right-1/4 hidden h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent md:block"
-              aria-hidden="true"
-            />
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full w-fit text-xs font-medium"
+              style={{ background: "#171f33", border: "1px solid #2d3449", color: "#c7c4d7" }}
+            >
+              <span
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ background: "#4edea3" }}
+              />
+              <span style={{ fontFamily: "'Space Grotesk', monospace" }}>
+                System Design V2.0 is Live
+              </span>
+            </div>
 
-            {STEPS.map((step) => {
-              const Icon = step.icon
-              return (
-                <div
-                  key={step.n}
-                  className="relative rounded-xl border border-base-300/40 bg-base-200 p-6 shadow-lg shadow-indigo-950/40 transition-default hover:border-primary/30 hover:shadow-primary/10"
-                >
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Icon size={18} />
-                    </div>
-                    <span className="font-mono text-xs font-bold text-base-content/30 tracking-widest">
-                      STEP {step.n}
-                    </span>
-                  </div>
-                  <h3 className="mb-2 font-semibold text-base-content">{step.title}</h3>
-                  <p className="text-sm text-base-content/50 leading-relaxed">{step.desc}</p>
-                </div>
-              )
-            })}
+            <h1
+              className="font-extrabold leading-tight"
+              style={{ fontSize: "clamp(2.5rem,5vw,3.5rem)", letterSpacing: "-0.02em", color: "#dae2fd" }}
+            >
+              Master Technical Interviews with{" "}
+              <span style={{ color: "#8083ff" }}>AI‑Led Precision.</span>
+            </h1>
+
+            <p className="text-base leading-relaxed max-w-xl" style={{ color: "#c7c4d7" }}>
+              High‑density environments for data‑driven architects. Simulate real‑world system
+              design constraints with our Excalidraw‑style canvas and Lexical‑style technical editor.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <Link
+                to="/questions"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 transition-all duration-150 active:scale-95"
+                style={{ boxShadow: "0 0 16px rgba(99,102,241,0.4)" }}
+              >
+                Start Interview Simulation
+                <ArrowRight size={15} />
+              </Link>
+              <Link
+                to="/questions"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-medium transition-all duration-150 active:scale-95 border"
+                style={{ color: "#c0c1ff", borderColor: "#464554", background: "transparent" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#171f33" }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
+              >
+                Browse Questions
+              </Link>
+            </div>
+          </div>
+
+          {/* Right — mock architecture canvas */}
+          <div className="relative hidden lg:block">
+            <div
+              className="absolute -inset-6 rounded-3xl blur-3xl opacity-20"
+              style={{ background: "radial-gradient(ellipse at center, #6366f1, transparent)" }}
+            />
+            <MockCanvas />
           </div>
         </div>
       </section>
 
-      {/* ── Categories ───────────────────────────────────────────── */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <h2 className="mb-2 text-center text-3xl font-bold tracking-tight">Question categories</h2>
-          <p className="mb-12 text-center text-base-content/50">
-            From fundamentals to senior-level distributed systems
-          </p>
+      {/* ── Stats strip ───────────────────────────────────────── */}
+      <div
+        className="border-y"
+        style={{ borderColor: "#222a3d", background: "#131b2e" }}
+      >
+        <div className="max-w-[1440px] mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { val: "30+",  label: "Design problems" },
+            { val: "7",    label: "AI evaluation agents" },
+            { val: "4",    label: "Scoring dimensions" },
+            { val: "100%", label: "Free to start" },
+          ].map((stat) => (
+            <div key={stat.label} className="flex flex-col gap-1">
+              <span className="text-3xl font-extrabold" style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}>
+                {stat.val}
+              </span>
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#908fa0" }}>
+                {stat.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      {/* ── How it works ──────────────────────────────────────── */}
+      <section className="w-full max-w-[1440px] mx-auto px-6 py-20">
+        <div className="mb-12 text-center">
+          <p
+            className="text-xs font-bold uppercase tracking-widest mb-2"
+            style={{ color: "#c0c1ff" }}
+          >
+            Process
+          </p>
+          <h2 className="text-3xl font-bold" style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}>
+            How it works
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {STEPS.map((step) => {
+            const Icon = step.icon
+            return (
+              <div
+                key={step.n}
+                className="flex flex-col gap-4 p-6 rounded-lg group hover:border-indigo-500/40 transition-all duration-200"
+                style={{ background: "#171f33", border: "1px solid #2d3449" }}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded flex items-center justify-center shrink-0"
+                    style={{ background: "rgba(192,193,255,0.1)", color: "#c0c1ff" }}
+                  >
+                    <Icon size={18} />
+                  </div>
+                  <span
+                    className="font-bold text-xs uppercase tracking-widest"
+                    style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}
+                  >
+                    Step {step.n}
+                  </span>
+                </div>
+                <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>{step.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>{step.desc}</p>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ── Categories ────────────────────────────────────────── */}
+      <section
+        className="border-t"
+        style={{ borderColor: "#222a3d", background: "rgba(23,31,51,0.5)" }}
+      >
+        <div className="w-full max-w-[1440px] mx-auto px-6 py-20">
+          <div className="mb-12 text-center">
+            <p
+              className="text-xs font-bold uppercase tracking-widest mb-2"
+              style={{ color: "#4edea3" }}
+            >
+              Categories
+            </p>
+            <h2 className="text-3xl font-bold" style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}>
+              Question categories
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {CATEGORIES.map((cat) => {
               const Icon = cat.icon
               return (
@@ -147,14 +208,28 @@ function HomePage() {
                   key={cat.slug}
                   to="/questions"
                   search={{ category: cat.slug } as never}
-                  className="group relative overflow-hidden rounded-xl border border-base-300/40 bg-base-200 p-5 transition-default hover:border-primary/40 hover:shadow-lg hover:shadow-indigo-950/40"
+                  className="group relative overflow-hidden flex flex-col gap-3 p-5 rounded-lg transition-all duration-200"
+                  style={{
+                    background: "#171f33",
+                    border: "1px solid #2d3449",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(128,131,255,0.5)"
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "#2d3449"
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-default group-hover:opacity-100" />
-                  <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-base-300/60 text-primary transition-default group-hover:bg-primary/15">
+                  <div
+                    className="w-10 h-10 rounded flex items-center justify-center transition-colors duration-200"
+                    style={{ background: "rgba(192,193,255,0.08)", color: "#c0c1ff" }}
+                  >
                     <Icon size={20} />
                   </div>
-                  <p className="font-semibold text-base-content">{cat.label}</p>
-                  <p className="text-xs text-base-content/40 mt-0.5">{cat.count} questions</p>
+                  <div>
+                    <p className="font-semibold text-sm" style={{ color: "#dae2fd" }}>{cat.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: "#464554" }}>{cat.count} questions</p>
+                  </div>
                 </Link>
               )
             })}
@@ -162,21 +237,58 @@ function HomePage() {
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────── */}
-      <footer className="border-t border-base-300/40 py-8">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row">
-          <span className="font-mono text-sm text-base-content/40">
-            <span className="text-primary">sys</span>design
-            <span className="ml-0.5 inline-block h-1 w-1 rounded-full bg-primary" aria-hidden="true" />
+      {/* ── CTA Banner ────────────────────────────────────────── */}
+      <section className="w-full max-w-[1440px] mx-auto px-6 py-20">
+        <div
+          className="rounded-xl p-10 flex flex-col md:flex-row items-center justify-between gap-8"
+          style={{
+            background: "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(23,31,51,0.8) 100%)",
+            border: "1px solid rgba(128,131,255,0.2)",
+          }}
+        >
+          <div className="flex flex-col gap-2">
+            <h2
+              className="text-2xl font-bold"
+              style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}
+            >
+              Ready to level up your system design?
+            </h2>
+            <p className="text-sm" style={{ color: "#908fa0" }}>
+              Start practicing with real-world challenges. Free forever.
+            </p>
+          </div>
+          <Link
+            to="/questions"
+            className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 transition-all duration-150 active:scale-95"
+            style={{ boxShadow: "0 0 16px rgba(99,102,241,0.35)" }}
+          >
+            <Activity size={15} />
+            Start Practicing
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Footer ────────────────────────────────────────────── */}
+      <footer
+        className="border-t py-8"
+        style={{ borderColor: "#222a3d" }}
+      >
+        <div className="max-w-[1440px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span
+            className="font-black text-base tracking-tighter"
+            style={{ color: "#dae2fd" }}
+          >
+            Hello Design
           </span>
-          <p className="text-xs text-base-content/30">
+          <p className="text-xs" style={{ color: "#464554" }}>
             Practice system design. Get evaluated by AI.
           </p>
           <a
             href="https://github.com/kandysh/hellodesign.dev"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 text-xs text-base-content/40 transition-default hover:text-base-content/70"
+            className="flex items-center gap-1.5 text-xs transition-colors duration-150 hover:text-slate-300"
+            style={{ color: "#464554" }}
           >
             <Github size={14} />
             GitHub
@@ -187,85 +299,134 @@ function HomePage() {
   )
 }
 
-// ── Animated preview card ─────────────────────────────────────
+// ── Mock Architecture Canvas ──────────────────────────────────
 
-function PreviewCard() {
+function MockCanvas() {
   return (
-    <div className="relative rounded-2xl border border-base-300/50 bg-base-200 p-5 shadow-2xl shadow-indigo-950/60">
-      {/* Question header */}
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <div className="mb-1.5 flex items-center gap-2">
-            <span className="badge badge-sm badge-warning badge-outline">Medium</span>
-            <span className="text-xs text-base-content/40">~25 min</span>
-          </div>
-          <p className="font-semibold text-sm text-base-content">Design a URL Shortener</p>
+    <div
+      className="relative w-full rounded-xl overflow-hidden flex flex-col"
+      style={{
+        background: "#131b2e",
+        border: "1px solid #2d3449",
+        height: 440,
+      }}
+    >
+      {/* Faux header bar */}
+      <div
+        className="h-8 flex items-center px-4 gap-2 shrink-0"
+        style={{ background: "#0b1326", borderBottom: "1px solid #2d3449" }}
+      >
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
+        <span className="ml-2 text-xs" style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}>
+          design-workspace.canvas
+        </span>
+      </div>
+
+      {/* Dot-grid canvas */}
+      <div
+        className="flex-1 relative overflow-hidden"
+        style={{
+          backgroundImage: "radial-gradient(#2d3449 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+          background: "#0b1326",
+          backgroundRepeat: "repeat",
+        }}
+      >
+        {/* Node: Client */}
+        <CanvasNode label="Client" top={40} left={24} />
+
+        {/* Connector */}
+        <svg aria-hidden="true" className="absolute" style={{ top: 62, left: 130, overflow: "visible", width: 60, height: 2 }}>
+          <line x1="0" y1="1" x2="60" y2="1" stroke="#464554" strokeWidth="1.5" strokeDasharray="4 3" />
+          <polygon points="58,0 62,1 58,2" fill="#464554" />
+        </svg>
+
+        {/* Node: Load Balancer (highlighted) */}
+        <CanvasNode label="Load Balancer" top={40} left={196} highlight />
+
+        {/* Connector down */}
+        <svg aria-hidden="true" className="absolute" style={{ top: 110, left: 268, overflow: "visible", width: 2, height: 60 }}>
+          <line x1="1" y1="0" x2="1" y2="60" stroke="#464554" strokeWidth="1.5" strokeDasharray="4 3" />
+          <polygon points="0,58 1,62 2,58" fill="#464554" />
+        </svg>
+
+        {/* Node: App Server */}
+        <CanvasNode label="App Server" top={172} left={196} />
+
+        {/* Connector right */}
+        <svg aria-hidden="true" className="absolute" style={{ top: 194, left: 316, overflow: "visible", width: 60, height: 2 }}>
+          <line x1="0" y1="1" x2="60" y2="1" stroke="#464554" strokeWidth="1.5" strokeDasharray="4 3" />
+          <polygon points="58,0 62,1 58,2" fill="#464554" />
+        </svg>
+
+        {/* Node: DB */}
+        <CanvasNode label="PostgreSQL" top={172} left={380} />
+
+        {/* Node: Cache (bottom-right area) */}
+        <div
+          className="absolute flex items-center gap-2 px-3 py-2 rounded text-xs font-medium"
+          style={{
+            top: 280,
+            left: 196,
+            background: "rgba(78,222,163,0.08)",
+            border: "1px dashed rgba(78,222,163,0.4)",
+            color: "#4edea3",
+            fontFamily: "'Space Grotesk', monospace",
+          }}
+        >
+          <Layers size={12} />
+          Redis Cache
+        </div>
+
+        {/* Score badge */}
+        <div
+          className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded text-xs"
+          style={{ background: "#131b2e", border: "1px solid #2d3449", color: "#908fa0" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
+          <span style={{ fontFamily: "'Space Grotesk', monospace" }}>AI evaluating…</span>
         </div>
       </div>
 
-      {/* Fake diagram preview */}
-      <div className="mb-4 overflow-hidden rounded-xl border border-base-300/40 bg-base-300/30" style={{ height: 120 }}>
-        <div className="flex h-full items-center justify-center gap-3 px-4 opacity-60">
-          <FakeBox label="Client" />
-          <FakeArrow />
-          <FakeBox label="API GW" highlight />
-          <FakeArrow />
-          <div className="flex flex-col gap-1.5">
-            <FakeBox label="App" small />
-            <FakeBox label="Redis" small />
-          </div>
-          <FakeArrow />
-          <FakeBox label="DB" />
-        </div>
+      {/* Bottom editor strip */}
+      <div
+        className="px-4 py-3 text-xs"
+        style={{ background: "#131b2e", borderTop: "1px solid #2d3449", color: "#c7c4d7" }}
+      >
+        <span style={{ color: "#8083ff", fontFamily: "'Space Grotesk', monospace" }}>Design Notes: </span>
+        Use read replicas for global latency reduction. Add CDN layer…
       </div>
-
-      {/* Score preview */}
-      <div className="flex items-center gap-3 rounded-xl border border-base-300/40 bg-base-300/20 p-3">
-        <div className="relative">
-          <svg width={52} height={52}>
-            <circle cx={26} cy={26} r={20} fill="none" stroke="#1e1e2e" strokeWidth={5} />
-            <circle
-              cx={26} cy={26} r={20} fill="none"
-              stroke="#4ade80" strokeWidth={5}
-              strokeDasharray={125.66} strokeDashoffset={28}
-              strokeLinecap="round"
-              transform="rotate(-90 26 26)"
-            />
-            <text x={26} y={30} textAnchor="middle" fontSize={11} fontWeight="bold" fill="#4ade80">82</text>
-          </svg>
-        </div>
-        <div className="flex-1">
-          <p className="text-xs font-medium text-base-content/70 mb-1.5">Evaluation score</p>
-          <div className="flex flex-wrap gap-1">
-            {["Scalability 85", "DB 74", "API 88"].map((d) => (
-              <span key={d} className="rounded-full border border-base-300/50 bg-base-300/30 px-2 py-0.5 text-[10px] text-base-content/50">
-                {d}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Blur overlay suggesting more content */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 rounded-b-2xl bg-gradient-to-t from-base-200 to-transparent" />
     </div>
   )
 }
 
-function FakeBox({ label, highlight, small }: { label: string; highlight?: boolean; small?: boolean }) {
+function CanvasNode({
+  label,
+  top,
+  left,
+  highlight,
+}: {
+  label: string
+  top: number
+  left: number
+  highlight?: boolean
+}) {
   return (
     <div
-      className={`flex items-center justify-center rounded-lg border text-center font-mono text-[9px] font-semibold ${
-        highlight
-          ? "border-primary/50 bg-primary/10 text-primary"
-          : "border-base-300/60 bg-base-300/40 text-base-content/50"
-      } ${small ? "h-7 w-12" : "h-9 w-14"}`}
+      className="absolute flex items-center gap-2 px-3 py-2 rounded text-xs font-medium"
+      style={{
+        top,
+        left,
+        background: highlight ? "rgba(128,131,255,0.12)" : "#171f33",
+        border: highlight ? "1px solid rgba(128,131,255,0.5)" : "1px solid #2d3449",
+        color: highlight ? "#c0c1ff" : "#dae2fd",
+        boxShadow: highlight ? "0 0 8px rgba(128,131,255,0.25)" : undefined,
+        fontFamily: "'Space Grotesk', monospace",
+      }}
     >
       {label}
     </div>
   )
-}
-
-function FakeArrow() {
-  return <div className="h-px w-5 bg-base-content/20" aria-hidden="true" />
 }

@@ -11,7 +11,7 @@
     "lint": "biome lint ./src"
   },
   "dependencies": {
-    "@langchain/core": "^0.3.0",
+    "@langchain/core": "^1.1.39",
     "@sysdesign/ai": "workspace:*",
     "@sysdesign/db": "workspace:*",
     "@sysdesign/queue": "workspace:*",

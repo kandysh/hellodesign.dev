@@ -1,7 +1,51 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '@fontsource-variable/geist';
-@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/manrope';
+@import '@fontsource/space-grotesk/500.css';
+
+/* ── Technical Precision Design Token Colors ────────────────── */
+@theme {
+  --color-background:               #0b1326;
+  --color-surface:                  #0b1326;
+  --color-surface-dim:              #0b1326;
+  --color-surface-bright:           #31394d;
+  --color-surface-container-lowest: #060e20;
+  --color-surface-container-low:    #131b2e;
+  --color-surface-container:        #171f33;
+  --color-surface-container-high:   #222a3d;
+  --color-surface-container-highest:#2d3449;
+  --color-surface-variant:          #2d3449;
+  --color-on-surface:               #dae2fd;
+  --color-on-surface-variant:       #c7c4d7;
+  --color-inverse-surface:          #dae2fd;
+  --color-inverse-on-surface:       #283044;
+  --color-outline:                  #908fa0;
+  --color-outline-variant:          #464554;
+  --color-surface-tint:             #c0c1ff;
+  --color-primary:                  #c0c1ff;
+  --color-on-primary:               #1000a9;
+  --color-primary-container:        #8083ff;
+  --color-on-primary-container:     #0d0096;
+  --color-inverse-primary:          #494bd6;
+  --color-secondary:                #b9c8de;
+  --color-on-secondary:             #233143;
+  --color-secondary-container:      #39485a;
+  --color-on-secondary-container:   #a7b6cc;
+  --color-tertiary:                 #4edea3;
+  --color-on-tertiary:              #003824;
+  --color-tertiary-container:       #00885d;
+  --color-on-tertiary-container:    #000703;
+  --color-error:                    #ffb4ab;
+  --color-on-error:                 #690005;
+  --color-error-container:          #93000a;
+  --color-on-error-container:       #ffdad6;
+  --color-primary-fixed:            #e1e0ff;
+  --color-primary-fixed-dim:        #c0c1ff;
+  --color-on-primary-fixed:         #07006c;
+  --color-on-primary-fixed-variant: #2f2ebe;
+  --font-sans: 'Manrope Variable', 'Manrope', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Space Grotesk', ui-monospace, 'Cascadia Code', Menlo, monospace;
+}
 
 @plugin "daisyui" {
   themes: sysdesign --default;
@@ -12,37 +56,37 @@
   default: true;
   color-scheme: dark;
 
-  --color-primary: oklch(62% 0.214 264);
-  --color-primary-content: oklch(100% 0 0);
-  --color-secondary: oklch(59% 0.221 292);
-  --color-secondary-content: oklch(100% 0 0);
-  --color-accent: oklch(71% 0.166 206);
-  --color-accent-content: oklch(15% 0.02 206);
-  --color-neutral: oklch(22% 0.027 273);
-  --color-neutral-content: oklch(88% 0.017 264);
-  --color-base-100: oklch(13% 0.02 273);
-  --color-base-200: oklch(16% 0.02 273);
-  --color-base-300: oklch(22% 0.027 273);
-  --color-base-content: oklch(89% 0.017 264);
-  --color-info: oklch(73% 0.148 218);
-  --color-info-content: oklch(15% 0.02 218);
-  --color-success: oklch(74% 0.169 154);
-  --color-success-content: oklch(15% 0.02 154);
-  --color-warning: oklch(80% 0.148 77);
+  --color-primary:         oklch(76% 0.17 265);   /* #c0c1ff */
+  --color-primary-content: oklch(15% 0.18 265);   /* #1000a9 */
+  --color-secondary:       oklch(80% 0.05 225);   /* #b9c8de */
+  --color-secondary-content: oklch(20% 0.03 225);
+  --color-accent:          oklch(83% 0.16 165);   /* #4edea3 tertiary */
+  --color-accent-content:  oklch(15% 0.06 165);
+  --color-neutral:         oklch(25% 0.03 265);   /* #2d3449 */
+  --color-neutral-content: oklch(86% 0.04 265);
+  --color-base-100:        oklch(11% 0.04 260);   /* #0b1326 */
+  --color-base-200:        oklch(14% 0.04 258);   /* #131b2e */
+  --color-base-300:        oklch(18% 0.04 258);   /* #222a3d */
+  --color-base-content:    oklch(91% 0.04 264);   /* #dae2fd */
+  --color-info:            oklch(73% 0.148 218);
+  --color-info-content:    oklch(15% 0.02 218);
+  --color-success:         oklch(83% 0.16 165);   /* #4edea3 */
+  --color-success-content: oklch(15% 0.06 165);
+  --color-warning:         oklch(80% 0.148 77);
   --color-warning-content: oklch(15% 0.02 77);
-  --color-error: oklch(72% 0.166 20);
-  --color-error-content: oklch(15% 0.02 20);
+  --color-error:           oklch(79% 0.12 18);    /* #ffb4ab */
+  --color-error-content:   oklch(15% 0.05 18);
 
-  --radius-selector: 0.5rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.75rem;
+  --radius-selector: 0.25rem;
+  --radius-field:    0.25rem;
+  --radius-box:      0.5rem;
   --border: 1px;
 }
 
 @plugin "@tailwindcss/typography";
 
 *, *::before, *::after {
-  @apply border-base-300/50;
+  @apply border-outline-variant/40;
 }
 
 html {
@@ -50,25 +94,34 @@ html {
 }
 
 body {
-  @apply m-0 bg-base-100 text-base-content antialiased;
-  font-family: 'Geist Variable', 'Geist', system-ui, -apple-system, sans-serif;
+  @apply m-0 antialiased;
+  background-color: #0b1326;
+  color: #dae2fd;
+  font-family: 'Manrope Variable', 'Manrope', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code, pre, .font-mono {
-  font-family: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-family: 'Space Grotesk', ui-monospace, 'Cascadia Code', Menlo, monospace;
+}
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection {
+  background-color: #8083ff33;
+  color: #c0c1ff;
 }
 
 /* ── Scrollbar styling ─────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { @apply bg-base-200; }
-::-webkit-scrollbar-thumb { @apply bg-base-300 rounded-full; }
-::-webkit-scrollbar-thumb:hover { @apply bg-neutral; }
+::-webkit-scrollbar-track { background: #131b2e; }
+::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #464554; }
 
 /* ── Focus rings ───────────────────────────────────────────── */
 :focus-visible {
-  @apply outline-2 outline-offset-2 outline-primary;
+  outline: 2px solid #c0c1ff;
+  outline-offset: 2px;
 }
 
 /* ── Transition default ────────────────────────────────────── */
@@ -78,27 +131,63 @@ code, pre, .font-mono {
 
 /* ── Glass panel ───────────────────────────────────────────── */
 .glass-panel {
-  @apply backdrop-blur-md bg-base-100/70 border border-base-300/40;
+  backdrop-filter: blur(12px);
+  background-color: rgba(11, 19, 38, 0.8);
+  border: 1px solid #464554;
+}
+
+/* ── Bento card ────────────────────────────────────────────── */
+.bento-card {
+  background-color: #171f33;
+  border: 1px solid #2d3449;
+}
+
+/* ── Indigo glow (active state) ────────────────────────────── */
+.glow-indigo {
+  box-shadow: 0 0 8px rgba(192, 193, 255, 0.35);
 }
 
 /* ── Reasoning trace terminal ──────────────────────────────── */
 .reasoning-trace {
-  font-family: 'Geist Mono Variable', 'Geist Mono', ui-monospace, monospace;
-  @apply text-xs text-success/80 bg-base-300/30 rounded-lg p-3 overflow-auto;
+  font-family: 'Space Grotesk', ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: rgba(78, 222, 163, 0.8);
+  background-color: rgba(45, 52, 73, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  overflow: auto;
   line-height: 1.6;
 }
 
 /* ── Lexical editor prose ──────────────────────────────────── */
 .lexical-prose {
   line-height: 1.8;
-  @apply text-base-content;
+  color: #dae2fd;
 }
-.lexical-prose h1 { @apply text-2xl font-bold mt-4 mb-2; }
-.lexical-prose h2 { @apply text-xl font-semibold mt-3 mb-2; }
-.lexical-prose p  { @apply mb-2; }
-.lexical-prose ul { @apply list-disc list-inside mb-2 space-y-0.5; }
-.lexical-prose ol { @apply list-decimal list-inside mb-2 space-y-0.5; }
-.lexical-prose li { @apply ml-4 text-base-content/90; }
-.lexical-prose blockquote { @apply border-l-4 border-primary/40 pl-4 italic text-base-content/60 my-2; }
-.lexical-prose code { @apply font-mono text-sm bg-base-300/60 px-1.5 py-0.5 rounded text-accent; }
-.lexical-prose pre  { @apply font-mono text-sm bg-base-300/60 p-3 rounded-lg my-2 overflow-x-auto; }
+.lexical-prose h1 { font-size: 1.5rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; }
+.lexical-prose h2 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
+.lexical-prose p  { margin-bottom: 0.5rem; }
+.lexical-prose ul { list-style-type: disc; padding-left: 1rem; margin-bottom: 0.5rem; }
+.lexical-prose ol { list-style-type: decimal; padding-left: 1rem; margin-bottom: 0.5rem; }
+.lexical-prose li { margin-left: 1rem; color: rgba(218, 226, 253, 0.9); }
+.lexical-prose blockquote { border-left: 4px solid rgba(192, 193, 255, 0.4); padding-left: 1rem; font-style: italic; color: rgba(218, 226, 253, 0.6); margin: 0.5rem 0; }
+.lexical-prose code { font-family: 'Space Grotesk', monospace; font-size: 0.875rem; background-color: rgba(45, 52, 73, 0.6); padding: 0.125rem 0.375rem; border-radius: 0.25rem; color: #4edea3; }
+.lexical-prose pre  { font-family: 'Space Grotesk', monospace; font-size: 0.875rem; background-color: rgba(45, 52, 73, 0.6); padding: 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; overflow-x: auto; }
+
+/* ── Auth input ────────────────────────────────────────────── */
+.auth-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  background: #060e20;
+  border: 1px solid #464554;
+  color: #dae2fd;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-input::placeholder { color: #464554; }
+.auth-input:focus {
+  border-color: #c0c1ff;
+  box-shadow: 0 0 0 2px rgba(192,193,255,0.15);
+}

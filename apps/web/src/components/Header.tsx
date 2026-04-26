@@ -1,6 +1,18 @@
 import { Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { BookOpen, Settings, LogOut, User, ChevronDown, Users, Zap } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import {
+  BookOpen,
+  Settings,
+  LogOut,
+  User,
+  Users,
+  Zap,
+  ChevronDown,
+  Activity,
+  Settings2,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -22,6 +34,18 @@ export default function Header() {
   })
 
   const user = session?.user ?? null
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside)
+    return () => document.removeEventListener("mousedown", onClickOutside)
+  }, [])
 
   async function handleSignOut() {
     await fetch(`${API}/api/auth/sign-out`, { method: "POST", credentials: "include" })
@@ -33,102 +57,137 @@ export default function Header() {
     : "?"
 
   return (
-    <header className="sticky top-0 z-50 border-b border-base-300/40 glass-panel">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        {/* Logo */}
-        <Link
-          to="/"
-          className="flex items-center gap-1 font-mono text-base font-semibold tracking-tight transition-default hover:opacity-80"
-        >
-          <span className="text-primary">sys</span>
-          <span className="text-base-content/90">design</span>
-          <span className="ml-0.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
-        </Link>
-
-        {/* Nav */}
-        <nav className="flex items-center gap-1">
+    <header
+      className="fixed top-0 w-full z-50 border-b"
+      style={{
+        background: "rgba(6, 8, 20, 0.9)",
+        backdropFilter: "blur(12px)",
+        borderColor: "#1e293b",
+      }}
+    >
+      <nav className="flex items-center justify-between h-16 px-6 max-w-[1440px] mx-auto">
+        {/* Brand */}
+        <div className="flex items-center gap-8">
           <Link
-            to="/questions"
-            activeProps={{ className: "!bg-base-300/60 !text-base-content" }}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-base-content/70 transition-default hover:bg-base-300/40 hover:text-base-content focus-visible:ring-2 focus-visible:ring-primary"
+            to="/"
+            className="text-xl font-black tracking-tighter text-slate-50 hover:text-white transition-colors duration-150"
           >
-            <BookOpen size={14} />
-            Questions
+            Hello Design
           </Link>
 
-          <Link
-            to="/community"
-            activeProps={{ className: "!bg-base-300/60 !text-base-content" }}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-base-content/70 transition-default hover:bg-base-300/40 hover:text-base-content focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <Users size={14} />
-            Community
-          </Link>
+          {/* Nav links */}
+          <div className="hidden md:flex items-center gap-6">
+            <NavLink to="/questions" label="Explore" icon={<BookOpen size={14} />} />
+            <NavLink to="/community" label="Community" icon={<Users size={14} />} />
+            <NavLink to="/pricing" label="Pricing" icon={<Zap size={14} />} />
+          </div>
+        </div>
 
-          <Link
-            to="/pricing"
-            activeProps={{ className: "!bg-base-300/60 !text-base-content" }}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-base-content/70 transition-default hover:bg-base-300/40 hover:text-base-content focus-visible:ring-2 focus-visible:ring-primary"
-          >
-            <Zap size={14} />
-            Pricing
-          </Link>
-
+        {/* Actions */}
+        <div className="flex items-center gap-3">
           {user ? (
-            <div className="dropdown dropdown-end ml-2">
+            <div className="relative" ref={menuRef}>
               <button
                 type="button"
-                tabIndex={0}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-default hover:bg-base-300/40 focus-visible:ring-2 focus-visible:ring-primary"
+                onClick={() => setMenuOpen((o) => !o)}
+                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-150 active:scale-95"
               >
-                <div className="avatar placeholder">
-                  <div className="w-7 rounded-full bg-primary/20 text-primary">
-                    {user.image ? (
-                      <img src={user.image} alt={user.name} referrerPolicy="no-referrer" />
-                    ) : (
-                      <span className="text-xs font-semibold">{initials}</span>
-                    )}
-                  </div>
-                </div>
-                <span className="max-w-[120px] truncate text-base-content/80">{user.name}</span>
-                <ChevronDown size={12} className="text-base-content/50" />
+                <Avatar user={user} initials={initials} />
+                <span className="hidden sm:block max-w-[120px] truncate font-medium">{user.name}</span>
+                <ChevronDown size={12} className="text-slate-500" />
               </button>
-              {/* biome-ignore lint/a11y/useSemanticElements: DaisyUI dropdown requires ul/tabIndex */}
-              <ul
-                tabIndex={0}
-                className="dropdown-content menu z-50 mt-1 w-44 rounded-xl border border-base-300/50 bg-base-200 p-1.5 shadow-lg shadow-indigo-950/40 text-sm"
-              >
-                <li>
-                  <Link to="/me" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-base-300/60">
-                    <User size={14} /> Profile
+
+              {menuOpen && (
+                <div
+                  className="absolute right-0 mt-1.5 w-48 rounded-lg border text-sm shadow-2xl py-1 z-50"
+                  style={{ background: "#131b2e", borderColor: "#2d3449" }}
+                >
+                  <Link
+                    to="/me"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors duration-150"
+                  >
+                    <User size={13} /> Profile
                   </Link>
-                </li>
-                <li>
-                  <Link to="/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 hover:bg-base-300/60">
-                    <Settings size={14} /> Settings
+                  <Link
+                    to="/settings"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors duration-150"
+                  >
+                    <Settings size={13} /> Settings
                   </Link>
-                </li>
-                <li className="mt-1 border-t border-base-300/40 pt-1">
+                  <div className="my-1 border-t" style={{ borderColor: "#2d3449" }} />
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-error hover:bg-error/10"
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors duration-150"
                   >
-                    <LogOut size={14} /> Sign out
+                    <LogOut size={13} /> Sign out
                   </button>
-                </li>
-              </ul>
+                </div>
+              )}
             </div>
           ) : (
             <Link
               to="/auth/login"
-              className="btn btn-ghost btn-sm rounded-lg border border-base-300/50 text-base-content/60 transition-default hover:text-base-content"
+              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-150 active:scale-95 px-3 py-1.5"
             >
-              Sign in to save progress
+              Sign in
             </Link>
           )}
-        </nav>
-      </div>
+
+          <Link
+            to="/questions"
+            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded transition-all duration-150 active:scale-95 border border-indigo-400/50"
+            style={{ boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}
+          >
+            <Activity size={13} />
+            Practice
+          </Link>
+        </div>
+      </nav>
     </header>
+  )
+}
+
+function NavLink({
+  to,
+  label,
+  icon,
+}: {
+  to: string
+  label: string
+  icon?: React.ReactNode
+}) {
+  return (
+    <Link
+      to={to}
+      activeProps={{
+        className: "!text-indigo-400 !border-b-2 !border-indigo-500 !pb-1",
+      }}
+      className={cn(
+        "flex items-center gap-1.5 text-sm font-medium text-slate-400",
+        "hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform",
+        "pb-1 border-b-2 border-transparent",
+      )}
+    >
+      {icon}
+      {label}
+    </Link>
+  )
+}
+
+function Avatar({ user, initials }: { user: SessionUser; initials: string }) {
+  return (
+    <div
+      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
+      style={{ background: "rgba(192,193,255,0.15)", color: "#c0c1ff", border: "1px solid rgba(192,193,255,0.25)" }}
+    >
+      {user.image ? (
+        <img src={user.image} alt={user.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+      ) : (
+        initials
+      )}
+    </div>
   )
 }

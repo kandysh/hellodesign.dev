@@ -50,9 +50,9 @@ export function ApiKeyInput({ className, onKeyChange }: ApiKeyInputProps) {
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-base-content/60 uppercase tracking-wide">
+        <p className="text-xs font-medium text-base-content/60 uppercase tracking-wide">
           OpenAI API Key
-        </label>
+        </p>
         {isSet && (
           <span className="flex items-center gap-1 text-xs text-success">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" />

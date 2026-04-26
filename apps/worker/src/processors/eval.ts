@@ -88,7 +88,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
   // 1. Resolve API key
   const apiKey = await resolveApiKey({ userId, sessionId })
   if (!apiKey) {
-    await publish(submissionId, { type: "error", message: "NO_API_KEY: No Mistral API key found." })
+    await publish(submissionId, { type: "error", message: "NO_API_KEY: No OpenAI API key found." })
     await db.submission.update({ where: { id: submissionId }, data: { status: "FAILED" } })
     return
   }

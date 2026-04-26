@@ -21,8 +21,8 @@ Your task has two phases:
 ## Phase 1 — CLARIFICATION
 Read the candidate's answer carefully. If any critical aspect is unclear, incomplete, or missing, use the \`ask_followup\` tool to ask ONE specific question at a time. You may ask a maximum of ${question.rubric.maxFollowupRounds} follow-up question(s). If the answer is already comprehensive, call \`mark_satisfied\` immediately.
 
-## Phase 2 — EVALUATION  
-After calling \`mark_satisfied\`, call \`score_component\` once for each rubric dimension below. Be strict but fair — a score of 70+ means production-ready thinking.
+## Phase 2 — EVALUATION
+After calling \`mark_satisfied\`, you are done. The system will automatically score the design across each rubric dimension.
 
 ## Evaluation Rubric for: ${question.title}
 ${dims}
@@ -56,12 +56,13 @@ Please begin your analysis. Start by reasoning about what you see, then decide w
 }
 
 export function buildEvaluationPrompt(dimensionIds: string[]): string {
-  return `You have finished the clarification phase. Now evaluate the candidate's answer by calling \`score_component\` once for each of these dimensions: ${dimensionIds.join(", ")}.
+  return `You have finished the clarification phase. Now evaluate the candidate's answer across all ${dimensionIds.length} rubric dimension(s): ${dimensionIds.join(", ")}.
 
-For each dimension:
-1. Reference specific parts of the candidate's answer in your reasoning
-2. Give a score from 0–100 based strictly on the rubric criteria
-3. List 2–4 concrete improvements
+Return a JSON object with a "scores" array containing one entry per dimension. For each entry:
+1. Set "dimensionId" to the exact dimension ID listed above
+2. Reference specific parts of the candidate's answer in "reasoning"
+3. Give a "score" from 0–100 based strictly on the rubric criteria (0–49 = significant gaps, 50–69 = adequate, 70–84 = solid, 85–100 = exceptional)
+4. List 2–4 concrete, actionable "improvements"
 
-Call \`score_component\` for all ${dimensionIds.length} dimensions before finishing.`
+Be strict but fair. Every dimension must have an entry.`
 }

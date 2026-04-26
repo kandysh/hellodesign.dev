@@ -1,10 +1,11 @@
-import { StateGraph, END, START, Annotation } from "@langchain/langgraph"
-import { AIMessage, HumanMessage, ToolMessage, BaseMessage } from "@langchain/core/messages"
-import { ChatMistralAI } from "@langchain/mistralai"
-import type { AIMessageChunk } from "@langchain/core/messages"
-import { clarificationTools, evaluationTools, scoreComponentTool } from "./tools.js"
-import { buildEvaluationPrompt } from "./prompts.js"
+import type { AIMessageChunk, BaseMessage } from "@langchain/core/messages"
+import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages"
+import { Annotation, END, START, StateGraph } from "@langchain/langgraph"
+import { ChatOpenAI } from "@langchain/openai"
 import type { AgentEvent, ComponentScore, RubricConfig } from "@sysdesign/shared"
+import { z } from "zod"
+import { buildEvaluationPrompt } from "./prompts.js"
+import { clarificationTools } from "./tools.js"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,6 +50,29 @@ export interface FeedbackResult {
   improvements: string[]
 }
 
+// ─── Structured output schemas ────────────────────────────────────────────────
+
+// Defined locally to avoid cross-package Zod version type conflicts
+const ComponentScoreZod = z.object({
+  dimensionId: z.string(),
+  score: z.number().min(0).max(100),
+  reasoning: z.string(),
+  improvements: z.array(z.string()),
+})
+
+const EvalOutputSchema = z.object({
+  scores: z.array(ComponentScoreZod).describe("One score entry per rubric dimension"),
+})
+
+const FeedbackOutputSchema = z.object({
+  narrative: z
+    .string()
+    .describe(
+      "3–5 paragraph narrative feedback covering overall performance, strengths, and areas for improvement",
+    ),
+  improvements: z.array(z.string()).describe("3–5 prioritised, concrete, actionable improvements"),
+})
+
 // ─── LangGraph state ──────────────────────────────────────────────────────────
 
 const ClarificationState = Annotation.Root({
@@ -69,8 +93,8 @@ export async function runClarificationPhase(
 ): Promise<ClarificationResult> {
   const { apiKey, initialMessages, question, submissionId, publishEvent, waitForReply } = params
 
-  const model = new ChatMistralAI({
-    model: "mistral-large-latest",
+  const model = new ChatOpenAI({
+    model: "gpt-5.4-mini",
     temperature: 0.2,
     apiKey,
     streaming: true,
@@ -78,11 +102,10 @@ export async function runClarificationPhase(
 
   // Agent node: stream LLM response, publish reasoning chunks
   const agentNode = async (state: typeof ClarificationState.State) => {
-    const stream = model.stream(state.messages)
-
     let accumulated: AIMessageChunk | null = null
 
-    for await (const chunk of await stream) {
+    // biome-ignore lint/suspicious/noExplicitAny: BaseMessage[] from LangGraph state has a specialized generic signature incompatible with BaseLanguageModelInput across module boundaries
+    for await (const chunk of await model.stream(state.messages as any)) {
       if (typeof chunk.content === "string" && chunk.content) {
         await publishEvent({ type: "reasoning", content: chunk.content })
       }
@@ -100,12 +123,16 @@ export async function runClarificationPhase(
 
     if (!toolCall) return {}
 
-    const question_text = toolCall.args.question as string
+    const questionText = toolCall.args.question as string
     const toolCallId = typeof toolCall.id === "string" ? toolCall.id : "followup_call"
 
-    await publishEvent({ type: "followup", question: question_text, submissionId })
+    await publishEvent({
+      type: "followup",
+      question: questionText,
+      submissionId,
+    })
 
-    // Add the tool result message (required for Mistral's tool message format)
+    // Tool result message is required before the next human turn
     const toolResult = new ToolMessage({
       tool_call_id: toolCallId,
       content: "Question sent to candidate. Waiting for their response...",
@@ -114,7 +141,7 @@ export async function runClarificationPhase(
     const reply = await waitForReply(submissionId)
 
     if (!reply) {
-      // Timed out — add the tool result and let the agent proceed to evaluation
+      // Timed out — let the agent proceed to evaluation
       return {
         messages: [toolResult],
         followupRounds: state.followupRounds + 1,
@@ -131,14 +158,13 @@ export async function runClarificationPhase(
 
   const maxRounds = question.rubric.maxFollowupRounds
 
-  // Routing: decide next node after the agent runs
   const shouldContinue = (state: typeof ClarificationState.State): string => {
     const lastMessage = state.messages[state.messages.length - 1]
 
     if (!lastMessage || lastMessage._getType() !== "ai") return END
 
     const aiMsg = lastMessage as AIMessage
-    if (!aiMsg.tool_calls?.length) return END // no tool call → implicitly satisfied
+    if (!aiMsg.tool_calls?.length) return END
 
     const toolName = aiMsg.tool_calls[0]?.name
 
@@ -146,7 +172,7 @@ export async function runClarificationPhase(
       return "wait_reply"
     }
 
-    // mark_satisfied, exceeded rounds, or unknown tool → end clarification
+    // mark_satisfied, rounds exceeded, or unknown tool → end clarification
     return END
   }
 
@@ -174,50 +200,32 @@ export async function runClarificationPhase(
 
 // ─── Evaluation phase ─────────────────────────────────────────────────────────
 
-export async function runEvaluationPhase(
-  params: EvaluationParams,
-): Promise<ComponentScore[]> {
-  const { apiKey, messages, question, submissionId, publishEvent } = params
+export async function runEvaluationPhase(params: EvaluationParams): Promise<ComponentScore[]> {
+  const { apiKey, messages, question, submissionId: _submissionId, publishEvent } = params
 
   const dimensionIds = question.rubric.dimensions.map((d) => d.id)
   await publishEvent({ type: "eval_start", dimensions: dimensionIds })
 
-  const model = new ChatMistralAI({
-    model: "mistral-large-latest",
+  const model = new ChatOpenAI({
+    model: "gpt-5.4-mini",
     temperature: 0.1,
     apiKey,
-    streaming: true,
-  }).bindTools(evaluationTools)
+    // biome-ignore lint/suspicious/noExplicitAny: Zod v4 cross-package type conflict with withStructuredOutput
+  }).withStructuredOutput(EvalOutputSchema as any)
 
-  const evalMessages = [
-    ...messages,
-    new HumanMessage(buildEvaluationPrompt(dimensionIds)),
-  ]
+  const evalMessages = [...messages, new HumanMessage(buildEvaluationPrompt(dimensionIds))]
 
-  const stream = model.stream(evalMessages)
-  let accumulated: AIMessageChunk | null = null
-
-  for await (const chunk of await stream) {
-    if (typeof chunk.content === "string" && chunk.content) {
-      await publishEvent({ type: "reasoning", content: chunk.content })
-    }
-    accumulated = accumulated ? accumulated.concat(chunk) : (chunk as AIMessageChunk)
+  // biome-ignore lint/suspicious/noExplicitAny: BaseMessage[] generic variance incompatibility across module boundaries
+  const { scores } = (await model.invoke(evalMessages as any)) as {
+    scores: ComponentScore[]
   }
 
-  const toolCalls = (accumulated as AIMessage)?.tool_calls ?? []
-  const scores: ComponentScore[] = []
-
-  for (const tc of toolCalls) {
-    if (tc.name === "score_component") {
-      const score: ComponentScore = {
-        dimensionId: tc.args.dimensionId as string,
-        score: tc.args.score as number,
-        reasoning: tc.args.reasoning as string,
-        improvements: tc.args.improvements as string[],
-      }
-      scores.push(score)
-      await publishEvent({ type: "eval_progress", dimensionId: score.dimensionId, score: score.score })
-    }
+  for (const score of scores) {
+    await publishEvent({
+      type: "eval_progress",
+      dimensionId: score.dimensionId,
+      score: score.score,
+    })
   }
 
   return scores
@@ -225,16 +233,15 @@ export async function runEvaluationPhase(
 
 // ─── Narrative feedback phase ─────────────────────────────────────────────────
 
-export async function generateNarrativeFeedback(
-  params: FeedbackParams,
-): Promise<FeedbackResult> {
+export async function generateNarrativeFeedback(params: FeedbackParams): Promise<FeedbackResult> {
   const { apiKey, messages, componentScores, overallScore, rubric } = params
 
-  const model = new ChatMistralAI({
-    model: "mistral-large-latest",
+  const model = new ChatOpenAI({
+    model: "gpt-5.4-mini",
     temperature: 0.3,
     apiKey,
-  })
+    // biome-ignore lint/suspicious/noExplicitAny: Zod v4 cross-package type conflict with withStructuredOutput
+  }).withStructuredOutput(FeedbackOutputSchema as any)
 
   const scoresText = componentScores
     .map((s) => {
@@ -248,46 +255,22 @@ export async function generateNarrativeFeedback(
 Component breakdown:
 ${scoresText}
 
-Write a structured evaluation response in JSON with this exact format:
-{
-  "narrative": "3-5 paragraph narrative feedback. Start with overall performance, then cover strengths, then areas for improvement. Be specific and reference the candidate's actual answer.",
-  "improvements": ["Improvement 1", "Improvement 2", "Improvement 3"]
-}
+Write a structured evaluation response with:
+- A "narrative" field: 3–5 paragraphs covering overall performance, strengths, then areas for improvement. Be specific and reference the candidate's actual answer.
+- An "improvements" array: the 3–5 most impactful concrete improvements, prioritised by impact.`
 
-The improvements array should contain 3-5 of the MOST IMPORTANT concrete improvements, prioritized by impact.`
-
-  const recentMessages = messages.slice(-6) // keep context manageable
-  const response = await model.invoke([
-    ...recentMessages,
-    new HumanMessage(feedbackPrompt),
-  ])
-
-  const content = typeof response.content === "string" ? response.content : ""
-
-  try {
-    const jsonMatch = content.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0]) as FeedbackResult
-      if (parsed.narrative && Array.isArray(parsed.improvements)) {
-        return parsed
-      }
-    }
-  } catch {
-    // Fall through to default
-  }
-
-  return {
-    narrative: content || "Evaluation complete. See component scores for details.",
-    improvements: componentScores.flatMap((s) => s.improvements).slice(0, 5),
-  }
+  const recentMessages = messages.slice(-6)
+  const feedbackMessages = [...recentMessages, new HumanMessage(feedbackPrompt)]
+  // biome-ignore lint/suspicious/noExplicitAny: BaseMessage[] generic variance incompatibility across module boundaries
+  return (await model.invoke(feedbackMessages as any)) as FeedbackResult
 }
 
 // ─── Key validation ───────────────────────────────────────────────────────────
 
-export async function validateMistralKey(apiKey: string): Promise<boolean> {
+export async function validateOpenAIKey(apiKey: string): Promise<boolean> {
   try {
-    const model = new ChatMistralAI({
-      model: "mistral-tiny",
+    const model = new ChatOpenAI({
+      model: "gpt-5.4-mini",
       apiKey,
       maxTokens: 5,
     })

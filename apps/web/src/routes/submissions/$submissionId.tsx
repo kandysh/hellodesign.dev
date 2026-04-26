@@ -19,7 +19,7 @@ function SubmissionResultPage() {
     "connecting",
   )
 
-  const { data: submission } = useQuery({
+  useQuery({
     queryKey: ["submission", submissionId],
     queryFn: () =>
       fetch(`${API}/api/submissions/${submissionId}`, { credentials: "include" }).then((r) =>
@@ -29,6 +29,7 @@ function SubmissionResultPage() {
   })
 
   // Open SSE stream
+  // biome-ignore lint/correctness/useExhaustiveDependencies: streamStatus intentionally excluded — re-creating the EventSource on status change would cause infinite loops
   useEffect(() => {
     const es = new EventSource(`${API}/api/submissions/${submissionId}/stream`, {
       withCredentials: true,
@@ -93,9 +94,10 @@ function SubmissionResultPage() {
               <div className="mb-2">
                 <p className="text-xs font-semibold text-success mb-1">Top Strengths</p>
                 <ul className="text-sm text-base-content/60 space-y-0.5">
-                  {orchestrator.topStrengths.map((s, i) => (
-                    <li key={i}>✓ {s}</li>
-                  ))}
+                  {orchestrator.topStrengths.map((s, i) => {
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static server response, no stable keys
+                    return <li key={i}>✓ {s}</li>
+                  })}
                 </ul>
               </div>
             )}
@@ -103,9 +105,10 @@ function SubmissionResultPage() {
               <div className="mb-2">
                 <p className="text-xs font-semibold text-error mb-1">Critical Gaps</p>
                 <ul className="text-sm text-base-content/60 space-y-0.5">
-                  {orchestrator.criticalGaps.map((g, i) => (
-                    <li key={i}>✗ {g}</li>
-                  ))}
+                  {orchestrator.criticalGaps.map((g, i) => {
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static server response, no stable keys
+                    return <li key={i}>✗ {g}</li>
+                  })}
                 </ul>
               </div>
             )}
@@ -115,11 +118,14 @@ function SubmissionResultPage() {
                   Top Suggestions (by impact)
                 </p>
                 <ul className="text-sm text-base-content/60 space-y-0.5">
-                  {orchestrator.prioritizedSuggestions.map((s, i) => (
-                    <li key={i}>
-                      {i + 1}. {s}
-                    </li>
-                  ))}
+                  {orchestrator.prioritizedSuggestions.map((s, i) => {
+                    // biome-ignore lint/suspicious/noArrayIndexKey: static server response, no stable keys
+                    return (
+                      <li key={i}>
+                        {i + 1}. {s}
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             )}
@@ -138,9 +144,10 @@ function SubmissionResultPage() {
 
         {isEvaluating && agentResults.length === 0 && (
           <div className="space-y-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 rounded-lg border border-base-300 bg-base-200 animate-pulse" />
-            ))}
+            {[...Array(3)].map((_, i) => {
+              // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
+              return <div key={i} className="h-32 rounded-lg border border-base-300 bg-base-200 animate-pulse" />
+            })}
           </div>
         )}
       </div>

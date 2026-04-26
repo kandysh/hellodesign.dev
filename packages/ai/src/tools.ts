@@ -12,9 +12,7 @@ export const askFollowupTool = tool(
     description:
       "Ask the user a clarifying question before evaluating. Use when the answer is ambiguous, incomplete, or you need more context on a specific design decision. Do not use more than the allowed number of times.",
     schema: z.object({
-      question: z
-        .string()
-        .describe("The clarifying question to ask the user. Be specific."),
+      question: z.string().describe("The clarifying question to ask the user. Be specific."),
       aspect: z
         .string()
         .describe(
@@ -36,30 +34,4 @@ export const markSatisfiedTool = tool(
   },
 )
 
-export const scoreComponentTool = tool(
-  async ({ dimensionId, score, reasoning, improvements }) => {
-    return `Scored ${dimensionId}: ${score}/100`
-  },
-  {
-    name: "score_component",
-    description:
-      "Score one rubric dimension. Call once per dimension after marking satisfied. Be strict but fair — 70+ means production-ready thinking.",
-    schema: z.object({
-      dimensionId: z.string().describe("The rubric dimension ID to score"),
-      score: z.number().min(0).max(100).describe("Score from 0 to 100"),
-      reasoning: z
-        .string()
-        .describe(
-          "Detailed reasoning for this score, referencing specific parts of the candidate's answer",
-        ),
-      improvements: z
-        .array(z.string())
-        .describe(
-          "Concrete, actionable improvements the candidate should make for this dimension",
-        ),
-    }),
-  },
-)
-
 export const clarificationTools = [askFollowupTool, markSatisfiedTool]
-export const evaluationTools = [scoreComponentTool]
