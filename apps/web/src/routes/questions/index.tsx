@@ -5,8 +5,7 @@ import type { QuestionSummary } from "@sysdesign/types"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { ArrowRight, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+import { questionsQueryOptions } from "@/lib/queries/questions"
 
 const categoryLabels: Record<string, string> = {
   "distributed-systems": "Distributed Systems",
@@ -24,17 +23,17 @@ const estimatedTime: Record<string, string> = {
   easy: "~15 min", medium: "~25 min", hard: "~40 min",
 }
 
-export const Route = createFileRoute("/questions/")({ component: QuestionsPage })
+export const Route = createFileRoute("/questions/")({
+  loader: ({ context: { queryClient } }) =>
+    queryClient.prefetchQuery(questionsQueryOptions),
+  component: QuestionsPage,
+})
 
 function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const { data: questions = [], isLoading, isError, refetch } = useQuery<QuestionSummary[]>({
-    queryKey: ["questions"],
-    queryFn: () => fetch(`${API}/api/questions`).then((r) => r.json()),
-    retry: false,
-  })
+  const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
 
   const categories = [...new Set(questions.map((q) => q.category))]
 

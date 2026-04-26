@@ -34,6 +34,7 @@ import {
   ArrowLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { questionQueryOptions } from "@/lib/queries/questions"
 
 const Excalidraw = lazy(() =>
   import("@excalidraw/excalidraw").then((m) => ({ default: m.Excalidraw })),
@@ -66,6 +67,8 @@ interface Message {
 }
 
 export const Route = createFileRoute("/questions/$questionId")({
+  loader: ({ context: { queryClient }, params: { questionId } }) =>
+    queryClient.prefetchQuery(questionQueryOptions(questionId)),
   component: WorkspacePage,
 })
 
@@ -107,10 +110,7 @@ function WorkspacePage() {
   const [currentSubmissionId, setCurrentSubmissionId] = useState<string | null>(null)
   const sseRef = useRef<EventSource | null>(null)
 
-  const { data: question, isLoading } = useQuery<QuestionDetail>({
-    queryKey: ["question", questionId],
-    queryFn: () => fetch(`${API}/api/questions/${questionId}`).then((r) => r.json()),
-  })
+  const { data: question, isLoading } = useQuery(questionQueryOptions(questionId))
 
   // Word count derived from editor
   const wordCount = answerText.trim() ? answerText.trim().split(/\s+/).length : 0

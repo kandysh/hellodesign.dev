@@ -1,4 +1,4 @@
-import { HeadContent, Scripts, createRootRouteWithContext, Outlet } from "@tanstack/react-router"
+import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
 import type { QueryClient } from "@tanstack/react-query"
 import Header from "../components/Header"
 import { ToastProvider } from "../components/Toast"
@@ -19,7 +19,21 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootDocument,
+  component: RootLayout,
 })
+
+// QueryClientProvider is already injected by setupRouterSsrQueryIntegration
+// (via router.options.Wrap in router.tsx) — no need to add it here.
+function RootLayout() {
+  return (
+    <ToastProvider>
+      <Header />
+      <main>
+        <Outlet />
+      </main>
+    </ToastProvider>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -28,10 +42,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="min-h-screen bg-base-100 text-base-content antialiased">
-        <ToastProvider>
-          <Header />
-          <main>{children}</main>
-        </ToastProvider>
+        {children}
         <Scripts />
       </body>
     </html>
