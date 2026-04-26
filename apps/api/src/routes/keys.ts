@@ -1,13 +1,14 @@
 import { Hono } from "hono"
 import { db, encryptKey, decryptKey } from "@sysdesign/db"
 import { validateMistralKey } from "@sysdesign/ai"
+import type { AppEnv } from "../lib/types.js"
 
-const app = new Hono()
+const app = new Hono<AppEnv>()
 
 // POST /api/keys — save (and optionally validate) a provider API key
 app.post("/", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
 
   const body = await c.req.json<{
     provider: string
@@ -81,8 +82,8 @@ app.post("/", async (c) => {
 
 // GET /api/keys — list keys for current user/session
 app.get("/", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
 
   const keys = await db.userApiKey.findMany({
     where: user ? { userId: user.id } : { sessionId },
@@ -95,8 +96,8 @@ app.get("/", async (c) => {
 
 // DELETE /api/keys/:id — remove a key
 app.delete("/:id", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
   const id = c.req.param("id")
 
   const record = await db.userApiKey.findUnique({ where: { id } })

@@ -10,7 +10,7 @@ import {
 } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import type { Question } from "@sysdesign/types"
+import type { QuestionDetail } from "@sysdesign/types"
 import { useApiKey } from "@/components/ApiKeyInput"
 import { useToast } from "@/components/Toast"
 import {
@@ -126,7 +126,7 @@ function InterviewPage() {
 
   useEffect(() => { phaseRef.current = phase }, [phase])
 
-  const { data: question, isLoading } = useQuery<Question>({
+  const { data: question, isLoading } = useQuery<QuestionDetail>({
     queryKey: ["question", questionId],
     queryFn: () => fetch(`${API}/api/questions/${questionId}`).then((r) => r.json()),
   })
@@ -881,7 +881,7 @@ function DoneCard({ onViewFeedback }: { onViewFeedback: () => void }) {
 
 // ── Hints & Docs tab ──────────────────────────────────────────────────────────
 
-function HintsTab({ question }: { question: Question }) {
+function HintsTab({ question }: { question: QuestionDetail }) {
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       <div>
@@ -890,17 +890,17 @@ function HintsTab({ question }: { question: Question }) {
         </p>
         <h3 className="text-sm font-semibold mb-2">{question.title}</h3>
         <div className="prose prose-sm prose-invert max-w-none text-xs text-base-content/50 leading-relaxed">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.description}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.prompt}</ReactMarkdown>
         </div>
       </div>
 
-      {question.rubricHints?.length > 0 && (
+      {(question.hints?.length ?? 0) > 0 && (
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-base-content/30">
             Key Areas to Cover
           </p>
           <div className="space-y-1.5">
-            {question.rubricHints.map((hint, i) => (
+            {question.hints!.map((hint, i) => (
               <div
                 key={i}
                 className="flex items-start gap-2 rounded-lg border border-base-300/30 bg-base-300/10 px-3 py-2"

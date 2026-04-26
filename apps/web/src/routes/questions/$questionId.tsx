@@ -9,7 +9,7 @@ import {
 } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import type { Question, AgentResult } from "@sysdesign/types"
+import type { QuestionDetail } from "@sysdesign/types"
 import { RichTextEditor } from "@/components/RichTextEditor"
 import { ApiKeyInput, useApiKey } from "@/components/ApiKeyInput"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
@@ -107,7 +107,7 @@ function WorkspacePage() {
   const [currentSubmissionId, setCurrentSubmissionId] = useState<string | null>(null)
   const sseRef = useRef<EventSource | null>(null)
 
-  const { data: question, isLoading } = useQuery<Question>({
+  const { data: question, isLoading } = useQuery<QuestionDetail>({
     queryKey: ["question", questionId],
     queryFn: () => fetch(`${API}/api/questions/${questionId}`).then((r) => r.json()),
   })
@@ -135,9 +135,8 @@ function WorkspacePage() {
         body: JSON.stringify({
           questionId,
           answerText,
-          excalidrawJson: excalidrawData,
-          apiKey: apiKey ?? undefined,
-          reviewMode,
+          excalidrawData: (excalidrawData as any)?.elements ?? [],
+          strategy: reviewMode === "deep" ? "agentic" : "quick",
         }),
       })
       if (!res.ok) {
@@ -154,13 +153,14 @@ function WorkspacePage() {
       toast("Submission received — agent is reading your answer", "success")
 
       // Open SSE stream
-      const es = new EventSource(`${API}/api/submissions/${submissionId}/stream`, {
+      const es = new EventSource(`${API}/api/submissions/${submissionId}/events`, {
         withCredentials: true,
       } as EventSourceInit)
       sseRef.current = es
 
-      es.addEventListener("agent:trace", (e) => {
-        const { line } = JSON.parse(e.data)
+      es.addEventListener("reasoning", (e) => {
+        const ev = JSON.parse(e.data)
+        const line = ev.content ?? ev.line ?? JSON.stringify(ev)
         setAgentState((prev) => {
           if (prev.phase === "processing") {
             return { phase: "processing", trace: [...prev.trace, line] }
@@ -169,8 +169,9 @@ function WorkspacePage() {
         })
       })
 
-      es.addEventListener("agent:followup", (e) => {
-        const { question: q } = JSON.parse(e.data)
+      es.addEventListener("followup", (e) => {
+        const ev = JSON.parse(e.data)
+        const q = ev.question ?? ev.content ?? ""
         setAgentState((prev) => ({
           phase: "follow-up",
           question: q,
@@ -182,15 +183,24 @@ function WorkspacePage() {
         ])
       })
 
-      es.addEventListener("agent:result", (e) => {
-        const result: AgentResult = JSON.parse(e.data)
+      es.addEventListener("eval_start", () => {
         setAgentState((prev) => ({
           phase: "evaluating",
-          agentResults: prev.phase === "evaluating" ? [...prev.agentResults, result] : [result],
+          agentResults: [],
         }))
       })
 
-      es.addEventListener("evaluation:complete", () => {
+      es.addEventListener("eval_progress", (e) => {
+        const ev = JSON.parse(e.data)
+        setAgentState((prev) => {
+          if (prev.phase === "evaluating") {
+            return { phase: "evaluating", agentResults: [...prev.agentResults, ev] }
+          }
+          return prev
+        })
+      })
+
+      es.addEventListener("eval_done", () => {
         setAgentState({
           phase: "done",
           submissionId,
@@ -200,9 +210,10 @@ function WorkspacePage() {
         sseRef.current = null
       })
 
-      es.addEventListener("evaluation:error", (e) => {
-        const { message: errMsg } = JSON.parse(e.data)
-        toast(errMsg ?? "Evaluation failed", "error")
+      es.addEventListener("error", (e) => {
+        let errMsg = "Evaluation failed"
+        try { errMsg = JSON.parse((e as MessageEvent).data)?.message ?? errMsg } catch {}
+        toast(errMsg, "error")
         es.close()
         sseRef.current = null
         setAgentState({ phase: "idle" })
@@ -234,7 +245,7 @@ function WorkspacePage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ message: msg }),
+      body: JSON.stringify({ content: msg }),
     }).catch(console.error)
   }
 
@@ -263,7 +274,7 @@ function WorkspacePage() {
     )
   }
 
-  const canSubmit = !!apiKey && answerText.trim().length > 20
+  const canSubmit = answerText.trim().length > 20
 
   return (
     <div className="flex h-[calc(100vh-56px)] overflow-hidden">
@@ -351,7 +362,7 @@ function WorkspacePage() {
                   </p>
                   <div className="prose prose-sm prose-invert max-w-none text-xs text-base-content/60 leading-relaxed [&_p]:mb-1.5">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {question.description}
+                      {question.prompt}
                     </ReactMarkdown>
                   </div>
                 </div>
@@ -381,9 +392,9 @@ function WorkspacePage() {
                       )}
                     />
                   </button>
-                  {hintsOpen && question.rubricHints?.length > 0 && (
+                  {hintsOpen && (question.hints?.length ?? 0) > 0 && (
                     <div className="border-t border-base-300/40 px-3 py-2.5 space-y-2">
-                      {question.rubricHints.map((hint, i) => (
+                      {question.hints!.map((hint, i) => (
                         <p key={i} className="text-xs text-base-content/60 flex gap-1.5">
                           <span className="text-primary/50 shrink-0">›</span>
                           {hint}

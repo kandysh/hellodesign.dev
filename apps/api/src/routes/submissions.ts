@@ -5,30 +5,49 @@ import { redis, submissionChannel } from "../lib/redis.js"
 import { evalQueue } from "@sysdesign/queue"
 import { extractLexicalText, summarizeExcalidraw } from "@sysdesign/shared"
 import type { AgentEvent } from "@sysdesign/shared"
+import type { AppEnv } from "../lib/types.js"
 
-const app = new Hono()
+const app = new Hono<AppEnv>()
 
 // POST /api/submissions — create submission + enqueue eval job
 app.post("/", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
 
   const body = await c.req.json<{
     questionId: string
-    lexicalState: Record<string, unknown>
+    lexicalState?: Record<string, unknown>
+    answerText?: string
     excalidrawData?: unknown[]
     strategy?: "quick" | "agentic"
   }>()
 
-  if (!body.questionId || !body.lexicalState) {
-    return c.json({ error: "questionId and lexicalState are required" }, 400)
+  if (!body.questionId || (!body.lexicalState && !body.answerText)) {
+    return c.json({ error: "questionId and either lexicalState or answerText are required" }, 400)
   }
 
   const question = await db.question.findUnique({ where: { id: body.questionId } })
   if (!question) return c.json({ error: "Question not found" }, 404)
 
-  // Extract plain text from Lexical JSON for the LLM
-  const lexicalContent = extractLexicalText(body.lexicalState)
+  // Extract plain text — prefer answerText, fall back to Lexical JSON extraction
+  const lexicalContent = body.answerText?.trim()
+    ? body.answerText.trim()
+    : extractLexicalText(body.lexicalState!)
+
+  // Build a minimal Lexical document from plain text so we can display it on the result page
+  const makeLexicalDoc = (text: string): object => ({
+    root: {
+      type: "root", version: 1, direction: "ltr", format: "", indent: 0,
+      children: text.split("\n").map((line) => ({
+        type: "paragraph", version: 1, direction: "ltr", format: "", indent: 0,
+        children: line
+          ? [{ type: "text", version: 1, text: line, format: 0, detail: 0, mode: "normal", style: "" }]
+          : [],
+      })),
+    },
+  })
+
+  const storedLexicalState = body.lexicalState ?? makeLexicalDoc(body.answerText ?? "")
   const excalidrawSummary = body.excalidrawData
     ? summarizeExcalidraw(body.excalidrawData)
     : undefined
@@ -38,7 +57,7 @@ app.post("/", async (c) => {
       questionId: body.questionId,
       userId: user?.id ?? null,
       sessionId: user ? null : sessionId,
-      lexicalState: body.lexicalState as object,
+      lexicalState: storedLexicalState as object,
       excalidrawData: body.excalidrawData ? (body.excalidrawData as object) : undefined,
       status: "PENDING",
     },
@@ -71,8 +90,8 @@ app.post("/", async (c) => {
 
 // GET /api/submissions/:id — get submission + result
 app.get("/:id", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
   const id = c.req.param("id")
 
   const submission = await db.submission.findUnique({
@@ -93,8 +112,8 @@ app.get("/:id", async (c) => {
 
 // GET /api/submissions/:id/messages — full agent conversation
 app.get("/:id/messages", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
   const id = c.req.param("id")
 
   const submission = await db.submission.findUnique({
@@ -116,8 +135,8 @@ app.get("/:id/messages", async (c) => {
 
 // POST /api/submissions/:id/reply — user sends follow-up reply
 app.post("/:id/reply", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
   const id = c.req.param("id")
 
   const submission = await db.submission.findUnique({ where: { id } })
@@ -158,8 +177,8 @@ app.post("/:id/reply", async (c) => {
 
 // GET /api/submissions/:id/events — SSE stream
 app.get("/:id/events", async (c) => {
-  const user = c.get("user" as never) as { id: string } | undefined
-  const sessionId = c.get("sessionId" as never) as string
+  const user = c.get("user")
+  const sessionId = c.get("sessionId")
   const id = c.req.param("id")
 
   const submission = await db.submission.findUnique({ where: { id } })

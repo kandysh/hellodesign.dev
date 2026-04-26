@@ -24,6 +24,7 @@
     "@lexical/utils": "^0.43.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@sysdesign/shared": "workspace:*",
     "@sysdesign/types": "workspace:*",
     "@sysdesign/ui": "workspace:*",
     "@tailwindcss/typography": "^0.5.19",

@@ -1,10 +1,11 @@
 import { Hono } from "hono"
 import { db } from "@sysdesign/db"
+import type { AppEnv } from "../lib/types.js"
 
-const app = new Hono()
+const app = new Hono<AppEnv>()
 
 app.get("/", async (c) => {
-  const user = c.get("user" as never) as { id: string; email: string; name?: string } | undefined
+  const user = c.get("user")
   if (!user) return c.json({ error: "Unauthorized" }, 401)
   return c.json(user)
 })

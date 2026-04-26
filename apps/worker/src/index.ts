@@ -1,3 +1,4 @@
+import "./env.js"
 import { Worker } from "bullmq"
 import { Redis } from "ioredis"
 import { QUEUES } from "@sysdesign/queue"

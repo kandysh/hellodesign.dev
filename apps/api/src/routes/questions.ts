@@ -3,6 +3,12 @@ import { db } from "@sysdesign/db"
 
 const app = new Hono()
 
+/** Extract a short description from the first line of the prompt. */
+function shortDescription(prompt: string): string {
+  const first = prompt.split("\n").find((l) => l.trim().length > 0) ?? ""
+  return first.length > 120 ? first.slice(0, 117) + "…" : first
+}
+
 app.get("/", async (c) => {
   const category = c.req.query("category")
   const difficulty = c.req.query("difficulty")
@@ -19,6 +25,7 @@ app.get("/", async (c) => {
     select: {
       id: true,
       title: true,
+      prompt: true,
       difficulty: true,
       category: true,
       estimatedMins: true,
@@ -26,7 +33,13 @@ app.get("/", async (c) => {
     },
   })
 
-  return c.json(questions)
+  return c.json(
+    questions.map(({ prompt, difficulty, ...q }) => ({
+      ...q,
+      description: shortDescription(prompt),
+      difficulty: difficulty.toLowerCase() as "easy" | "medium" | "hard",
+    })),
+  )
 })
 
 app.get("/:id", async (c) => {
@@ -50,7 +63,11 @@ app.get("/:id", async (c) => {
 
   if (!question) return c.json({ error: "Not found" }, 404)
 
-  return c.json(question)
+  return c.json({
+    ...question,
+    difficulty: question.difficulty.toLowerCase() as "easy" | "medium" | "hard",
+  })
 })
 
 export default app
+

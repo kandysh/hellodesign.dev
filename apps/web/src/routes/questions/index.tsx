@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import type { Question } from "@sysdesign/types"
+import type { QuestionSummary } from "@sysdesign/types"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { ArrowRight, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -30,9 +30,10 @@ function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const { data: questions = [], isLoading } = useQuery<Question[]>({
+  const { data: questions = [], isLoading, isError, refetch } = useQuery<QuestionSummary[]>({
     queryKey: ["questions"],
     queryFn: () => fetch(`${API}/api/questions`).then((r) => r.json()),
+    retry: false,
   })
 
   const categories = [...new Set(questions.map((q) => q.category))]
@@ -145,6 +146,17 @@ function QuestionsPage() {
                 <div key={i} className="skeleton h-20 w-full rounded-xl" />
               ))}
             </div>
+          ) : isError ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-error/40 py-16 text-center">
+              <p className="text-error/80 mb-3">Could not load questions — is the API running?</p>
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="btn btn-sm btn-outline btn-error"
+              >
+                Retry
+              </button>
+            </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-base-300/50 py-16 text-center">
               <p className="text-base-content/40 mb-2">No questions match your filters</p>
@@ -169,7 +181,7 @@ function QuestionsPage() {
   )
 }
 
-function QuestionCard({ question: q }: { question: Question }) {
+function QuestionCard({ question: q }: { question: QuestionSummary }) {
   return (
     <Link
       to="/questions/$questionId"
@@ -185,7 +197,7 @@ function QuestionCard({ question: q }: { question: Question }) {
             {q.title}
           </p>
           <p className="mt-0.5 text-sm text-base-content/50 line-clamp-1">
-            {q.description}
+          {q.description}
           </p>
         </div>
 

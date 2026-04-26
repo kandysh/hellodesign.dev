@@ -38,6 +38,9 @@ importers:
       '@sysdesign/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       hono:
         specifier: ^4.7.7
         version: 4.12.15
@@ -102,6 +105,9 @@ importers:
       '@radix-ui/react-slot':
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.7)(react@19.2.3)
+      '@sysdesign/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@sysdesign/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -220,6 +226,9 @@ importers:
       bullmq:
         specifier: ^5.53.1
         version: 5.76.2
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       ioredis:
         specifier: ^5.6.1
         version: 5.10.1

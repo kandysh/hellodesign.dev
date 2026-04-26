@@ -10,7 +10,8 @@
     "check": "biome check .",
     "db:migrate": "pnpm turbo run db:migrate",
     "db:deploy": "pnpm turbo run db:deploy",
-    "db:generate": "pnpm turbo run db:generate"
+    "db:generate": "pnpm turbo run db:generate",
+    "db:seed": "pnpm --filter @sysdesign/db db:seed"
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",

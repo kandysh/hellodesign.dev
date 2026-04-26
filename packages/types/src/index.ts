@@ -9,16 +9,33 @@ export type Category =
   | "networking"
   | "general"
 
-export interface Question {
+/** Returned by GET /api/questions (list endpoint) */
+export interface QuestionSummary {
   id: string
   title: string
   description: string
   difficulty: Difficulty
   category: Category
-  rubricHints: string[]
+  estimatedMins: number
   createdAt: Date
-  updatedAt: Date
 }
+
+/** Returned by GET /api/questions/:id (detail endpoint) */
+export interface QuestionDetail {
+  id: string
+  title: string
+  prompt: string
+  difficulty: Difficulty
+  category: Category
+  estimatedMins: number
+  hints: string[]
+  coverageChecklist: string[]
+  rubric: unknown
+  createdAt: Date
+}
+
+/** @deprecated use QuestionSummary or QuestionDetail */
+export type Question = QuestionDetail
 
 export interface Submission {
   id: string
