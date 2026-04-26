@@ -28,13 +28,19 @@ function RegisterPage() {
 
     setLoading(true);
 
-    const { data, error: authError } = await authClient.signUp.email({ name, email, password });
+    try {
+      const { error: authError } = await authClient.signUp.email({ name, email, password });
 
-    if (authError) {
-      setError(authError.message ?? "Registration failed");
+      if (authError) {
+        setError(authError.message ?? "Registration failed");
+        setLoading(false);
+      } else {
+        window.location.href = "/me";
+      }
+    } catch (err) {
+      console.error("[register] Unexpected error:", err)
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
-    } else if (data) {
-      window.location.href = "/me";
     }
   }
 

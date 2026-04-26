@@ -278,7 +278,7 @@ function WorkspacePage() {
   const canSubmit = answerText.trim().length > 20
 
   return (
-    <div className="flex h-[calc(100vh-56px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
       {/* ── Left panel ─────────────────────────────────────────── */}
       <aside
         className={cn(
@@ -533,9 +533,13 @@ function WorkspacePage() {
 
         {/* Editor / Diagram content */}
         <div className="flex-1 overflow-hidden relative">
-          {/* Write tab — always rendered */}
+          {/* Write tab — always rendered, absolute fill */}
           <div
-            style={{ display: activeTab === "write" ? "block" : "none", height: "100%" }}
+            className="absolute inset-0"
+            style={{
+              visibility: activeTab === "write" ? "visible" : "hidden",
+              pointerEvents: activeTab === "write" ? "auto" : "none",
+            }}
           >
             <RichTextEditor
               onChange={setAnswerText}
@@ -544,10 +548,15 @@ function WorkspacePage() {
             />
           </div>
 
-          {/* Diagram tab — mounted on first visit, then kept alive */}
+          {/* Diagram tab — mounted on first visit, then kept alive with absolute fill */}
           {diagramMounted && (
             <div
-              style={{ display: activeTab === "diagram" ? "block" : "none", height: "100%" }}
+              role="region"
+              className="absolute inset-0"
+              style={{
+                visibility: activeTab === "diagram" ? "visible" : "hidden",
+                pointerEvents: activeTab === "diagram" ? "auto" : "none",
+              }}
               aria-label="Architecture diagram canvas"
             >
               <Suspense

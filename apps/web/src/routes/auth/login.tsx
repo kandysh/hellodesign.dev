@@ -20,13 +20,19 @@ function LoginPage() {
     setLoading(true);
     setError("");
 
-    const { data, error: authError } = await authClient.signIn.email({ email, password });
+    try {
+      const { error: authError } = await authClient.signIn.email({ email, password });
 
-    if (authError) {
-      setError(authError.message ?? "Login failed");
+      if (authError) {
+        setError(authError.message ?? "Login failed");
+        setLoading(false);
+      } else {
+        window.location.href = "/me";
+      }
+    } catch (err) {
+      console.error("[login] Unexpected error:", err)
+      setError("An unexpected error occurred. Please try again.");
       setLoading(false);
-    } else if (data) {
-      window.location.href = "/me";
     }
   }
 
