@@ -12,7 +12,7 @@ import remarkGfm from "remark-gfm"
 import { RichTextEditor } from "@/components/RichTextEditor"
 import { ApiKeyInput, useApiKey } from "@/components/ApiKeyInput"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
-import { AgentPanel, type AgentPanelState } from "@/components/AgentPanel"
+import { AgentPanel, type AgentPanelState, type Message } from "@/components/AgentPanel"
 import { useToast } from "@/components/Toast"
 import {
   ChevronLeft,
@@ -59,11 +59,6 @@ const CHECKLIST_ITEMS = [
   "Bottlenecks & trade-offs",
 ]
 
-interface Message {
-  role: "agent" | "user"
-  content: string
-  timestamp: Date
-}
 
 export const Route = createFileRoute("/questions/$questionId")({
   loader: ({ context: { queryClient }, params: { questionId } }) =>
@@ -180,7 +175,7 @@ function WorkspacePage() {
         }))
         setAgentMessages((prev) => [
           ...prev,
-          { role: "agent", content: q, timestamp: new Date() },
+          { id: crypto.randomUUID(), role: "agent", content: q, timestamp: new Date() },
         ])
       })
 
@@ -241,7 +236,7 @@ function WorkspacePage() {
   }, [])
 
   function handleSendAgentMessage(msg: string) {
-    setAgentMessages((prev) => [...prev, { role: "user", content: msg, timestamp: new Date() }])
+    setAgentMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content: msg, timestamp: new Date() }])
     fetch(`${API}/api/submissions/${currentSubmissionId}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

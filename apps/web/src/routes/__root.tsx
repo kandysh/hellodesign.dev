@@ -1,5 +1,6 @@
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from "@tanstack/react-router"
 import type { QueryClient } from "@tanstack/react-query"
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router"
+import { Footer } from "../components/Footer"
 import Header from "../components/Header"
 import { ToastProvider } from "../components/Toast"
 import appCss from "../styles.css?url"
@@ -14,7 +15,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "sysdesign — AI-powered system design interview prep" },
-      { name: "description", content: "Practice system design questions with AI-powered multi-dimensional feedback." },
+      {
+        name: "description",
+        content: "Practice system design questions with AI-powered multi-dimensional feedback.",
+      },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -29,6 +33,7 @@ function RootLayout() {
       <main className="pt-16">
         <Outlet />
       </main>
+      <Footer />
     </ToastProvider>
   )
 }

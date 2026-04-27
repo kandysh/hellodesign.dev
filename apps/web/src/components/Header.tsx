@@ -1,17 +1,17 @@
-import { Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { useState, useRef, useEffect } from "react"
+import { Link, useNavigate } from "@tanstack/react-router"
 import {
+  Activity,
   BookOpen,
-  Settings,
+  ChevronDown,
   LogOut,
+  Search,
+  Settings,
   User,
   Users,
   Zap,
-  ChevronDown,
-  Activity,
-  Settings2,
 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
@@ -24,6 +24,7 @@ interface SessionUser {
 }
 
 export default function Header() {
+  const navigate = useNavigate()
   const { data: session } = useQuery<{ user: SessionUser } | null>({
     queryKey: ["session"],
     queryFn: () =>
@@ -35,6 +36,7 @@ export default function Header() {
 
   const user = session?.user ?? null
   const [menuOpen, setMenuOpen] = useState(false)
+  const [search, setSearch] = useState("")
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -52,8 +54,22 @@ export default function Header() {
     window.location.href = "/"
   }
 
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const q = search.trim()
+    if (q) {
+      navigate({ to: "/questions", search: { q } as never })
+      setSearch("")
+    }
+  }
+
   const initials = user?.name
-    ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
     : "?"
 
   return (
@@ -66,20 +82,48 @@ export default function Header() {
       }}
     >
       <nav className="flex items-center justify-between h-16 px-6 max-w-[1440px] mx-auto">
-        {/* Brand */}
-        <div className="flex items-center gap-8">
+        {/* Brand + search */}
+        <div className="flex items-center gap-6">
           <Link
             to="/"
-            className="text-xl font-black tracking-tighter text-slate-50 hover:text-white transition-colors duration-150"
+            className="text-xl font-black tracking-tighter text-slate-50 hover:text-white transition-colors duration-150 shrink-0"
           >
             Hello Design
           </Link>
+
+          {/* Search bar (hidden on small screens) */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="hidden md:flex items-center gap-2 rounded border px-3 py-1.5 h-9 transition-all"
+            style={{
+              background: "#222a3d",
+              borderColor: "#2d3449",
+            }}
+            onFocusCapture={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderColor = "#c0c1ff"
+              ;(e.currentTarget as HTMLElement).style.boxShadow = "0 0 8px rgba(192,193,255,0.2)"
+            }}
+            onBlurCapture={(e) => {
+              ;(e.currentTarget as HTMLElement).style.borderColor = "#2d3449"
+              ;(e.currentTarget as HTMLElement).style.boxShadow = "none"
+            }}
+          >
+            <Search size={14} style={{ color: "#908fa0" }} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search questions…"
+              className="bg-transparent border-none outline-none text-sm w-48 placeholder:text-slate-600"
+              style={{ color: "#dae2fd" }}
+            />
+          </form>
 
           {/* Nav links */}
           <div className="hidden md:flex items-center gap-6">
             <NavLink to="/questions" label="Explore" icon={<BookOpen size={14} />} />
             <NavLink to="/community" label="Community" icon={<Users size={14} />} />
             <NavLink to="/pricing" label="Pricing" icon={<Zap size={14} />} />
+            <NavLink to="/settings" label="Settings" icon={<Settings size={14} />} />
           </div>
         </div>
 
@@ -93,7 +137,9 @@ export default function Header() {
                 className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-150 active:scale-95"
               >
                 <Avatar user={user} initials={initials} />
-                <span className="hidden sm:block max-w-[120px] truncate font-medium">{user.name}</span>
+                <span className="hidden sm:block max-w-[120px] truncate font-medium">
+                  {user.name}
+                </span>
                 <ChevronDown size={12} className="text-slate-500" />
               </button>
 
@@ -150,15 +196,7 @@ export default function Header() {
   )
 }
 
-function NavLink({
-  to,
-  label,
-  icon,
-}: {
-  to: string
-  label: string
-  icon?: React.ReactNode
-}) {
+function NavLink({ to, label, icon }: { to: string; label: string; icon?: React.ReactNode }) {
   return (
     <Link
       to={to}
@@ -181,10 +219,19 @@ function Avatar({ user, initials }: { user: SessionUser; initials: string }) {
   return (
     <div
       className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
-      style={{ background: "rgba(192,193,255,0.15)", color: "#c0c1ff", border: "1px solid rgba(192,193,255,0.25)" }}
+      style={{
+        background: "rgba(192,193,255,0.15)",
+        color: "#c0c1ff",
+        border: "1px solid rgba(192,193,255,0.25)",
+      }}
     >
       {user.image ? (
-        <img src={user.image} alt={user.name} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
+        <img
+          src={user.image}
+          alt={user.name}
+          referrerPolicy="no-referrer"
+          className="w-full h-full object-cover"
+        />
       ) : (
         initials
       )}
