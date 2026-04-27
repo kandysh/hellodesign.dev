@@ -1,39 +1,33 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router"
-import { useQuery, useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
-  useState,
-  lazy,
-  Suspense,
-  useEffect,
-  useRef,
-} from "react"
-import ReactMarkdown from "react-markdown"
-import remarkGfm from "remark-gfm"
-import { RichTextEditor } from "@/components/RichTextEditor"
-import { ApiKeyInput, useApiKey } from "@/components/ApiKeyInput"
-import { DifficultyBadge } from "@/components/DifficultyBadge"
-import { AgentPanel, type AgentPanelState, type Message } from "@/components/AgentPanel"
-import { useToast } from "@/components/Toast"
-import {
+  ArrowLeft,
+  BookOpen,
+  CheckSquare,
   ChevronLeft,
   ChevronRight,
-  CheckSquare,
-  Square,
-  Lock,
-  Unlock,
-  PenLine,
-  Map,
-  Zap,
-  Layers,
-  Info,
-  Mic,
   Clock,
+  Info,
+  Layers,
   ListTodo,
-  BookOpen,
-  ArrowLeft,
+  Lock,
+  Map,
+  Mic,
+  PenLine,
+  Square,
+  Unlock,
+  Zap,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { lazy, Suspense, useEffect, useRef, useState } from "react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { AgentPanel, type AgentPanelState, type Message } from "@/components/AgentPanel"
+import { ApiKeyInput, useApiKey } from "@/components/ApiKeyInput"
+import { DifficultyBadge } from "@/components/DifficultyBadge"
+import { RichTextEditor } from "@/components/RichTextEditor"
+import { useToast } from "@/components/Toast"
 import { questionQueryOptions } from "@/lib/queries/questions"
+import { cn } from "@/lib/utils"
 
 const Excalidraw = lazy(() =>
   import("@excalidraw/excalidraw").then((m) => ({ default: m.Excalidraw })),
@@ -58,7 +52,6 @@ const CHECKLIST_ITEMS = [
   "API design",
   "Bottlenecks & trade-offs",
 ]
-
 
 export const Route = createFileRoute("/questions/$questionId")({
   loader: ({ context: { queryClient }, params: { questionId } }) =>
@@ -208,7 +201,9 @@ function WorkspacePage() {
 
       es.addEventListener("error", (e) => {
         let errMsg = "Evaluation failed"
-        try { errMsg = JSON.parse((e as MessageEvent).data)?.message ?? errMsg } catch {}
+        try {
+          errMsg = JSON.parse((e as MessageEvent).data)?.message ?? errMsg
+        } catch {}
         toast(errMsg, "error")
         es.close()
         sseRef.current = null
@@ -236,7 +231,10 @@ function WorkspacePage() {
   }, [])
 
   function handleSendAgentMessage(msg: string) {
-    setAgentMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", content: msg, timestamp: new Date() }])
+    setAgentMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "user", content: msg, timestamp: new Date() },
+    ])
     fetch(`${API}/api/submissions/${currentSubmissionId}/reply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -255,9 +253,18 @@ function WorkspacePage() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 space-y-4">
-        <div className="animate-pulse rounded-lg" style={{ background: "#1e2a3d", height: 32, width: 256 }} />
-        <div className="animate-pulse rounded" style={{ background: "#1e2a3d", height: 16, width: 384, marginTop: 8 }} />
-        <div className="animate-pulse rounded-xl" style={{ background: "#1e2a3d", height: 500, width: "100%", marginTop: 16 }} />
+        <div
+          className="animate-pulse rounded-lg"
+          style={{ background: "#1e2a3d", height: 32, width: 256 }}
+        />
+        <div
+          className="animate-pulse rounded"
+          style={{ background: "#1e2a3d", height: 16, width: 384, marginTop: 8 }}
+        />
+        <div
+          className="animate-pulse rounded-xl"
+          style={{ background: "#1e2a3d", height: 500, width: "100%", marginTop: 16 }}
+        />
       </div>
     )
   }
@@ -273,7 +280,7 @@ function WorkspacePage() {
   const canSubmit = answerText.trim().length > 20
 
   return (
-    <div className="flex h-[calc(100vh-56px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
       {/* ── Left panel ─────────────────────────────────────────── */}
       <aside
         className={cn(
@@ -310,15 +317,25 @@ function WorkspacePage() {
                   active={sidebarTab === "checklist"}
                   onClick={() => setSidebarTab("checklist")}
                   icon={<ListTodo size={12} />}
-                  label={checklistProgress > 0 ? `Checklist ${checklistProgress}/${checklistTotal}` : "Checklist"}
+                  label={
+                    checklistProgress > 0
+                      ? `Checklist ${checklistProgress}/${checklistTotal}`
+                      : "Checklist"
+                  }
                 />
                 <button
                   type="button"
                   onClick={() => setLeftCollapsed(true)}
                   className="ml-auto p-1.5 rounded-lg transition-colors"
                   style={{ color: "#464554" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#908fa0"; e.currentTarget.style.background = "rgba(255,255,255,0.05)" }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#464554"; e.currentTarget.style.background = "transparent" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#908fa0"
+                    e.currentTarget.style.background = "rgba(255,255,255,0.05)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "#464554"
+                    e.currentTarget.style.background = "transparent"
+                  }}
                   aria-label="Collapse sidebar"
                 >
                   <ChevronLeft size={13} />
@@ -328,10 +345,16 @@ function WorkspacePage() {
               {/* Checklist progress bar */}
               {checklistProgress > 0 && (
                 <div className="px-3 pb-2 pt-1.5">
-                  <div className="h-0.5 w-full rounded-full overflow-hidden" style={{ background: "#2d3449" }}>
+                  <div
+                    className="h-0.5 w-full rounded-full overflow-hidden"
+                    style={{ background: "#2d3449" }}
+                  >
                     <div
                       className="h-full rounded-full transition-all duration-300"
-                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%`, background: "#8083ff" }}
+                      style={{
+                        width: `${(checklistProgress / checklistTotal) * 100}%`,
+                        background: "#8083ff",
+                      }}
                     />
                   </div>
                 </div>
@@ -360,18 +383,25 @@ function WorkspacePage() {
 
                 {/* Description */}
                 <div>
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#464554" }}>
+                  <p
+                    className="mb-2 text-[10px] font-semibold uppercase tracking-widest"
+                    style={{ color: "#464554" }}
+                  >
                     Description
                   </p>
-                  <div className="max-w-none text-xs leading-relaxed [&_p]:mb-1.5" style={{ color: "#908fa0" }}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {question.prompt}
-                    </ReactMarkdown>
+                  <div
+                    className="max-w-none text-xs leading-relaxed [&_p]:mb-1.5"
+                    style={{ color: "#908fa0" }}
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.prompt}</ReactMarkdown>
                   </div>
                 </div>
 
                 {/* Hints */}
-                <div className="rounded-xl overflow-hidden" style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}>
+                <div
+                  className="rounded-xl overflow-hidden"
+                  style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}
+                >
                   <button
                     type="button"
                     onClick={() => setHintsOpen((v) => !v)}
@@ -394,10 +424,15 @@ function WorkspacePage() {
                     />
                   </button>
                   {hintsOpen && (question.hints?.length ?? 0) > 0 && (
-                    <div className="px-3 py-2.5 space-y-2" style={{ borderTop: "1px solid #2d3449" }}>
-                    {question.hints?.map((hint, i) => (
+                    <div
+                      className="px-3 py-2.5 space-y-2"
+                      style={{ borderTop: "1px solid #2d3449" }}
+                    >
+                      {question.hints?.map((hint, i) => (
                         <p key={i} className="text-xs flex gap-1.5" style={{ color: "#908fa0" }}>
-                          <span className="shrink-0" style={{ color: "rgba(128,131,255,0.5)" }}>›</span>
+                          <span className="shrink-0" style={{ color: "rgba(128,131,255,0.5)" }}>
+                            ›
+                          </span>
                           {hint}
                         </p>
                       ))}
@@ -416,7 +451,12 @@ function WorkspacePage() {
             {sidebarTab === "checklist" && (
               <div className="p-4 space-y-5">
                 <div>
-                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#464554" }}>What to cover</p>
+                  <p
+                    className="mb-1 text-[10px] font-semibold uppercase tracking-widest"
+                    style={{ color: "#464554" }}
+                  >
+                    What to cover
+                  </p>
                   <p className="text-xs mb-3" style={{ color: "#464554" }}>
                     Mark each section as you complete it.
                   </p>
@@ -429,12 +469,26 @@ function WorkspacePage() {
                           type="button"
                           onClick={() => toggleChecklist(item)}
                           className="flex items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 transition-all"
-                          style={{ background: checked ? "rgba(99,102,241,0.08)" : "transparent", color: checked ? "#c7c4d7" : "#908fa0" }}
-                          onMouseEnter={(e) => { if (!checked) e.currentTarget.style.background = "rgba(255,255,255,0.04)" }}
-                          onMouseLeave={(e) => { e.currentTarget.style.background = checked ? "rgba(99,102,241,0.08)" : "transparent" }}
+                          style={{
+                            background: checked ? "rgba(99,102,241,0.08)" : "transparent",
+                            color: checked ? "#c7c4d7" : "#908fa0",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!checked)
+                              e.currentTarget.style.background = "rgba(255,255,255,0.04)"
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = checked
+                              ? "rgba(99,102,241,0.08)"
+                              : "transparent"
+                          }}
                         >
                           {checked ? (
-                            <CheckSquare size={13} style={{ color: "#8083ff" }} className="shrink-0" />
+                            <CheckSquare
+                              size={13}
+                              style={{ color: "#8083ff" }}
+                              className="shrink-0"
+                            />
                           ) : (
                             <Square size={13} style={{ color: "#2d3449" }} className="shrink-0" />
                           )}
@@ -446,22 +500,36 @@ function WorkspacePage() {
                 </div>
 
                 {/* Progress summary */}
-                <div className="rounded-xl p-3" style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}>
+                <div
+                  className="rounded-xl p-3"
+                  style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}
+                >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#464554" }}>
+                    <span
+                      className="text-[10px] font-semibold uppercase tracking-widest"
+                      style={{ color: "#464554" }}
+                    >
                       Progress
                     </span>
                     <span
                       className="text-xs font-semibold"
-                      style={{ color: checklistProgress === checklistTotal ? "#4edea3" : "#908fa0" }}
+                      style={{
+                        color: checklistProgress === checklistTotal ? "#4edea3" : "#908fa0",
+                      }}
                     >
                       {checklistProgress}/{checklistTotal}
                     </span>
                   </div>
-                  <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: "#2d3449" }}>
+                  <div
+                    className="h-1.5 w-full rounded-full overflow-hidden"
+                    style={{ background: "#2d3449" }}
+                  >
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${(checklistProgress / checklistTotal) * 100}%`, background: checklistProgress === checklistTotal ? "#4edea3" : "#8083ff" }}
+                      style={{
+                        width: `${(checklistProgress / checklistTotal) * 100}%`,
+                        background: checklistProgress === checklistTotal ? "#4edea3" : "#8083ff",
+                      }}
                     />
                   </div>
                   {checklistProgress === checklistTotal && (
@@ -482,7 +550,10 @@ function WorkspacePage() {
       {/* ── Center panel ───────────────────────────────────────── */}
       <div className="flex flex-1 flex-col min-w-0 relative">
         {/* Question context bar */}
-        <div className="flex items-center gap-3 px-4 py-2 shrink-0" style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}>
+        <div
+          className="flex items-center gap-3 px-4 py-2 shrink-0"
+          style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}
+        >
           <Link
             to="/questions"
             className="flex items-center gap-1 text-xs transition-colors shrink-0"
@@ -491,13 +562,18 @@ function WorkspacePage() {
             <ArrowLeft size={11} />
             Questions
           </Link>
-          <span className="text-xs" style={{ color: "#2d3449" }}>/</span>
+          <span className="text-xs" style={{ color: "#2d3449" }}>
+            /
+          </span>
           <span className="truncate text-xs font-medium min-w-0" style={{ color: "#908fa0" }}>
             {question.title}
           </span>
           <div className="ml-auto flex items-center gap-3 shrink-0">
             <DifficultyBadge difficulty={question.difficulty} />
-            <span className="flex items-center gap-1 text-xs font-mono tabular-nums" style={{ color: "#464554" }}>
+            <span
+              className="flex items-center gap-1 text-xs font-mono tabular-nums"
+              style={{ color: "#464554" }}
+            >
               <Clock size={11} />
               {elapsed}
             </span>
@@ -505,7 +581,10 @@ function WorkspacePage() {
         </div>
 
         {/* Tab bar */}
-        <div className="flex items-center px-4 gap-0" style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}>
+        <div
+          className="flex items-center px-4 gap-0"
+          style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}
+        >
           <TabButton
             active={activeTab === "write"}
             onClick={() => setActiveTab("write")}
@@ -514,7 +593,10 @@ function WorkspacePage() {
           />
           <TabButton
             active={activeTab === "diagram"}
-            onClick={() => { setActiveTab("diagram"); setDiagramMounted(true); }}
+            onClick={() => {
+              setActiveTab("diagram")
+              setDiagramMounted(true)
+            }}
             icon={<Map size={13} />}
             label="Diagram"
           />
@@ -528,9 +610,11 @@ function WorkspacePage() {
 
         {/* Editor / Diagram content */}
         <div className="flex-1 overflow-hidden relative">
-          {/* Write tab — always rendered */}
+          {/* Write tab — always in the DOM, absolutely fills the container.
+              `flex-col` sets direction; display is driven entirely by inline style. */}
           <div
-            style={{ display: activeTab === "write" ? "block" : "none", height: "100%" }}
+            className="absolute inset-0 flex-col overflow-auto"
+            style={{ display: activeTab === "write" ? "flex" : "none" }}
           >
             <RichTextEditor
               onChange={setAnswerText}
@@ -539,16 +623,27 @@ function WorkspacePage() {
             />
           </div>
 
-          {/* Diagram tab — mounted on first visit, then kept alive */}
+          {/* Diagram tab — mounted on first visit, then kept alive.
+              Uses visibility (not display) so Excalidraw can measure its size. */}
           {diagramMounted && (
             <div
-              style={{ display: activeTab === "diagram" ? "block" : "none", height: "100%" }}
+              className="absolute inset-0"
+              style={{
+                visibility: activeTab === "diagram" ? "visible" : "hidden",
+                pointerEvents: activeTab === "diagram" ? "auto" : "none",
+              }}
               aria-label="Architecture diagram canvas"
             >
               <Suspense
                 fallback={
-                  <div className="flex h-full items-center justify-center text-sm gap-2" style={{ color: "#464554" }}>
-                    <span className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }} />
+                  <div
+                    className="flex h-full items-center justify-center text-sm gap-2"
+                    style={{ color: "#464554" }}
+                  >
+                    <span
+                      className="w-4 h-4 rounded-full border-2 animate-spin"
+                      style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }}
+                    />
                     Loading canvas…
                   </div>
                 }
@@ -558,9 +653,7 @@ function WorkspacePage() {
                   UIOptions={{ canvasActions: { export: false } }}
                   onChange={(elements, appState) => {
                     setExcalidrawData({ elements, appState })
-                    setHasExcalidrawElements(
-                      Array.isArray(elements) && elements.length > 0,
-                    )
+                    setHasExcalidrawElements(Array.isArray(elements) && elements.length > 0)
                   }}
                 />
               </Suspense>
@@ -569,7 +662,10 @@ function WorkspacePage() {
         </div>
 
         {/* Bottom action bar */}
-        <div className="flex items-center justify-between gap-4 px-4 py-2.5 shrink-0" style={{ borderTop: "1px solid #1e2a3d", background: "#0b1326" }}>
+        <div
+          className="flex items-center justify-between gap-4 px-4 py-2.5 shrink-0"
+          style={{ borderTop: "1px solid #1e2a3d", background: "#0b1326" }}
+        >
           {/* Left: word count + diagram indicator */}
           <div className="flex items-center gap-3 text-xs min-w-0" style={{ color: "#464554" }}>
             <span style={{ color: wordCount > 0 ? "#908fa0" : "#464554" }}>{wordCount} words</span>
@@ -584,10 +680,7 @@ function WorkspacePage() {
           {/* Center: submit */}
           <div className="flex-1 flex justify-center">
             <div
-              className={cn(
-                "tooltip",
-                !canSubmit && "tooltip-open tooltip-top",
-              )}
+              className={cn("tooltip", !canSubmit && "tooltip-open tooltip-top")}
               data-tip={
                 !apiKey
                   ? "Add your OpenAI API key in the left panel"
@@ -601,7 +694,11 @@ function WorkspacePage() {
                 onClick={() => submitMutation.mutate()}
                 disabled={!canSubmit || submitMutation.isPending}
                 className="inline-flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl font-semibold text-sm text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: "#6366f1", border: "1px solid rgba(99,102,241,0.5)", boxShadow: "0 0 12px rgba(99,102,241,0.25)" }}
+                style={{
+                  background: "#6366f1",
+                  border: "1px solid rgba(99,102,241,0.5)",
+                  boxShadow: "0 0 12px rgba(99,102,241,0.25)",
+                }}
               >
                 {submitMutation.isPending ? (
                   <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -620,8 +717,14 @@ function WorkspacePage() {
               params={{ questionId }}
               className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
               style={{ color: "#908fa0", border: "1px solid #2d3449" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#dae2fd"; e.currentTarget.style.borderColor = "#464554" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#908fa0"; e.currentTarget.style.borderColor = "#2d3449" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#dae2fd"
+                e.currentTarget.style.borderColor = "#464554"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#908fa0"
+                e.currentTarget.style.borderColor = "#2d3449"
+              }}
             >
               <Mic size={12} />
               Interview

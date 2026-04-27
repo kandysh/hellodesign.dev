@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-/** Matches the `eval_progress` SSE event payload from the worker */
+/** Payload shape of the `eval_progress` SSE event sent by the worker */
 interface EvalProgressItem {
   dimensionId: string
   score: number

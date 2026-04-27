@@ -379,7 +379,7 @@ function InterviewPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-56px)] items-center justify-center">
+      <div className="flex h-[calc(100vh-64px)] items-center justify-center">
         <span className="w-5 h-5 rounded-full border-2 animate-spin inline-block" style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }} />
       </div>
     )
@@ -387,7 +387,7 @@ function InterviewPage() {
 
   if (!question) {
     return (
-      <div className="flex h-[calc(100vh-56px)] items-center justify-center" style={{ color: "#464554" }}>
+      <div className="flex h-[calc(100vh-64px)] items-center justify-center" style={{ color: "#464554" }}>
         Question not found.
       </div>
     )
@@ -396,7 +396,7 @@ function InterviewPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)] overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden">
 
       {/* ─── Interview Header ──────────────────────────────────────────── */}
       <header className="flex h-12 shrink-0 items-center gap-4 px-4" style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}>
