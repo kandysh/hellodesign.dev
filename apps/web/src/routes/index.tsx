@@ -1,28 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
-  ArrowRight,
-  MessageSquare,
-  Database,
-  Globe,
-  Shield,
-  Search,
-  Gauge,
-  Sparkles,
-  PenLine,
-  Github,
-  Layers,
   Activity,
+  ArrowRight,
+  Database,
+  Gauge,
+  Globe,
+  Layers,
+  MessageSquare,
+  PenLine,
+  Search,
+  Shield,
+  Sparkles,
 } from "lucide-react"
 
 export const Route = createFileRoute("/")({ component: HomePage })
 
 const CATEGORIES = [
-  { slug: "messaging",           label: "Messaging",          icon: MessageSquare, count: 4 },
-  { slug: "storage",             label: "Storage",            icon: Database,      count: 6 },
-  { slug: "networking",          label: "CDN & Networks",     icon: Globe,         count: 3 },
-  { slug: "caching",             label: "Rate Limiting",      icon: Gauge,         count: 5 },
-  { slug: "api-design",          label: "Search Systems",     icon: Search,        count: 4 },
-  { slug: "distributed-systems", label: "Auth & Security",    icon: Shield,        count: 5 },
+  { slug: "messaging", label: "Messaging", icon: MessageSquare, count: 4 },
+  { slug: "storage", label: "Storage", icon: Database, count: 6 },
+  { slug: "networking", label: "CDN & Networks", icon: Globe, count: 3 },
+  { slug: "caching", label: "Rate Limiting", icon: Gauge, count: 5 },
+  { slug: "api-design", label: "Search Systems", icon: Search, count: 4 },
+  { slug: "distributed-systems", label: "Auth & Security", icon: Shield, count: 5 },
 ]
 
 const STEPS = [
@@ -70,7 +69,11 @@ function HomePage() {
 
             <h1
               className="font-extrabold leading-tight"
-              style={{ fontSize: "clamp(2.5rem,5vw,3.5rem)", letterSpacing: "-0.02em", color: "#dae2fd" }}
+              style={{
+                fontSize: "clamp(2.5rem,5vw,3.5rem)",
+                letterSpacing: "-0.02em",
+                color: "#dae2fd",
+              }}
             >
               Master Technical Interviews with{" "}
               <span style={{ color: "#8083ff" }}>AI‑Led Precision.</span>
@@ -78,7 +81,8 @@ function HomePage() {
 
             <p className="text-base leading-relaxed max-w-xl" style={{ color: "#c7c4d7" }}>
               High‑density environments for data‑driven architects. Simulate real‑world system
-              design constraints with our Excalidraw‑style canvas and Lexical‑style technical editor.
+              design constraints with our Excalidraw‑style canvas and Lexical‑style technical
+              editor.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -94,8 +98,12 @@ function HomePage() {
                 to="/questions"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-medium transition-all duration-150 active:scale-95 border"
                 style={{ color: "#c0c1ff", borderColor: "#464554", background: "transparent" }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "#171f33" }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent" }}
+                onMouseEnter={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = "#171f33"
+                }}
+                onMouseLeave={(e) => {
+                  ;(e.currentTarget as HTMLElement).style.background = "transparent"
+                }}
               >
                 Browse Questions
               </Link>
@@ -114,22 +122,25 @@ function HomePage() {
       </section>
 
       {/* ── Stats strip ───────────────────────────────────────── */}
-      <div
-        className="border-y"
-        style={{ borderColor: "#222a3d", background: "#131b2e" }}
-      >
+      <div className="border-y" style={{ borderColor: "#222a3d", background: "#131b2e" }}>
         <div className="max-w-[1440px] mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { val: "30+",  label: "Design problems" },
-            { val: "7",    label: "AI evaluation agents" },
-            { val: "4",    label: "Scoring dimensions" },
+            { val: "30+", label: "Design problems" },
+            { val: "7", label: "AI evaluation agents" },
+            { val: "4", label: "Scoring dimensions" },
             { val: "100%", label: "Free to start" },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1">
-              <span className="text-3xl font-extrabold" style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}>
+              <span
+                className="text-3xl font-extrabold"
+                style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}
+              >
                 {stat.val}
               </span>
-              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: "#908fa0" }}>
+              <span
+                className="text-xs font-bold uppercase tracking-wider"
+                style={{ color: "#908fa0" }}
+              >
                 {stat.label}
               </span>
             </div>
@@ -174,8 +185,12 @@ function HomePage() {
                     Step {step.n}
                   </span>
                 </div>
-                <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>{step.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>{step.desc}</p>
+                <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
+                  {step.desc}
+                </p>
               </div>
             )
           })}
@@ -195,7 +210,10 @@ function HomePage() {
             >
               Categories
             </p>
-            <h2 className="text-3xl font-bold" style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}>
+            <h2
+              className="text-3xl font-bold"
+              style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}
+            >
               Question categories
             </h2>
           </div>
@@ -214,10 +232,10 @@ function HomePage() {
                     border: "1px solid #2d3449",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(128,131,255,0.5)"
+                    ;(e.currentTarget as HTMLElement).style.borderColor = "rgba(128,131,255,0.5)"
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#2d3449"
+                    ;(e.currentTarget as HTMLElement).style.borderColor = "#2d3449"
                   }}
                 >
                   <div
@@ -227,12 +245,144 @@ function HomePage() {
                     <Icon size={20} />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm" style={{ color: "#dae2fd" }}>{cat.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "#464554" }}>{cat.count} questions</p>
+                    <p className="font-semibold text-sm" style={{ color: "#dae2fd" }}>
+                      {cat.label}
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: "#464554" }}>
+                      {cat.count} questions
+                    </p>
                   </div>
                 </Link>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Feature Grid (Bento Style) ─────────────────────────── */}
+      <section className="w-full max-w-[1440px] mx-auto px-6 py-20">
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold mb-2" style={{ color: "#dae2fd" }}>
+            Technical Tooling for Architects
+          </h2>
+          <p className="text-sm" style={{ color: "#908fa0" }}>
+            High-fidelity components designed for rigorous system planning.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Canvas — spans 2 columns */}
+          <div className="md:col-span-2 flex flex-col gap-4 p-6 rounded-xl bento-card transition-colors hover:border-surface-bright">
+            <div className="flex items-center justify-between">
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+                style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#8083ff" }}
+              >
+                <Layers size={18} />
+              </div>
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded"
+                style={{ background: "#222a3d", color: "#908fa0" }}
+              >
+                CANVAS V2
+              </span>
+            </div>
+            <div className="flex flex-col gap-1 mt-2">
+              <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
+                Infinite Excalidraw-Style Canvas
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
+                Map out complex microservices architectures with low-latency rendering and
+                snap-to-grid precision. Native support for AWS, GCP, and Azure iconography.
+              </p>
+            </div>
+            {/* Visual preview */}
+            <div
+              className="mt-2 h-28 rounded-lg relative overflow-hidden flex items-center justify-center"
+              style={{
+                background: "#0b1326",
+                border: "1px solid #2d3449",
+                backgroundImage: "radial-gradient(#2d3449 1px, transparent 1px)",
+                backgroundSize: "16px 16px",
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className="px-3 py-1.5 rounded text-[12px]"
+                  style={{
+                    border: "1px solid #8083ff",
+                    background: "#131b2e",
+                    color: "#c0c1ff",
+                    fontFamily: "'Space Grotesk', monospace",
+                  }}
+                >
+                  Client
+                </div>
+                <div className="w-8 h-px" style={{ background: "#8083ff" }} />
+                <div
+                  className="px-3 py-1.5 rounded text-[12px]"
+                  style={{
+                    border: "1px solid #464554",
+                    background: "#131b2e",
+                    color: "#dae2fd",
+                    fontFamily: "'Space Grotesk', monospace",
+                  }}
+                >
+                  API Gateway
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Editor — 1 column */}
+          <div className="flex flex-col gap-4 p-6 rounded-xl bento-card transition-colors hover:border-surface-bright">
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#8083ff" }}
+            >
+              <PenLine size={18} />
+            </div>
+            <div className="flex flex-col gap-1 mt-2">
+              <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
+                Lexical Technical Editor
+              </h3>
+              <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
+                Write API contracts and schema definitions with rich formatting and inline code
+                blocks.
+              </p>
+            </div>
+            {/* Code preview */}
+            <div
+              className="mt-auto rounded p-3 text-[11px] leading-relaxed"
+              style={{
+                background: "#060e20",
+                border: "1px solid #2d3449",
+                fontFamily: "'Space Grotesk', monospace",
+              }}
+            >
+              <div
+                className="flex items-center gap-1.5 mb-2 pb-2"
+                style={{ borderBottom: "1px solid #2d3449" }}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ background: "#ffb4ab" }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: "#464554" }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: "#4edea3" }} />
+              </div>
+              <span style={{ color: "#8083ff" }}>type</span>{" "}
+              <span style={{ color: "#4edea3" }}>User</span>
+              {" = {\n"}
+              <span className="pl-4 block" style={{ color: "#c7c4d7" }}>
+                id: string;
+              </span>
+              <span className="pl-4 block" style={{ color: "#c7c4d7" }}>
+                {"role: "}
+                <span style={{ color: "#4edea3" }}>{"'ADMIN'"}</span>
+                {" | "}
+                <span style={{ color: "#4edea3" }}>{"'USER'"}</span>
+                {";"}
+              </span>
+              {"}"}
+            </div>
           </div>
         </div>
       </section>
@@ -242,7 +392,8 @@ function HomePage() {
         <div
           className="rounded-xl p-10 flex flex-col md:flex-row items-center justify-between gap-8"
           style={{
-            background: "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(23,31,51,0.8) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(23,31,51,0.8) 100%)",
             border: "1px solid rgba(128,131,255,0.2)",
           }}
         >
@@ -267,34 +418,6 @@ function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* ── Footer ────────────────────────────────────────────── */}
-      <footer
-        className="border-t py-8"
-        style={{ borderColor: "#222a3d" }}
-      >
-        <div className="max-w-[1440px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span
-            className="font-black text-base tracking-tighter"
-            style={{ color: "#dae2fd" }}
-          >
-            Hello Design
-          </span>
-          <p className="text-xs" style={{ color: "#464554" }}>
-            Practice system design. Get evaluated by AI.
-          </p>
-          <a
-            href="https://github.com/kandysh/hellodesign.dev"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1.5 text-xs transition-colors duration-150 hover:text-slate-300"
-            style={{ color: "#464554" }}
-          >
-            <Github size={14} />
-            GitHub
-          </a>
-        </div>
-      </footer>
     </div>
   )
 }
@@ -319,7 +442,10 @@ function MockCanvas() {
         <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
         <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
         <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
-        <span className="ml-2 text-xs" style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}>
+        <span
+          className="ml-2 text-xs"
+          style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}
+        >
           design-workspace.canvas
         </span>
       </div>
@@ -338,8 +464,20 @@ function MockCanvas() {
         <CanvasNode label="Client" top={40} left={24} />
 
         {/* Connector */}
-        <svg aria-hidden="true" className="absolute" style={{ top: 62, left: 130, overflow: "visible", width: 60, height: 2 }}>
-          <line x1="0" y1="1" x2="60" y2="1" stroke="#464554" strokeWidth="1.5" strokeDasharray="4 3" />
+        <svg
+          aria-hidden="true"
+          className="absolute"
+          style={{ top: 62, left: 130, overflow: "visible", width: 60, height: 2 }}
+        >
+          <line
+            x1="0"
+            y1="1"
+            x2="60"
+            y2="1"
+            stroke="#464554"
+            strokeWidth="1.5"
+            strokeDasharray="4 3"
+          />
           <polygon points="58,0 62,1 58,2" fill="#464554" />
         </svg>
 
@@ -347,8 +485,20 @@ function MockCanvas() {
         <CanvasNode label="Load Balancer" top={40} left={196} highlight />
 
         {/* Connector down */}
-        <svg aria-hidden="true" className="absolute" style={{ top: 110, left: 268, overflow: "visible", width: 2, height: 60 }}>
-          <line x1="1" y1="0" x2="1" y2="60" stroke="#464554" strokeWidth="1.5" strokeDasharray="4 3" />
+        <svg
+          aria-hidden="true"
+          className="absolute"
+          style={{ top: 110, left: 268, overflow: "visible", width: 2, height: 60 }}
+        >
+          <line
+            x1="1"
+            y1="0"
+            x2="1"
+            y2="60"
+            stroke="#464554"
+            strokeWidth="1.5"
+            strokeDasharray="4 3"
+          />
           <polygon points="0,58 1,62 2,58" fill="#464554" />
         </svg>
 
@@ -356,8 +506,20 @@ function MockCanvas() {
         <CanvasNode label="App Server" top={172} left={196} />
 
         {/* Connector right */}
-        <svg aria-hidden="true" className="absolute" style={{ top: 194, left: 316, overflow: "visible", width: 60, height: 2 }}>
-          <line x1="0" y1="1" x2="60" y2="1" stroke="#464554" strokeWidth="1.5" strokeDasharray="4 3" />
+        <svg
+          aria-hidden="true"
+          className="absolute"
+          style={{ top: 194, left: 316, overflow: "visible", width: 60, height: 2 }}
+        >
+          <line
+            x1="0"
+            y1="1"
+            x2="60"
+            y2="1"
+            stroke="#464554"
+            strokeWidth="1.5"
+            strokeDasharray="4 3"
+          />
           <polygon points="58,0 62,1 58,2" fill="#464554" />
         </svg>
 
@@ -385,7 +547,10 @@ function MockCanvas() {
           className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded text-xs"
           style={{ background: "#131b2e", border: "1px solid #2d3449", color: "#908fa0" }}
         >
-          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4edea3" }} />
+          <span
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ background: "#4edea3" }}
+          />
           <span style={{ fontFamily: "'Space Grotesk', monospace" }}>AI evaluating…</span>
         </div>
       </div>
@@ -395,7 +560,9 @@ function MockCanvas() {
         className="px-4 py-3 text-xs"
         style={{ background: "#131b2e", borderTop: "1px solid #2d3449", color: "#c7c4d7" }}
       >
-        <span style={{ color: "#8083ff", fontFamily: "'Space Grotesk', monospace" }}>Design Notes: </span>
+        <span style={{ color: "#8083ff", fontFamily: "'Space Grotesk', monospace" }}>
+          Design Notes:{" "}
+        </span>
         Use read replicas for global latency reduction. Add CDN layer…
       </div>
     </div>

@@ -1,26 +1,24 @@
-import { useState, useRef, useEffect } from "react"
-import {
-  Brain,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-  Send,
-  CheckCircle2,
-  Info,
-} from "lucide-react"
+import { Brain, CheckCircle2, ChevronDown, ChevronRight, Info, Loader2, Send } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
-import type { AgentResult } from "@sysdesign/types"
 
 // ── Types ──────────────────────────────────────────────────────────────────
+
+/** Payload shape of the `eval_progress` SSE event sent by the worker */
+interface EvalProgressItem {
+  dimensionId: string
+  score: number
+}
 
 export type AgentPanelState =
   | { phase: "idle" }
   | { phase: "processing"; trace: string[] }
   | { phase: "follow-up"; question: string; trace: string[] }
-  | { phase: "evaluating"; agentResults: AgentResult[] }
-  | { phase: "done"; submissionId: string; agentResults: AgentResult[] }
+  | { phase: "evaluating"; agentResults: EvalProgressItem[] }
+  | { phase: "done"; submissionId: string; agentResults: EvalProgressItem[] }
 
-interface Message {
+export interface Message {
+  id: string
   role: "agent" | "user"
   content: string
   timestamp: Date
@@ -85,17 +83,11 @@ export function AgentPanel({
     setInput("")
   }
 
-  const trace =
-    state.phase === "processing" || state.phase === "follow-up"
-      ? state.trace
-      : []
+  const trace = state.phase === "processing" || state.phase === "follow-up" ? state.trace : []
 
   return (
     <div
-      className={cn(
-        "flex h-full flex-col border-l border-base-300/40 bg-base-200/50",
-        className,
-      )}
+      className={cn("flex h-full flex-col border-l border-base-300/40 bg-base-200/50", className)}
     >
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-base-300/40 px-4 py-3">
@@ -166,10 +158,14 @@ export function AgentPanel({
         {/* ── Messages (follow-up chat + done) ── */}
         {(state.phase === "follow-up" || state.phase === "done") && messages.length > 0 && (
           <div className="space-y-3 px-4 pb-4">
-            {messages.map((msg, i) => {
-              // biome-ignore lint/suspicious/noArrayIndexKey: messages are append-only
-              return <ChatBubble key={i} message={msg} userInitials={userInitials} userAvatar={userAvatar} />
-            })}
+            {messages.map((msg) => (
+              <ChatBubble
+                key={msg.id}
+                message={msg}
+                userInitials={userInitials}
+                userAvatar={userAvatar}
+              />
+            ))}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -229,14 +225,15 @@ export function AgentPanel({
 
 function StatusPill({ phase }: { phase: AgentPanelState["phase"] }) {
   const config: Record<string, { label: string; classes: string }> = {
-    idle:        { label: "Idle",        classes: "bg-base-300/40 text-base-content/40" },
-    processing:  { label: "Processing",  classes: "bg-primary/10 text-primary" },
-    "follow-up": { label: "Follow-up",   classes: "bg-warning/10 text-warning" },
-    evaluating:  { label: "Evaluating",  classes: "bg-info/10 text-info" },
-    done:        { label: "Done",        classes: "bg-success/10 text-success" },
+    idle: { label: "Idle", classes: "bg-base-300/40 text-base-content/40" },
+    processing: { label: "Processing", classes: "bg-primary/10 text-primary" },
+    "follow-up": { label: "Follow-up", classes: "bg-warning/10 text-warning" },
+    evaluating: { label: "Evaluating", classes: "bg-info/10 text-info" },
+    done: { label: "Done", classes: "bg-success/10 text-success" },
   }
   const pill = config[phase as keyof typeof config] ?? config.idle
-  const { label, classes } = pill!
+  const label = pill.label
+  const classes = pill.classes
   return (
     <span
       className={cn(
@@ -251,7 +248,13 @@ function StatusPill({ phase }: { phase: AgentPanelState["phase"] }) {
 
 // ── Reasoning trace ────────────────────────────────────────────────────────
 
-const ReasoningTrace = ({ trace, ref }: { trace: string[]; ref: React.RefObject<HTMLDivElement | null> }) => (
+const ReasoningTrace = ({
+  trace,
+  ref,
+}: {
+  trace: string[]
+  ref: React.RefObject<HTMLDivElement | null>
+}) => (
   <div className="space-y-1">
     <div className="flex items-center gap-1.5 text-xs text-base-content/40">
       <span>Reasoning trace</span>
@@ -262,10 +265,7 @@ const ReasoningTrace = ({ trace, ref }: { trace: string[]; ref: React.RefObject<
         <Info size={11} className="text-base-content/30" />
       </span>
     </div>
-    <div
-      ref={ref}
-      className="reasoning-trace max-h-48 overflow-y-auto"
-    >
+    <div ref={ref} className="reasoning-trace max-h-48 overflow-y-auto">
       {trace.length === 0 ? (
         <span className="opacity-50">Initializing…</span>
       ) : (
@@ -303,9 +303,7 @@ function ChatBubble({
         <div
           className={cn(
             "w-7 rounded-full flex items-center justify-center text-xs font-semibold",
-            isAgent
-              ? "bg-primary/15 text-primary"
-              : "bg-base-300/60 text-base-content/60",
+            isAgent ? "bg-primary/15 text-primary" : "bg-base-300/60 text-base-content/60",
           )}
         >
           {isAgent ? (
@@ -320,9 +318,7 @@ function ChatBubble({
       <div
         className={cn(
           "chat-bubble text-sm leading-relaxed",
-          isAgent
-            ? "bg-base-300/50 text-base-content"
-            : "bg-primary/15 text-base-content",
+          isAgent ? "bg-base-300/50 text-base-content" : "bg-primary/15 text-base-content",
         )}
       >
         {message.content}
