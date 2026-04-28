@@ -116,6 +116,7 @@ function InterviewPage() {
   const [input,        setInput]        = useState("")
   const [submissionId, setSubmissionId] = useState<string | null>(null)
   const [elapsed,      setElapsed]      = useState(0)
+  const [pendingPrefill, setPendingPrefill] = useState<{ answerText: string; elements: unknown[] } | null>(null)
 
   const phaseRef       = useRef<Phase>("setup")
   const sseRef         = useRef<EventSource | null>(null)
@@ -148,6 +149,25 @@ function InterviewPage() {
     if (timerRef.current) clearInterval(timerRef.current)
     sseRef.current?.close()
   }, [])
+
+  // Load prefill content passed from workspace (Deep AI review mode)
+  useEffect(() => {
+    const key = `hd:prefill:${questionId}`
+    const raw = sessionStorage.getItem(key)
+    if (raw) {
+      sessionStorage.removeItem(key)
+      try { setPendingPrefill(JSON.parse(raw)) } catch {}
+    }
+  }, [questionId])
+
+  // Auto-start when prefill data is ready and API key is available
+  // biome-ignore lint/correctness/useExhaustiveDependencies: handleStart is stable within render
+  useEffect(() => {
+    if (pendingPrefill && apiKey && phase === "setup") {
+      setPendingPrefill(null)
+      handleStart(pendingPrefill)
+    }
+  }, [pendingPrefill, apiKey, phase])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll whenever messages change
   useEffect(() => {
@@ -272,20 +292,21 @@ function InterviewPage() {
 
   // ── Start interview ───────────────────────────────────────────────────────
 
-  async function handleStart() {
+  async function handleStart(prefill?: { answerText: string; elements: unknown[] }) {
     if (!apiKey) { toast("Add your OpenAI API key in Settings first", "error"); return }
     setPhase("starting")
-
-    const emptyRoot = {
-      root: { children: [], direction: null, format: "", indent: 0, type: "root", version: 1 },
-    }
 
     try {
       const res = await fetch(`${API}/api/submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ questionId, lexicalState: emptyRoot, strategy: "agentic" }),
+        body: JSON.stringify({
+          questionId,
+          answerText: prefill?.answerText ?? "",
+          excalidrawData: prefill?.elements ?? [],
+          strategy: "agentic",
+        }),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string }

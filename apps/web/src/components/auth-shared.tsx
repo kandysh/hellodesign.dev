@@ -326,66 +326,13 @@ function HdLogo() {
       className="shrink-0"
     >
       <rect width="32" height="32" rx="7" fill="#0b1326" />
-      <line
-        x1="8.5"
-        y1="9"
-        x2="23.5"
-        y2="9"
-        stroke="#8083ff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        x1="8.5"
-        y1="9"
-        x2="16"
-        y2="18"
-        stroke="#8083ff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        x1="23.5"
-        y1="9"
-        x2="16"
-        y2="18"
-        stroke="#8083ff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="18"
-        x2="8.5"
-        y2="26"
-        stroke="#8083ff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        x1="16"
-        y1="18"
-        x2="23.5"
-        y2="26"
-        stroke="#8083ff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line
-        x1="8.5"
-        y1="26"
-        x2="23.5"
-        y2="26"
-        stroke="#8083ff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <circle cx="8.5" cy="9" r="2.5" fill="#6366f1" />
-      <circle cx="23.5" cy="9" r="2.5" fill="#6366f1" />
-      <circle cx="8.5" cy="26" r="2.5" fill="#6366f1" />
-      <circle cx="23.5" cy="26" r="2.5" fill="#6366f1" />
-      <circle cx="16" cy="18" r="3.5" fill="#4edea3" />
-      <circle cx="16" cy="18" r="1.5" fill="#0b1326" opacity="0.4" />
+      {/* Material Symbol: polyline (outlined, FILL=1), indigo */}
+      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
+        <path
+          d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
+          fill="#6366f1"
+        />
+      </svg>
     </svg>
   );
 }

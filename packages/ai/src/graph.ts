@@ -180,7 +180,7 @@ export async function runClarificationPhase(
   const shouldContinue = (state: typeof ClarificationState.State): string => {
     const lastMessage = state.messages[state.messages.length - 1];
 
-    if (!lastMessage ;|| lastMessage._getType() ;!== "ai") return END;
+    if (!lastMessage || !AIMessage.isInstance(lastMessage)) return END;
 
     const aiMsg = lastMessage as AIMessage;
     if (!aiMsg.tool_calls?.length) return END;
