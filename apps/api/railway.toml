@@ -23,7 +23,7 @@ watchPatterns = [
 ]
 
 [deploy]
-startCommand = "node apps/api/dist/index.js"
+startCommand = "pnpm --filter @sysdesign/api exec tsx src/index.ts"
 preDeployCommand = "pnpm --filter @sysdesign/db db:deploy"
 healthcheckPath = "/health"
 restartPolicyType = "ON_FAILURE"
