@@ -116,7 +116,7 @@ function PricingPage() {
           className="mb-3 text-4xl font-extrabold md:text-5xl"
         >
           Upgrade to{" "}
-          <span style={{ color: "#8083ff" }}>ArchMaster</span>
+          <span style={{ color: "#8083ff" }}>Hello Design</span>
         </h1>
         <p style={{ color: "#908fa0" }} className="mx-auto max-w-xl leading-relaxed text-sm">
           Unlock advanced evaluation metrics, unlimited AI interviews, and secure cloud sync.
@@ -261,7 +261,7 @@ function PricingPage() {
           Ready to level up your designs?
         </h3>
         <p style={{ color: "#908fa0" }} className="mb-5 text-sm">
-          Join engineers at top companies who use ArchMaster to ace system design interviews.
+          Join engineers at top companies who use Hello Design to ace system design interviews.
         </p>
         <Link
           to="/questions"

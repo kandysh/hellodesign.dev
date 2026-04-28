@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WipRouteImport } from './routes/wip'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MeRouteImport } from './routes/me'
@@ -23,6 +24,11 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as QuestionsQuestionIdInterviewRouteImport } from './routes/questions/$questionId_.interview'
 import { Route as QuestionsQuestionIdResultSubmissionIdRouteImport } from './routes/questions/$questionId_.result.$submissionId'
 
+const WipRoute = WipRouteImport.update({
+  id: '/wip',
+  path: '/wip',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/me': typeof MeRoute
   '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
+  '/wip': typeof WipRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/community/$threadId': typeof CommunityThreadIdRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/me': typeof MeRoute
   '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
+  '/wip': typeof WipRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/community/$threadId': typeof CommunityThreadIdRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/me': typeof MeRoute
   '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
+  '/wip': typeof WipRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/community/$threadId': typeof CommunityThreadIdRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/pricing'
     | '/settings'
+    | '/wip'
     | '/auth/login'
     | '/auth/register'
     | '/community/$threadId'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/pricing'
     | '/settings'
+    | '/wip'
     | '/auth/login'
     | '/auth/register'
     | '/community/$threadId'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/me'
     | '/pricing'
     | '/settings'
+    | '/wip'
     | '/auth/login'
     | '/auth/register'
     | '/community/$threadId'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   MeRoute: typeof MeRoute
   PricingRoute: typeof PricingRoute
   SettingsRoute: typeof SettingsRoute
+  WipRoute: typeof WipRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
   CommunityThreadIdRoute: typeof CommunityThreadIdRoute
@@ -203,6 +216,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wip': {
+      id: '/wip'
+      path: '/wip'
+      fullPath: '/wip'
+      preLoaderRoute: typeof WipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -302,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   MeRoute: MeRoute,
   PricingRoute: PricingRoute,
   SettingsRoute: SettingsRoute,
+  WipRoute: WipRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
   CommunityThreadIdRoute: CommunityThreadIdRoute,

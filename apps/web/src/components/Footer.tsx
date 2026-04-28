@@ -1,3 +1,27 @@
+import { Link } from "@tanstack/react-router";
+
+function HdLogo() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <rect width="32" height="32" rx="7" fill="#131b2e" />
+      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
+        <path
+          d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
+          fill="#6366f1"
+        />
+      </svg>
+    </svg>
+  );
+}
+
 export function Footer() {
   return (
     <footer
@@ -6,35 +30,41 @@ export function Footer() {
     >
       <div className="flex flex-col md:flex-row justify-between items-center py-10 px-8 max-w-[1440px] mx-auto gap-4">
         {/* Brand */}
-        <div className="text-base font-bold" style={{ color: "#dae2fd" }}>
-          © 2025 Hello Design. Technical Precision in System Design.
+        <div className="flex items-center gap-2">
+          <HdLogo />
+          <span className="text-sm font-bold" style={{ color: "#dae2fd" }}>
+            Hello Design
+          </span>
+          <span className="text-sm" style={{ color: "#464554" }}>
+            · © 2026
+          </span>
         </div>
 
         {/* Links */}
         <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm">
           {[
-            { label: "Documentation", href: "#" },
-            { label: "API Reference", href: "#" },
-            { label: "Terms of Service", href: "#" },
-            { label: "Privacy Policy", href: "#" },
-          ].map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
+            "Documentation",
+            "API Reference",
+            "Terms of Service",
+            "Privacy Policy",
+          ].map((label) => (
+            <Link
+              key={label}
+              to="/wip"
               className="transition-colors"
               style={{ color: "#464554" }}
               onMouseEnter={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.color = "#dae2fd"
+                (e.currentTarget as HTMLElement).style.color = "#dae2fd";
               }}
               onMouseLeave={(e) => {
-                ;(e.currentTarget as HTMLAnchorElement).style.color = "#464554"
+                (e.currentTarget as HTMLElement).style.color = "#464554";
               }}
             >
-              {link.label}
-            </a>
+              {label}
+            </Link>
           ))}
         </div>
       </div>
     </footer>
-  )
+  );
 }

@@ -140,8 +140,8 @@ function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 transition-all duration-150 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
-              style={{ boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded font-semibold text-sm transition-colors active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              style={{ background: "#6366f1", color: "white", boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}
             >
               {loading ? (
                 <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />

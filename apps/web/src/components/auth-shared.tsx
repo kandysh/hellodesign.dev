@@ -66,7 +66,7 @@ export function BrandingPanel() {
 
       <div className="relative z-10">
         <p className="text-xs" style={{ color: "#2d3449" }}>
-          © 2025 Hello Design. All rights reserved.
+          © 2026 Hello Design. All rights reserved.
         </p>
       </div>
     </div>
