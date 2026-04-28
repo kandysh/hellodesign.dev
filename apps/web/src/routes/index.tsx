@@ -34,7 +34,7 @@ const STEPS = [
   {
     n: "02",
     title: "Write & diagram your answer",
-    desc: "Use the rich text editor to explain your architecture and the Excalidraw canvas to draw component diagrams.",
+    desc: "Use the CodeMirror editor to explain your architecture and the Excalidraw canvas to draw component diagrams.",
     icon: PenLine,
   },
   {
@@ -81,8 +81,7 @@ function HomePage() {
 
             <p className="text-base leading-relaxed max-w-xl" style={{ color: "#c7c4d7" }}>
               High‑density environments for data‑driven architects. Simulate real‑world system
-              design constraints with our Excalidraw‑style canvas and Lexical‑style technical
-              editor.
+              design constraints with our Excalidraw canvas and CodeMirror technical editor.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -344,11 +343,11 @@ function HomePage() {
             </div>
             <div className="flex flex-col gap-1 mt-2">
               <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
-                Lexical Technical Editor
+                CodeMirror Technical Editor
               </h3>
               <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
-                Write API contracts and schema definitions with rich formatting and inline code
-                blocks.
+                Write API contracts and schema definitions with rich Markdown formatting,
+                syntax-highlighted code blocks, and multi-language support.
               </p>
             </div>
             {/* Code preview */}

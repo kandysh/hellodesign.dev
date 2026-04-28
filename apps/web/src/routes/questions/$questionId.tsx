@@ -1,30 +1,32 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
+  AlertTriangle,
   ArrowLeft,
   BookOpen,
   CheckSquare,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Code2,
   Info,
   Layers,
   ListTodo,
   Lock,
   Map,
   Mic,
-  PenLine,
   Square,
   Unlock,
+  X,
   Zap,
 } from "lucide-react"
-import { lazy, Suspense, useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { AgentPanel, type AgentPanelState, type Message } from "@/components/AgentPanel"
-import { ApiKeyInput, useApiKey } from "@/components/ApiKeyInput"
+import { useApiKey } from "@/components/ApiKeyInput"
+import { CodeEditor } from "@/components/CodeEditor"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
-import { RichTextEditor } from "@/components/RichTextEditor"
 import { useToast } from "@/components/Toast"
 import { questionQueryOptions } from "@/lib/queries/questions"
 import { cn } from "@/lib/utils"
@@ -35,14 +37,17 @@ const Excalidraw = lazy(() =>
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
-const EDITOR_PLACEHOLDER = `Walk through your design step by step:
-
-1. Clarify requirements (functional + non-functional)
-2. Capacity estimation (QPS, storage, bandwidth)
-3. High-level architecture
-4. Data model & database choice
-5. API design
-6. Scalability, caching, bottlenecks`
+const EDITOR_PLACEHOLDER = `/*
+ * Walk through your design step by step:
+ *
+ * 1. Clarify requirements (functional + non-functional)
+ * 2. Capacity estimation (QPS, storage, bandwidth)
+ * 3. High-level architecture
+ * 4. Data model & database choice
+ * 5. API design
+ * 6. Scalability, caching, bottlenecks
+ */
+`
 
 const CHECKLIST_ITEMS = [
   "Functional requirements",
@@ -82,15 +87,24 @@ function WorkspacePage() {
   const [sidebarTab, setSidebarTab] = useState<"overview" | "checklist">("overview")
   const [hintsOpen, setHintsOpen] = useState(false)
   const [checklist, setChecklist] = useState<Set<string>>(new Set())
-  const [activeTab, setActiveTab] = useState<"write" | "diagram">("write")
+  const [activeTab, setActiveTab] = useState<"diagram" | "code">("code")
   const [reviewMode, setReviewMode] = useState<"quick" | "deep">("quick")
+  const [apiBannerDismissed, setApiBannerDismissed] = useState(false)
 
   // Content state
-  const [answerText, setAnswerText] = useState("")
+  const [answerCode, setAnswerCode] = useState("")
   const [excalidrawData, setExcalidrawData] = useState<Record<string, unknown> | null>(null)
   const [hasExcalidrawElements, setHasExcalidrawElements] = useState(false)
   // Track if diagram tab has ever been visited so we mount Excalidraw lazily
   const [diagramMounted, setDiagramMounted] = useState(false)
+
+  const handleExcalidrawChange = useCallback(
+    (elements: unknown, appState: unknown) => {
+      setExcalidrawData({ elements, appState })
+      setHasExcalidrawElements(Array.isArray(elements) && elements.length > 0)
+    },
+    [],
+  )
 
   // Agent panel state
   const [agentVisible, setAgentVisible] = useState(false)
@@ -102,7 +116,7 @@ function WorkspacePage() {
   const { data: question, isLoading } = useQuery(questionQueryOptions(questionId))
 
   // Word count derived from editor
-  const wordCount = answerText.trim() ? answerText.trim().split(/\s+/).length : 0
+  const wordCount = answerCode.trim() ? answerCode.trim().split(/\s+/).length : 0
   const checklistProgress = checklist.size
   const checklistTotal = CHECKLIST_ITEMS.length
 
@@ -123,7 +137,7 @@ function WorkspacePage() {
         credentials: "include",
         body: JSON.stringify({
           questionId,
-          answerText,
+          answerText: answerCode,
           excalidrawData: (excalidrawData as any)?.elements ?? [],
           strategy: reviewMode === "deep" ? "agentic" : "quick",
         }),
@@ -277,7 +291,7 @@ function WorkspacePage() {
     )
   }
 
-  const canSubmit = answerText.trim().length > 20
+  const canSubmit = answerCode.trim().length > 20 && checklistProgress > 0
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
@@ -440,10 +454,6 @@ function WorkspacePage() {
                   )}
                 </div>
 
-                {/* API Key at bottom of overview */}
-                <div className="pt-1">
-                  <ApiKeyInput />
-                </div>
               </div>
             )}
 
@@ -539,8 +549,6 @@ function WorkspacePage() {
                   )}
                 </div>
 
-                {/* API Key */}
-                <ApiKeyInput />
               </div>
             )}
           </div>
@@ -580,17 +588,42 @@ function WorkspacePage() {
           </div>
         </div>
 
+        {/* API Key Warning Banner */}
+        {!apiKey && !apiBannerDismissed && (
+          <div
+            className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
+            style={{ background: "rgba(255,180,171,0.08)", borderBottom: "1px solid rgba(255,180,171,0.15)" }}
+          >
+            <div className="flex items-center gap-2">
+              <AlertTriangle size={14} style={{ color: "#ffb4ab" }} className="shrink-0" />
+              <span style={{ color: "#ffb4ab" }} className="text-xs font-medium">
+                No OpenAI API key set.{" "}
+                <Link
+                  to="/settings"
+                  style={{ color: "#ffb4ab", textDecoration: "underline" }}
+                  className="hover:opacity-80 transition-opacity"
+                >
+                  Add one in Settings
+                </Link>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setApiBannerDismissed(true)}
+              className="shrink-0 p-0.5 hover:opacity-80 transition-opacity"
+              style={{ color: "#ffb4ab" }}
+              aria-label="Dismiss"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {/* Tab bar */}
         <div
           className="flex items-center px-4 gap-0"
           style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}
         >
-          <TabButton
-            active={activeTab === "write"}
-            onClick={() => setActiveTab("write")}
-            icon={<PenLine size={13} />}
-            label="Write"
-          />
           <TabButton
             active={activeTab === "diagram"}
             onClick={() => {
@@ -599,6 +632,12 @@ function WorkspacePage() {
             }}
             icon={<Map size={13} />}
             label="Diagram"
+          />
+          <TabButton
+            active={activeTab === "code"}
+            onClick={() => setActiveTab("code")}
+            icon={<Code2 size={13} />}
+            label="Code"
           />
           {hasExcalidrawElements && activeTab !== "diagram" && (
             <span className="ml-auto text-xs flex items-center gap-1" style={{ color: "#464554" }}>
@@ -610,29 +649,32 @@ function WorkspacePage() {
 
         {/* Editor / Diagram content */}
         <div className="flex-1 overflow-hidden relative">
-          {/* Write tab — always in the DOM, absolutely fills the container.
-              `flex-col` sets direction; display is driven entirely by inline style. */}
+          {/* Code tab — always in the DOM, toggled via display. */}
           <div
-            className="absolute inset-0 flex-col overflow-auto"
-            style={{ display: activeTab === "write" ? "flex" : "none" }}
+            className="absolute inset-0 p-3"
+            style={{ display: activeTab === "code" ? "flex" : "none" }}
           >
-            <RichTextEditor
-              onChange={setAnswerText}
+            <CodeEditor
+              value={answerCode}
+              onChange={setAnswerCode}
+              className="w-full"
+              height="100%"
               placeholder={EDITOR_PLACEHOLDER}
-              className="h-full"
             />
           </div>
 
           {/* Diagram tab — mounted on first visit, then kept alive.
-              Uses visibility (not display) so Excalidraw can measure its size. */}
+              Uses opacity (not display/visibility) so Excalidraw can measure its
+              size AND opacity cannot be overridden by children (unlike visibility). */}
           {diagramMounted && (
             <div
               className="absolute inset-0"
               style={{
-                visibility: activeTab === "diagram" ? "visible" : "hidden",
+                opacity: activeTab === "diagram" ? 1 : 0,
                 pointerEvents: activeTab === "diagram" ? "auto" : "none",
               }}
               aria-label="Architecture diagram canvas"
+              aria-hidden={activeTab !== "diagram"}
             >
               <Suspense
                 fallback={
@@ -651,10 +693,7 @@ function WorkspacePage() {
                 <Excalidraw
                   theme="dark"
                   UIOptions={{ canvasActions: { export: false } }}
-                  onChange={(elements, appState) => {
-                    setExcalidrawData({ elements, appState })
-                    setHasExcalidrawElements(Array.isArray(elements) && elements.length > 0)
-                  }}
+                  onChange={handleExcalidrawChange}
                 />
               </Suspense>
             </div>
@@ -682,10 +721,10 @@ function WorkspacePage() {
             <div
               className={cn("tooltip", !canSubmit && "tooltip-open tooltip-top")}
               data-tip={
-                !apiKey
-                  ? "Add your OpenAI API key in the left panel"
-                  : answerText.trim().length <= 20
-                    ? "Write at least a few sentences before submitting"
+                answerCode.trim().length <= 20
+                  ? "Write at least a few sentences or some code before submitting"
+                  : checklistProgress === 0
+                    ? "Complete at least one checklist item before submitting"
                     : undefined
               }
             >

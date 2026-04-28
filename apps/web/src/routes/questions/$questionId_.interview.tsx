@@ -521,9 +521,6 @@ function InterviewPage() {
               <Excalidraw
                 theme="dark"
                 UIOptions={{ canvasActions: { export: false } }}
-                onChange={() => {
-                  // Diagram changes tracked by Excalidraw internally
-                }}
               />
             </Suspense>
 

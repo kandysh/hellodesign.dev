@@ -1,8 +1,15 @@
 # ArchMaster (SysDesign Pro) — Agent Instructions
 
+Terse like caveman. Technical substance exact. Only fluff die.
+Drop: articles, filler (just/really/basically), pleasantries, hedging.
+Fragments OK. Short synonyms. Code unchanged.
+Pattern: [thing] [action] [reason]. [next step].
+ACTIVE EVERY RESPONSE. No revert after many turns. No filler drift.
+Code/commits/PRs: normal. Off: "stop caveman" / "normal mode".
+
 ## Project Overview
 
-This project is **ArchMaster**, an AI-powered system design preparation platform designed to help software engineers master complex architectural challenges. Unlike traditional platforms that focus on coding, ArchMaster provides a high-fidelity environment for diagramming, technical writing, and interactive AI-led architectural interviews.
+This project is **Hello Design**, an AI-powered system design preparation platform designed to help software engineers master complex architectural challenges. Unlike traditional platforms that focus on coding, ArchMaster provides a high-fidelity environment for diagramming, technical writing, and interactive AI-led architectural interviews.
 
 ---
 
