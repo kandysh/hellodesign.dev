@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hello Design - Pre-Evaluation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface": "#0b1326",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#002113",
+                        "on-tertiary": "#003824",
+                        "tertiary-container": "#00885d",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#b9c8de",
+                        "secondary-fixed": "#d4e4fa",
+                        "on-secondary-fixed-variant": "#39485a",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary": "#233143",
+                        "surface-container-highest": "#2d3449",
+                        "outline": "#908fa0",
+                        "primary-container": "#8083ff",
+                        "outline-variant": "#464554",
+                        "on-primary-fixed": "#07006c",
+                        "on-primary-container": "#0d0096",
+                        "secondary-fixed-dim": "#b9c8de",
+                        "surface-container-lowest": "#060e20",
+                        "on-tertiary-container": "#000703",
+                        "on-secondary-container": "#a7b6cc",
+                        "inverse-surface": "#dae2fd",
+                        "surface-bright": "#31394d",
+                        "on-secondary-fixed": "#0d1c2d",
+                        "surface-variant": "#2d3449",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-container-high": "#222a3d",
+                        "inverse-primary": "#494bd6",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-surface": "#dae2fd",
+                        "tertiary": "#4edea3",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#c7c4d7",
+                        "primary": "#c0c1ff",
+                        "secondary-container": "#39485a",
+                        "error": "#ffb4ab",
+                        "surface-container": "#171f33",
+                        "surface-dim": "#0b1326",
+                        "surface-tint": "#c0c1ff",
+                        "inverse-on-surface": "#283044",
+                        "surface-container-low": "#131b2e",
+                        "on-primary": "#1000a9",
+                        "primary-fixed": "#e1e0ff",
+                        "on-error": "#690005",
+                        "background": "#0b1326",
+                        "on-background": "#dae2fd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin": "24px",
+                        "gutter": "16px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "headline-md": ["Manrope"],
+                        "body-sm": ["Manrope"],
+                        "label-caps": ["Manrope"],
+                        "code-inline": ["Space Grotesk"],
+                        "body-base": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "letterSpacing": "0em", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "code-inline": ["14px", { "lineHeight": "1", "letterSpacing": "0em", "fontWeight": "500" }],
+                        "body-base": ["16px", { "lineHeight": "1.6", "letterSpacing": "0em", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-base min-h-screen flex flex-col">
+<!-- TopNavBar (Shared Component) -->
+<nav class="bg-slate-950 docked full-width top-0 border-b border-slate-800 flex justify-between items-center w-full px-6 h-14 z-50">
+<div class="flex items-center gap-8">
+<span class="text-xl font-black tracking-tighter text-slate-50">Hello Design</span>
+<div class="hidden md:flex gap-6 items-end h-full">
+<!-- Assuming "Explore" might be the closest fit for a general workspace area if this isn't a direct top-level destination, but given the specific pre-evaluation context, we will highlight a generic active state or follow intent. We'll map "Solutions" to this workspace. -->
+<a class="font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-100 transition-colors pb-4 mt-auto" href="#">Explore</a>
+<a class="font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-100 transition-colors pb-4 mt-auto" href="#">Community</a>
+<a class="font-manrope text-sm font-medium tracking-tight text-indigo-400 border-b-2 border-indigo-500 pb-4 mt-auto" href="#">Solutions</a>
+<a class="font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-100 transition-colors pb-4 mt-auto" href="#">Pricing</a>
+<a class="font-manrope text-sm font-medium tracking-tight text-slate-400 hover:text-slate-100 transition-colors pb-4 mt-auto" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-indigo-500 dark:text-indigo-400 hover:bg-slate-900/50 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-indigo-500 dark:text-indigo-400 hover:bg-slate-900/50 p-2 rounded-full transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high border border-outline-variant overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="close up portrait of a professional male user in soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBncv3GBxyOJg-wDlAwbv8QbEt3g6azqMgLheZy1RiBkBsjsAcp5cnUQMhKDryAEZk8vf27NysgSWdaHv2NrBYQyfLqQSJ8fncWdNLg--k8iBg7YXHr58n7vB45SX2DqTAifhAI8apDmT2a9D7QELGP5_b3sgpNn09WZt05BBJ_YGpGhIGTOGi04S-EaHEgJV0D921VmeGy4PEDDPFbRguJrEwR-ZCN0X3XGftq5oUabCIerVQ4hl9IvYjCcxB_v6c8jL_X9Lg6lWbU"/>
+</div>
+</div>
+</nav>
+<div class="flex flex-1 overflow-hidden max-w-[1440px] mx-auto w-full">
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col p-6 gap-6 overflow-y-auto custom-scrollbar relative">
+<header class="flex justify-between items-center mb-4">
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Microservices Authentication Architecture</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">System Design Review • Draft v1.2</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-surface-container border border-outline-variant text-primary rounded hover:bg-surface-container-highest transition-colors font-label-caps text-label-caps flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span> Export
+                    </button>
+<button class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-fixed-dim transition-all font-label-caps text-label-caps shadow-[0_0_8px_rgba(192,193,255,0.4)] flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">play_arrow</span> Start Evaluation
+                    </button>
+</div>
+</header>
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<!-- Diagram Section -->
+<div class="xl:col-span-2 bg-surface-container border border-surface-container-highest rounded-xl p-4 flex flex-col min-h-[500px]">
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-surface-container-highest">
+<h2 class="font-label-caps text-label-caps text-secondary uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">schema</span> Architecture Diagram
+                        </h2>
+<div class="flex gap-2">
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">zoom_in</span></button>
+<button class="p-1 text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">zoom_out</span></button>
+</div>
+</div>
+<div class="flex-1 bg-surface rounded-lg border border-outline-variant/30 flex items-center justify-center relative overflow-hidden group">
+<img alt="Architecture Diagram" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="complex technical architecture diagram with interconnected nodes and flowcharts in dark mode" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6KzJukTjNp9ffBHDLKqulmkqoKeDXAfZfvKj_NogK_CPoo5UUUn6XT-u9xjnETv2lja1gI1uzzs5GGZ1r3XLmlzmDic5ItHdKWTDV8XPPY4c7m181g6XQSdlfptdRzwTavZyw2A_gmHe9ZKhjok2YEfgFfE6WPp2_I0Lr12mgqFHNumtSWrdd9b4HuMu_06s29_x7wKqMZenehfN5JHG1S34rdQpZCtPWVCBeoj-ezlpVIgsl4DdPEA8gzzMBiA_BiakpHQZ9BCzf"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface/80 to-transparent flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="bg-surface-container-high text-primary font-code-inline text-xs px-2 py-1 rounded border border-primary/30">auth-service-v2.drawio</span>
+</div>
+</div>
+</div>
+<!-- Technical Notes Section -->
+<div class="bg-surface-container border border-surface-container-highest rounded-xl p-4 flex flex-col h-[500px]">
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-surface-container-highest">
+<h2 class="font-label-caps text-label-caps text-secondary uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">description</span> Technical Notes
+                        </h2>
+<button class="text-primary hover:text-primary-fixed-dim"><span class="material-symbols-outlined text-sm">edit</span></button>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
+<div>
+<h3 class="font-body-sm text-body-sm text-primary font-bold mb-1">Key Objectives</h3>
+<ul class="list-disc list-inside font-body-sm text-body-sm text-on-surface-variant space-y-1">
+<li>Decouple user auth from main API gateway.</li>
+<li>Implement OAuth2.0 and OIDC standard.</li>
+<li>Ensure sub-50ms latency for token validation.</li>
+</ul>
+</div>
+<div>
+<h3 class="font-body-sm text-body-sm text-primary font-bold mb-1">Identified Risks</h3>
+<div class="bg-surface p-3 rounded border border-error/30 text-error font-body-sm text-sm">
+                                Potential bottleneck at the Redis caching layer during token refresh spikes. Need to evaluate read-replica strategy.
+                            </div>
+</div>
+<div>
+<h3 class="font-body-sm text-body-sm text-primary font-bold mb-1">Dependencies</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container-high border border-outline-variant px-2 py-1 rounded font-code-inline text-code-inline text-secondary">PostgreSQL 14</span>
+<span class="bg-surface-container-high border border-outline-variant px-2 py-1 rounded font-code-inline text-code-inline text-secondary">Redis Cluster</span>
+<span class="bg-surface-container-high border border-outline-variant px-2 py-1 rounded font-code-inline text-code-inline text-secondary">Kong API Gateway</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento Data Grid (Supplementary) -->
+<div class="grid grid-cols-4 gap-4 mt-2">
+<div class="bg-surface-container border border-surface-container-highest rounded-lg p-4 flex items-center justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Estimated Load</p>
+<p class="font-headline-md text-headline-md text-on-surface">10k <span class="text-body-sm text-on-surface-variant font-normal">req/s</span></p>
+</div>
+<span class="material-symbols-outlined text-tertiary text-3xl">speed</span>
+</div>
+<div class="bg-surface-container border border-surface-container-highest rounded-lg p-4 flex items-center justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Security Tier</p>
+<p class="font-headline-md text-headline-md text-on-surface">Level 3</p>
+</div>
+<span class="material-symbols-outlined text-primary text-3xl">shield</span>
+</div>
+<div class="bg-surface-container border border-surface-container-highest rounded-lg p-4 flex items-center justify-between">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">Compliance</p>
+<p class="font-headline-md text-headline-md text-tertiary flex items-center gap-1">SOC2 <span class="material-symbols-outlined text-sm">check_circle</span></p>
+</div>
+</div>
+<div class="bg-surface-container border border-surface-container-highest rounded-lg p-4 flex flex-col justify-center items-start cursor-pointer hover:bg-surface-container-highest transition-colors border-dashed border-primary/50 group">
+<p class="font-label-caps text-label-caps text-primary group-hover:text-primary-fixed-dim flex items-center gap-2">
+<span class="material-symbols-outlined">add</span> Add Metric
+                    </p>
+</div>
+</div>
+</main>
+<!-- SideNavBar (Shared Component) representing the AI Agent Panel -->
+<aside class="bg-slate-900 w-80 flex-shrink-0 border-l border-slate-800 flex flex-col py-4 overflow-hidden z-40">
+<!-- Agent Header -->
+<div class="px-4 pb-4 border-b border-slate-800 flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary/10 border border-primary/30 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">smart_toy</span>
+</div>
+<div>
+<h2 class="font-manrope text-sm font-bold text-slate-50">Interviewer</h2>
+<p class="font-manrope text-xs text-indigo-500 font-bold tracking-widest uppercase">Live Session</p>
+</div>
+</div>
+<!-- Tabs -->
+<div class="flex flex-col gap-1 px-2 py-4 border-b border-slate-800">
+<button class="w-full text-left px-3 py-2 rounded flex items-center gap-3 bg-slate-800 text-indigo-400 border-r-2 border-indigo-500 transition-all font-manrope text-xs uppercase tracking-widest font-bold">
+<span class="material-symbols-outlined text-sm">analytics</span> Evaluation Stream
+                </button>
+<button class="w-full text-left px-3 py-2 rounded flex items-center gap-3 text-slate-500 hover:bg-slate-800/50 hover:text-slate-300 transition-all font-manrope text-xs uppercase tracking-widest font-bold">
+<span class="material-symbols-outlined text-sm">smart_toy</span> AI Agent Chat
+                </button>
+<button class="w-full text-left px-3 py-2 rounded flex items-center gap-3 text-slate-500 hover:bg-slate-800/50 hover:text-slate-300 transition-all font-manrope text-xs uppercase tracking-widest font-bold">
+<span class="material-symbols-outlined text-sm">edit_note</span> Technical Notes
+                </button>
+<button class="w-full text-left px-3 py-2 rounded flex items-center gap-3 text-slate-500 hover:bg-slate-800/50 hover:text-slate-300 transition-all font-manrope text-xs uppercase tracking-widest font-bold">
+<span class="material-symbols-outlined text-sm">history</span> Session History
+                </button>
+</div>
+<!-- Evaluation Stream Content -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4 font-code-inline text-code-inline">
+<div class="flex flex-col gap-1">
+<span class="text-on-surface-variant text-xs opacity-70">10:42:01 AM</span>
+<div class="bg-surface border border-outline-variant/50 p-2 rounded text-secondary break-words">
+<span class="text-primary mr-2">[LOG]</span>Ingesting architecture diagram 'auth-service-v2.drawio'...
+                    </div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-on-surface-variant text-xs opacity-70">10:42:05 AM</span>
+<div class="bg-surface border border-outline-variant/50 p-2 rounded text-secondary break-words">
+<span class="text-tertiary mr-2">[EVAL]</span>Identified standard OAuth2 flow. Redis caching layer detected. Database structure aligns with requirements.
+                    </div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-on-surface-variant text-xs opacity-70">10:42:08 AM</span>
+<div class="bg-surface border border-error/50 p-2 rounded text-error break-words relative">
+<div class="absolute -left-[1px] top-0 bottom-0 w-[2px] bg-error"></div>
+<span class="text-error font-bold mr-2">[RISK]</span>Single point of failure detected in API Gateway configuration. Redundancy required for Level 3 security.
+                    </div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-on-surface-variant text-xs opacity-70">10:42:15 AM</span>
+<div class="bg-surface border border-outline-variant/50 p-2 rounded text-secondary break-words flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Analyzing alternative routing strategies...
+                    </div>
+</div>
+</div>
+<!-- Chat Input Area (DaisyUI style inspiration) -->
+<div class="p-4 border-t border-slate-800 bg-slate-900/90 backdrop-blur">
+<div class="relative w-full">
+<input class="w-full bg-surface border border-outline-variant rounded-full py-2 pl-4 pr-10 font-body-sm text-body-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline-variant/70 transition-all" placeholder="Ask AI to clarify..." type="text"/>
+<button class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center text-primary hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+<button class="w-full mt-4 py-2 border border-error/50 text-error rounded hover:bg-error/10 transition-colors font-manrope text-xs uppercase tracking-widest font-bold">
+                    End Interview
+                </button>
+</div>
+</aside>
+</div>
+</body></html>

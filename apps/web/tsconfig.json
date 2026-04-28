@@ -1,0 +1,10 @@
+{
+  "extends": "@sysdesign/config/tsconfig/react-app",
+  "compilerOptions": {
+    "paths": {
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

@@ -1,0 +1,46 @@
+# ── Dockerfile.api ──────────────────────────────────────────────────────────
+# Build context: repo root (required for pnpm workspace packages)
+# Railway UI settings:
+#   Dockerfile path : Dockerfile.api
+#   Root directory  : / (repo root)
+#
+# Uses tsx to run TypeScript directly — workspace packages export .ts source
+# so tsc compilation is skipped; tsx strips types at runtime (Node 20-safe).
+
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy workspace manifests first — maximise Docker layer cache
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+
+COPY apps/api/package.json          ./apps/api/
+COPY apps/worker/package.json       ./apps/worker/
+COPY apps/web/package.json          ./apps/web/
+COPY packages/ai/package.json       ./packages/ai/
+COPY packages/auth/package.json     ./packages/auth/
+COPY packages/config/package.json   ./packages/config/
+COPY packages/db/package.json       ./packages/db/
+COPY packages/queue/package.json    ./packages/queue/
+COPY packages/shared/package.json   ./packages/shared/
+COPY packages/types/package.json    ./packages/types/
+COPY packages/ui/package.json       ./packages/ui/
+
+# Install all dependencies (devDeps included — needed for tsx + prisma CLI)
+RUN pnpm install --frozen-lockfile
+
+# Copy full source after install (keeps node_modules layer cached)
+COPY . .
+
+# Generate the Prisma client into packages/db/generated/
+RUN pnpm --filter @sysdesign/db exec prisma generate
+
+ENV NODE_ENV=production
+
+EXPOSE 3001
+
+# 1. Run pending DB migrations (idempotent — safe to run on every deploy)
+# 2. Start the API via tsx (handles TypeScript workspace imports directly)
+CMD ["sh", "-c", "pnpm --filter @sysdesign/db db:deploy && node_modules/.bin/tsx apps/api/src/index.ts"]

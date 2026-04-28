@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hello Design - Evaluation Results</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Space+Grotesk:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#4edea3",
+                      "on-secondary-fixed": "#0d1c2d",
+                      "on-primary-fixed": "#07006c",
+                      "on-secondary-fixed-variant": "#39485a",
+                      "surface-container-low": "#131b2e",
+                      "background": "#0b1326",
+                      "secondary": "#b9c8de",
+                      "on-primary": "#1000a9",
+                      "surface": "#0b1326",
+                      "surface-dim": "#0b1326",
+                      "on-tertiary-container": "#000703",
+                      "surface-container": "#171f33",
+                      "surface-tint": "#c0c1ff",
+                      "outline": "#908fa0",
+                      "on-tertiary-fixed-variant": "#005236",
+                      "tertiary-fixed": "#6ffbbe",
+                      "surface-variant": "#2d3449",
+                      "secondary-fixed": "#d4e4fa",
+                      "on-primary-container": "#0d0096",
+                      "surface-container-lowest": "#060e20",
+                      "on-secondary": "#233143",
+                      "on-tertiary": "#003824",
+                      "tertiary-container": "#00885d",
+                      "secondary-container": "#39485a",
+                      "on-surface": "#dae2fd",
+                      "inverse-on-surface": "#283044",
+                      "on-surface-variant": "#c7c4d7",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "primary-fixed": "#e1e0ff",
+                      "primary": "#c0c1ff",
+                      "surface-container-high": "#222a3d",
+                      "primary-container": "#8083ff",
+                      "on-error-container": "#ffdad6",
+                      "outline-variant": "#464554",
+                      "error-container": "#93000a",
+                      "on-secondary-container": "#a7b6cc",
+                      "inverse-surface": "#dae2fd",
+                      "error": "#ffb4ab",
+                      "inverse-primary": "#494bd6",
+                      "tertiary-fixed-dim": "#4edea3",
+                      "secondary-fixed-dim": "#b9c8de",
+                      "on-error": "#690005",
+                      "on-tertiary-fixed": "#002113",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-background": "#dae2fd",
+                      "surface-container-highest": "#2d3449",
+                      "surface-bright": "#31394d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin": "24px",
+                      "gutter": "16px",
+                      "container-max": "1440px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "Manrope"
+                      ],
+                      "body-base": [
+                              "Manrope"
+                      ],
+                      "code-inline": [
+                              "Space Grotesk"
+                      ],
+                      "body-sm": [
+                              "Manrope"
+                      ],
+                      "headline-md": [
+                              "Manrope"
+                      ],
+                      "label-caps": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-base": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-inline": [
+                              "14px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0em",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        body { background-color: #0b1326; color: #dae2fd; }
+        .bento-card {
+            background-color: #171f33;
+            border: 1px solid #2d3449;
+        }
+        .code-container {
+            background-color: #060e20;
+            border: 1px solid #2d3449;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-base antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col">
+<!-- TopNavBar Component -->
+<nav class="fixed top-0 w-full z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md font-manrope tracking-tight antialiased">
+<div class="flex justify-between items-center h-16 px-6 max-w-[1440px] mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-8">
+<a class="text-xl font-black tracking-tighter text-slate-50" href="#">Hello Design</a>
+<!-- Navigation Links -->
+<div class="hidden md:flex items-center gap-6">
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Explore</a>
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Community</a>
+<a class="text-indigo-400 border-b-2 border-indigo-500 pb-1 hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Solutions</a>
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Pricing</a>
+<a class="text-slate-400 font-medium hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150" href="#">Settings</a>
+</div>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-4">
+<button class="hidden md:flex items-center justify-center bg-indigo-500 text-white px-4 py-2 rounded font-medium hover:bg-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150">
+                    Get Started
+                </button>
+<div class="flex items-center gap-3 text-slate-400">
+<button class="hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<button class="hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 pb-16 px-6 max-w-[1440px] mx-auto w-full space-y-12">
+<!-- Header / Scorecard -->
+<header class="flex flex-col md:flex-row gap-8 items-start md:items-center justify-between border-b border-surface-variant pb-8">
+<div>
+<h1 class="font-display-lg text-display-lg text-on-surface mb-2">Final Evaluation Results</h1>
+<p class="font-body-base text-body-base text-on-surface-variant max-w-2xl">
+                    Comprehensive architectural assessment. Review pillar scores, identify bottlenecks, and apply AI-driven refactoring proposals for optimal system health.
+                </p>
+</div>
+<div class="flex items-center gap-6 bento-card p-6 rounded-lg">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Overall Score</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-tertiary">88</span>
+<span class="font-headline-md text-headline-md text-surface-variant">/100</span>
+</div>
+</div>
+<div class="h-16 w-px bg-surface-variant"></div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase">Status</span>
+<span class="font-body-base text-body-base text-tertiary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary animate-pulse shadow-[0_0_8px_rgba(78,222,163,0.6)]"></span>
+                        Healthy
+                    </span>
+</div>
+</div>
+</header>
+<!-- Pillar Breakdown (Bento Grid) -->
+<section>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">assessment</span>
+                Pillar Breakdown
+            </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Scalability -->
+<div class="bento-card p-6 rounded-lg flex flex-col gap-4 hover:border-primary transition-colors group cursor-default">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center border border-surface-variant text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">layers</span>
+</div>
+<span class="font-body-base text-body-base text-tertiary">92/100</span>
+</div>
+<div>
+<h3 class="font-body-base text-body-base font-bold text-on-surface mb-1">Scalability</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Excellent horizontal scaling capacity. Minor bottlenecks in read-heavy database operations.</p>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-auto rounded-full overflow-hidden">
+<div class="bg-tertiary h-full" style="width: 92%"></div>
+</div>
+</div>
+<!-- Reliability -->
+<div class="bento-card p-6 rounded-lg flex flex-col gap-4 hover:border-primary transition-colors group cursor-default">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center border border-surface-variant text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<span class="font-body-base text-body-base text-tertiary">95/100</span>
+</div>
+<div>
+<h3 class="font-body-base text-body-base font-bold text-on-surface mb-1">Reliability</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Robust failover mechanisms. High availability achieved across multi-region deployments.</p>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-auto rounded-full overflow-hidden">
+<div class="bg-tertiary h-full" style="width: 95%"></div>
+</div>
+</div>
+<!-- Security -->
+<div class="bento-card p-6 rounded-lg flex flex-col gap-4 hover:border-primary transition-colors group cursor-default">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center border border-surface-variant text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">shield</span>
+</div>
+<span class="font-body-base text-body-base text-primary">85/100</span>
+</div>
+<div>
+<h3 class="font-body-base text-body-base font-bold text-on-surface mb-1">Security</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Solid baseline. Requires implementation of stricter RBAC policies and automated key rotation.</p>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-auto rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 85%"></div>
+</div>
+</div>
+<!-- Performance -->
+<div class="bento-card p-6 rounded-lg flex flex-col gap-4 hover:border-primary transition-colors group cursor-default">
+<div class="flex justify-between items-start">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center border border-surface-variant text-primary group-hover:bg-primary-container group-hover:text-on-primary-container transition-colors">
+<span class="material-symbols-outlined">speed</span>
+</div>
+<span class="font-body-base text-body-base text-error">78/100</span>
+</div>
+<div>
+<h3 class="font-body-base text-body-base font-bold text-on-surface mb-1">Performance</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Latency spikes detected during peak batch processing times. Caching layer optimization required.</p>
+</div>
+<div class="w-full bg-surface-container-high h-1 mt-auto rounded-full overflow-hidden">
+<div class="bg-error h-full" style="width: 78%"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- AI Architectural Insights -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">psychology</span>
+                    AI Architectural Insights
+                </h2>
+<span class="font-label-caps text-label-caps text-primary border border-primary px-2 py-1 rounded bg-primary/10">AUTO-ANALYSIS ACTIVE</span>
+</div>
+<div class="bento-card rounded-lg overflow-hidden flex flex-col lg:flex-row">
+<!-- Insight Details -->
+<div class="p-6 lg:w-1/3 border-b lg:border-b-0 lg:border-r border-surface-variant flex flex-col gap-4">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<h3 class="font-body-base text-body-base font-bold text-on-surface">Data Fetch Optimization</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+                            Analysis indicates an N+1 query issue in the user feed service. Abstracting the fetch logic to utilize batch processing and pre-compiled views will reduce latency by an estimated 42%.
+                        </p>
+</div>
+<div class="mt-auto pt-4 flex gap-3">
+<button class="bg-primary text-on-primary font-body-sm text-body-sm px-4 py-2 rounded font-bold hover:opacity-90 transition-opacity flex-1 active:scale-95 duration-150">
+                            Apply Refactor
+                        </button>
+<button class="bg-transparent border border-primary text-primary font-body-sm text-body-sm px-4 py-2 rounded font-bold hover:bg-primary/10 transition-colors flex-1 active:scale-95 duration-150">
+                            Dismiss
+                        </button>
+</div>
+</div>
+<!-- Code Block -->
+<div class="lg:w-2/3 code-container p-6 relative overflow-x-auto">
+<div class="absolute top-0 right-0 px-3 py-1 bg-surface-variant/50 border-b border-l border-surface-variant text-on-surface-variant font-label-caps text-label-caps rounded-bl">Proposed Refactor</div>
+<pre class="font-code-inline text-code-inline text-secondary mt-4 whitespace-pre-wrap"><code><span class="text-on-surface-variant">// Current Implementation (Bottleneck)</span>
+async function getUserFeed(userIds) {
+  const feed = [];
+  for (const id of userIds) {
+    <span class="text-error">const data = await db.query(`SELECT * FROM posts WHERE user_id = ${id}`);</span>
+    feed.push(...data);
+  }
+  return feed;
+}
+
+<span class="text-on-surface-variant">// Proposed Refactor (Batched Query)</span>
+async function getUserFeedOptimized(userIds) {
+  if (!userIds.length) return [];
+  
+  <span class="text-tertiary">const placeholders = userIds.map((_, i) =&gt; `$${i + 1}`).join(',');
+  const query = `
+    SELECT * FROM posts 
+    WHERE user_id IN (${placeholders})
+    ORDER BY created_at DESC
+  `;
+  
+  return await db.query(query, userIds);</span>
+}</code></pre>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Component -->
+<footer class="w-full border-t border-slate-800 bg-slate-950 mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center py-12 px-8 max-w-[1440px] mx-auto space-y-4 md:space-y-0">
+<!-- Copyright -->
+<div class="text-lg font-bold text-slate-200 font-manrope">
+                © 2024 Hello Design. Technical Precision in System Design.
+            </div>
+<!-- Links -->
+<div class="flex flex-wrap justify-center md:justify-end gap-6 font-manrope text-sm">
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">Documentation</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">API Reference</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-slate-200 transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+</div>
+</div>
+</footer>
+</body></html>

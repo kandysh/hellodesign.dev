@@ -1,13 +1,27 @@
-node_modules
-.DS_Store
-dist
-dist-ssr
-*.local
-count.txt
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.output/
+.next/
+*.tsbuildinfo
+
+# Environment
 .env
-.nitro
-.tanstack
-.wrangler
-.output
-.vinxi
-todos.json
+.env.local
+.env.*.local
+
+# Turbo
+.turbo/
+
+# Editor
+.DS_Store
+*.swp
+
+# Drizzle
+drizzle/
+
+# Logs
+*.log
