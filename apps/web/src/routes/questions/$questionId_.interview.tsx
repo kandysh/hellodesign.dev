@@ -210,6 +210,15 @@ function InterviewPage() {
         )
       })
 
+      es.addEventListener("agent_flow", (e) => {
+        const data = JSON.parse((e as MessageEvent).data) as { type: string; step: string; details?: Record<string, unknown> }
+        const details = data.details ? ` ${JSON.stringify(data.details)}` : ""
+        setEvalLogs((prev) => [
+          ...prev,
+          { time: nowHHMM(), tag: "INFO", text: `→ ${data.step}${details}` },
+        ])
+      })
+
       es.addEventListener("followup", (e) => {
         const evt = JSON.parse((e as MessageEvent).data) as SSEFollowupEvent
         // Detect quick-reply chips from common patterns

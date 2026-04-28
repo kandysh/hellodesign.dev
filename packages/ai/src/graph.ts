@@ -1,6 +1,7 @@
 import type { AIMessageChunk, BaseMessage } from "@langchain/core/messages";
 import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
+import type { RunnableConfig } from "@langchain/core/runnables";
 import { ChatOpenAI } from "@langchain/openai";
 import type {
   AgentEvent,
@@ -11,6 +12,66 @@ import { z } from "zod";
 import { buildEvaluationPrompt } from "./prompts.js";
 import { clarificationTools } from "./tools.js";
 import { ChatDeepSeek } from "@langchain/deepseek";
+
+// ─── Logger for capturing LangGraph execution ──────────────────────────────────
+
+export function createAgentFlowLogger(publishEvent: (event: AgentEvent) => Promise<void>) {
+  return async (event: Record<string, unknown>) => {
+    try {
+      const eventName = event.event as string;
+      const data = event.data as Record<string, unknown>;
+      
+      // Log node execution
+      if (eventName === "on_chain_start" && event.name === "agent") {
+        await publishEvent({
+          type: "agent_flow",
+          step: "Agent analyzing design",
+          details: { phase: "clarification", node: "agent" },
+        });
+      }
+      
+      // Log tool calls
+      if (eventName === "on_tool_start") {
+        const toolName = event.tool as string;
+        const toolInput = data.input as Record<string, unknown>;
+        await publishEvent({
+          type: "agent_flow",
+          step: `Tool called: ${toolName}`,
+          details: { tool: toolName, input: toolInput },
+        });
+      }
+      
+      // Log node transitions
+      if (eventName === "on_chain_end" && event.name === "agent") {
+        await publishEvent({
+          type: "agent_flow",
+          step: "Agent completed step",
+          details: { node: "agent" },
+        });
+      }
+
+      if (eventName === "on_chain_start" && event.name === "wait_reply") {
+        await publishEvent({
+          type: "agent_flow",
+          step: "Waiting for user reply",
+          details: { node: "wait_reply" },
+        });
+      }
+
+      // Log workflow end
+      if (eventName === "on_chain_end" && event.name === "__root__") {
+        await publishEvent({
+          type: "agent_flow",
+          step: "Clarification phase completed",
+          details: { phase: "clarification_done" },
+        });
+      }
+    } catch (error) {
+      // Silently ignore logger errors to not disrupt the main flow
+      console.debug("[agent_logger] Error in logger:", error);
+    }
+  };
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -212,10 +273,16 @@ export async function runClarificationPhase(
     .addEdge("wait_reply", "agent")
     .compile();
 
-  const result = await workflow.invoke({
-    messages: initialMessages,
-    followupRounds: 0,
-  });
+  const logger = createAgentFlowLogger(publishEvent);
+  const config: RunnableConfig = { callbacks: [] };
+
+  const result = await workflow.invoke(
+    {
+      messages: initialMessages,
+      followupRounds: 0,
+    },
+    { ...config, callbacks: [{ on_chain_start: logger, on_tool_start: logger, on_chain_end: logger }] } as any
+  );
 
   return {
     messages: result.messages,
@@ -238,6 +305,8 @@ export async function runEvaluationPhase(
   } = params;
 
   const dimensionIds = question.rubric.dimensions.map((d) => d.id);
+  
+  await publishEvent({ type: "agent_flow", step: "Evaluation starting", details: { dimensions: dimensionIds.length } });
   await publishEvent({ type: "eval_start", dimensions: dimensionIds });
 
   const model = new ChatOpenAI({
@@ -253,12 +322,20 @@ export async function runEvaluationPhase(
     new HumanMessage(buildEvaluationPrompt(dimensionIds)),
   ];
 
+  await publishEvent({ type: "agent_flow", step: "Evaluating design against rubric", details: { dimensionCount: dimensionIds.length } });
+
   // biome-ignore lint/suspicious/noExplicitAny: BaseMessage[] generic variance incompatibility across module boundaries
   const { scores } = (await model.invoke(evalMessages as any)) as {
     scores: ComponentScore[];
   };
 
   for (const score of scores) {
+    const dimension = question.rubric.dimensions.find((d) => d.id === score.dimensionId);
+    await publishEvent({
+      type: "agent_flow",
+      step: `Scored ${dimension?.label ?? score.dimensionId}`,
+      details: { dimensionId: score.dimensionId, score: score.score, reasoning: score.reasoning },
+    });
     await publishEvent({
       type: "eval_progress",
       dimensionId: score.dimensionId,

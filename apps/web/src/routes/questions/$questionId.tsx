@@ -177,6 +177,20 @@ function WorkspacePage() {
         })
       })
 
+      es.addEventListener("agent_flow", (e) => {
+        const ev = JSON.parse(e.data)
+        const flowStep = ev.step ?? "Agent progress"
+        const details = ev.details ? ` (${JSON.stringify(ev.details)})` : ""
+        const flowLine = `→ ${flowStep}${details}`
+        
+        setAgentState((prev) => {
+          if (prev.phase === "processing" || prev.phase === "follow-up") {
+            return { ...prev, trace: [...(prev.trace ?? []), flowLine] }
+          }
+          return prev
+        })
+      })
+
       es.addEventListener("followup", (e) => {
         const ev = JSON.parse(e.data)
         const q = ev.question ?? ev.content ?? ""

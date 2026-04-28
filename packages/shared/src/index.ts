@@ -52,6 +52,7 @@ export type AgentEvent =
   | { type: "eval_progress"; dimensionId: string; score: number }
   | { type: "eval_done"; submissionId: string }
   | { type: "error"; message: string }
+  | { type: "agent_flow"; step: string; details?: Record<string, unknown> }
 
 // ─── Zod schemas ─────────────────────────────────────────────────────────────
 
