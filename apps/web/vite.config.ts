@@ -9,4 +9,7 @@ export default defineConfig({
     viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
     TanStackRouterVite({ routesDirectory: "./src/routes", generatedRouteTree: "./src/routeTree.gen.ts" }),
   ],
+  preview: {
+    allowedHosts: true,
+  },
 })
