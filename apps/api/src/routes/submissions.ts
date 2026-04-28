@@ -197,6 +197,17 @@ app.get("/:id/events", async (c) => {
   const channel = submissionChannel(id)
 
   return streamSSE(c, async (stream) => {
+    // Send immediate status event for late subscribers
+    await stream.writeSSE({
+      event: "submission_status",
+      data: JSON.stringify({ 
+        submissionId: id,
+        status: submission.status,
+        timestamp: new Date().toISOString(),
+      }),
+      id: Date.now().toString(),
+    }).catch(() => {})
+
     const sub = redis.duplicate()
     await sub.subscribe(channel)
 
@@ -207,6 +218,7 @@ app.get("/:id/events", async (c) => {
     sub.on("message", async (_, raw) => {
       try {
         const event = JSON.parse(raw) as AgentEvent
+        console.log(`[sse] Publishing event for ${id}:`, event.type)
         await stream.writeSSE({
           event: event.type,
           data: JSON.stringify(event),
@@ -218,8 +230,8 @@ app.get("/:id/events", async (c) => {
           await sub.quit()
           stream.close()
         }
-      } catch {
-        // ignore parse errors
+      } catch (err) {
+        console.error(`[sse] Error parsing event for ${id}:`, err)
       }
     })
 

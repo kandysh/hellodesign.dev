@@ -191,6 +191,12 @@ function WorkspacePage() {
         })
       })
 
+      es.addEventListener("submission_status", (e) => {
+        const ev = JSON.parse(e.data)
+        console.log("[sse] Submission status:", ev.status)
+        // Status event signals connection is live, no UI update needed
+      })
+
       es.addEventListener("followup", (e) => {
         const ev = JSON.parse(e.data)
         const q = ev.question ?? ev.content ?? ""

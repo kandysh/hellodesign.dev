@@ -219,6 +219,11 @@ function InterviewPage() {
         ])
       })
 
+      es.addEventListener("submission_status", (e) => {
+        const evt = JSON.parse((e as MessageEvent).data) as { status: string }
+        console.log(`[sse] submission_status: ${evt.status}`)
+      })
+
       es.addEventListener("followup", (e) => {
         const evt = JSON.parse((e as MessageEvent).data) as SSEFollowupEvent
         // Detect quick-reply chips from common patterns

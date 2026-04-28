@@ -20,6 +20,7 @@ import { redisPub, createSubscriber, submissionChannel, replyChannel } from "../
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function publish(submissionId: string, event: AgentEvent) {
+  console.log(`[worker:publish] ${submissionId} -> ${event.type}`)
   await redisPub.publish(submissionChannel(submissionId), JSON.stringify(event))
 }
 
@@ -111,6 +112,13 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
 
   // 2. Mark as processing
   await db.submission.update({ where: { id: submissionId }, data: { status: "PROCESSING" } })
+  
+  // Publish initial event to signal job has started
+  await publish(submissionId, { 
+    type: "agent_flow", 
+    step: "Job started - initializing agent",
+    details: { phase: "startup" }
+  })
 
   try {
     // 3. Build initial messages
