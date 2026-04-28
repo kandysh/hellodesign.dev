@@ -135,12 +135,6 @@ importers:
       '@tanstack/react-router-devtools':
         specifier: ^1.166.13
         version: 1.166.13(@tanstack/react-router@1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.168.16)(csstype@3.2.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@tanstack/react-router-ssr-query':
-        specifier: ^1.166.11
-        version: 1.166.11(@tanstack/query-core@5.100.3)(@tanstack/react-query@5.100.3(react@19.2.3))(@tanstack/react-router@1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.168.16)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@tanstack/react-start':
-        specifier: ^1.167.48
-        version: 1.167.48(crossws@0.4.1(srvx@0.11.15))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))
       better-auth:
         specifier: ^1.2.7
         version: 1.6.9(@opentelemetry/api@1.9.1)(@prisma/client@7.8.0(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3))(@tanstack/react-start@1.167.48(crossws@0.4.1(srvx@0.11.15))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)))(drizzle-kit@0.31.8)(mysql2@3.15.3)(next@16.2.4(@babel/core@7.28.5)(@opentelemetry/api@1.9.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(pg@8.20.0)(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(solid-js@1.9.10)(vitest@3.2.4(@types/debug@4.1.13)(@types/node@22.19.17)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.32.0)(tsx@4.21.0))
@@ -2762,16 +2756,6 @@ packages:
       '@tanstack/router-core':
         optional: true
 
-  '@tanstack/react-router-ssr-query@1.166.11':
-    resolution: {integrity: sha512-i81a5avRWgTjSKH5VYttbQ/Y86Il8GIkdcrIlyYUys0Lt1zMCxkTGHH9lBN5ZmhBe3mzwQ+9jOlx9xSxj8Kx0w==}
-    engines: {node: '>=20.19'}
-    peerDependencies:
-      '@tanstack/query-core': '>=5.90.0'
-      '@tanstack/react-query': '>=5.90.0'
-      '@tanstack/react-router': '>=1.127.0'
-      react: '>=18.0.0 || >=19.0.0'
-      react-dom: '>=18.0.0 || >=19.0.0'
-
   '@tanstack/react-router@1.168.24':
     resolution: {integrity: sha512-CQWd9ywDZU6icG65SrjJMzWcNg/ehBKFxfxYssKSuELk0eM9SzJxJ3JBI760kdLXIsXewOX9PHpJDknxC/R5Ag==}
     engines: {node: '>=20.19'}
@@ -2874,13 +2858,6 @@ packages:
         optional: true
       webpack:
         optional: true
-
-  '@tanstack/router-ssr-query-core@1.167.1':
-    resolution: {integrity: sha512-sJNRHa36lfuHw04akO9C6KU1P1Ncam2Azsk5XlgdQHMFgOtSlFAsuwqAHpyYSwu5Jyxj6P3PmyKYMIm4u8dI7Q==}
-    engines: {node: '>=20.19'}
-    peerDependencies:
-      '@tanstack/query-core': '>=5.90.0'
-      '@tanstack/router-core': '>=1.127.0'
 
   '@tanstack/router-utils@1.161.7':
     resolution: {integrity: sha512-VkY0u7ax/GD0qU6ZLLnfPC+UMxVzxRbvZp4yV4iUSXjgJZ/siAT5/QlLm9FEDJ9QDoC0VD9W7f00tKKreUI7Ng==}
@@ -6696,17 +6673,21 @@ snapshots:
       '@oozcitak/infra': 2.0.2
       '@oozcitak/url': 3.0.0
       '@oozcitak/util': 10.0.0
+    optional: true
 
   '@oozcitak/infra@2.0.2':
     dependencies:
       '@oozcitak/util': 10.0.0
+    optional: true
 
   '@oozcitak/url@3.0.0':
     dependencies:
       '@oozcitak/infra': 2.0.2
       '@oozcitak/util': 10.0.0
+    optional: true
 
-  '@oozcitak/util@10.0.0': {}
+  '@oozcitak/util@10.0.0':
+    optional: true
 
   '@opentelemetry/api-logs@0.201.1':
     dependencies:
@@ -7299,7 +7280,8 @@ snapshots:
 
   '@radix-ui/rect@1.1.0': {}
 
-  '@rolldown/pluginutils@1.0.0-beta.40': {}
+  '@rolldown/pluginutils@1.0.0-beta.40':
+    optional: true
 
   '@rollup/rollup-android-arm-eabi@4.54.0':
     optional: true
@@ -7549,17 +7531,6 @@ snapshots:
     transitivePeerDependencies:
       - csstype
 
-  '@tanstack/react-router-ssr-query@1.166.11(@tanstack/query-core@5.100.3)(@tanstack/react-query@5.100.3(react@19.2.3))(@tanstack/react-router@1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.168.16)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@tanstack/query-core': 5.100.3
-      '@tanstack/react-query': 5.100.3(react@19.2.3)
-      '@tanstack/react-router': 1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@tanstack/router-ssr-query-core': 1.167.1(@tanstack/query-core@5.100.3)(@tanstack/router-core@1.168.16)
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-    transitivePeerDependencies:
-      - '@tanstack/router-core'
-
   '@tanstack/react-router@1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@tanstack/history': 1.161.6
@@ -7576,6 +7547,7 @@ snapshots:
       '@tanstack/start-client-core': 1.167.19
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
+    optional: true
 
   '@tanstack/react-start-rsc@0.0.27(crossws@0.4.1(srvx@0.11.15))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
@@ -7598,6 +7570,7 @@ snapshots:
       - vite
       - vite-plugin-solid
       - webpack
+    optional: true
 
   '@tanstack/react-start-rsc@0.0.27(crossws@0.4.1(srvx@0.11.15))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.3.2(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
@@ -7633,6 +7606,7 @@ snapshots:
       react-dom: 19.2.3(react@19.2.3)
     transitivePeerDependencies:
       - crossws
+    optional: true
 
   '@tanstack/react-start@1.167.48(crossws@0.4.1(srvx@0.11.15))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
@@ -7656,6 +7630,7 @@ snapshots:
       - supports-color
       - vite-plugin-solid
       - webpack
+    optional: true
 
   '@tanstack/react-start@1.167.48(crossws@0.4.1(srvx@0.11.15))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vite@7.3.2(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
@@ -7759,11 +7734,6 @@ snapshots:
       - supports-color
     optional: true
 
-  '@tanstack/router-ssr-query-core@1.167.1(@tanstack/query-core@5.100.3)(@tanstack/router-core@1.168.16)':
-    dependencies:
-      '@tanstack/query-core': 5.100.3
-      '@tanstack/router-core': 1.168.16
-
   '@tanstack/router-utils@1.161.7':
     dependencies:
       '@babel/core': 7.28.5
@@ -7784,8 +7754,10 @@ snapshots:
       '@tanstack/start-fn-stubs': 1.161.6
       '@tanstack/start-storage-context': 1.166.30
       seroval: 1.5.2
+    optional: true
 
-  '@tanstack/start-fn-stubs@1.161.6': {}
+  '@tanstack/start-fn-stubs@1.161.6':
+    optional: true
 
   '@tanstack/start-plugin-core@1.169.4(@tanstack/react-router@1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(crossws@0.4.1(srvx@0.11.15))(vite@7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
@@ -7820,6 +7792,7 @@ snapshots:
       - supports-color
       - vite-plugin-solid
       - webpack
+    optional: true
 
   '@tanstack/start-plugin-core@1.169.4(@tanstack/react-router@1.168.24(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(crossws@0.4.1(srvx@0.11.15))(vite@7.3.2(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))':
     dependencies:
@@ -7866,10 +7839,12 @@ snapshots:
       seroval: 1.5.2
     transitivePeerDependencies:
       - crossws
+    optional: true
 
   '@tanstack/start-storage-context@1.166.30':
     dependencies:
       '@tanstack/router-core': 1.168.16
+    optional: true
 
   '@tanstack/store@0.9.3': {}
 
@@ -8159,7 +8134,8 @@ snapshots:
       normalize-path: 3.0.0
       picomatch: 2.3.1
 
-  argparse@2.0.1: {}
+  argparse@2.0.1:
+    optional: true
 
   aria-hidden@1.2.6:
     dependencies:
@@ -8275,7 +8251,8 @@ snapshots:
 
   binary-extensions@2.3.0: {}
 
-  boolbase@1.0.0: {}
+  boolbase@1.0.0:
+    optional: true
 
   braces@3.0.3:
     dependencies:
@@ -8365,6 +8342,7 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
       domutils: 3.2.2
+    optional: true
 
   cheerio@1.1.2:
     dependencies:
@@ -8379,6 +8357,7 @@ snapshots:
       parse5-parser-stream: 7.1.2
       undici: 7.16.0
       whatwg-mimetype: 4.0.0
+    optional: true
 
   chevrotain-allstar@0.3.1(chevrotain@11.0.3):
     dependencies:
@@ -8485,6 +8464,7 @@ snapshots:
       domhandler: 5.0.3
       domutils: 3.2.2
       nth-check: 2.1.1
+    optional: true
 
   css-tree@3.2.1:
     dependencies:
@@ -8492,7 +8472,8 @@ snapshots:
       source-map-js: 1.2.1
     optional: true
 
-  css-what@6.2.2: {}
+  css-what@6.2.2:
+    optional: true
 
   cssesc@3.0.0: {}
 
@@ -8745,12 +8726,15 @@ snapshots:
       domelementtype: 2.3.0
       domhandler: 5.0.3
       entities: 4.5.0
+    optional: true
 
-  domelementtype@2.3.0: {}
+  domelementtype@2.3.0:
+    optional: true
 
   domhandler@5.0.3:
     dependencies:
       domelementtype: 2.3.0
+    optional: true
 
   dompurify@3.4.1:
     optionalDependencies:
@@ -8761,6 +8745,7 @@ snapshots:
       dom-serializer: 2.0.0
       domelementtype: 2.3.0
       domhandler: 5.0.3
+    optional: true
 
   dotenv@17.4.2: {}
 
@@ -8787,15 +8772,18 @@ snapshots:
     dependencies:
       iconv-lite: 0.6.3
       whatwg-encoding: 3.1.1
+    optional: true
 
   enhanced-resolve@5.18.4:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.0
 
-  entities@4.5.0: {}
+  entities@4.5.0:
+    optional: true
 
-  entities@6.0.1: {}
+  entities@6.0.1:
+    optional: true
 
   entities@8.0.0:
     optional: true
@@ -9034,6 +9022,7 @@ snapshots:
       srvx: 0.11.15
     optionalDependencies:
       crossws: 0.4.1(srvx@0.11.15)
+    optional: true
 
   hachure-fill@0.5.2: {}
 
@@ -9076,6 +9065,7 @@ snapshots:
       domhandler: 5.0.3
       domutils: 3.2.2
       entities: 6.0.1
+    optional: true
 
   http-proxy-agent@7.0.2:
     dependencies:
@@ -9195,6 +9185,7 @@ snapshots:
   js-yaml@4.1.1:
     dependencies:
       argparse: 2.0.1
+    optional: true
 
   jsdom@27.3.0:
     dependencies:
@@ -9372,6 +9363,7 @@ snapshots:
       lightningcss-linux-x64-musl: 1.32.0
       lightningcss-win32-arm64-msvc: 1.32.0
       lightningcss-win32-x64-msvc: 1.32.0
+    optional: true
 
   lodash-es@4.17.21: {}
 
@@ -9881,6 +9873,7 @@ snapshots:
   nth-check@2.1.1:
     dependencies:
       boolbase: 1.0.0
+    optional: true
 
   object-assign@4.1.1: {}
 
@@ -9933,14 +9926,17 @@ snapshots:
     dependencies:
       domhandler: 5.0.3
       parse5: 7.3.0
+    optional: true
 
   parse5-parser-stream@7.1.2:
     dependencies:
       parse5: 7.3.0
+    optional: true
 
   parse5@7.3.0:
     dependencies:
       entities: 6.0.1
+    optional: true
 
   parse5@8.0.1:
     dependencies:
@@ -10315,7 +10311,8 @@ snapshots:
 
   rou3@0.7.12: {}
 
-  rou3@0.8.1: {}
+  rou3@0.8.1:
+    optional: true
 
   roughjs@4.6.4:
     dependencies:
@@ -10435,7 +10432,8 @@ snapshots:
   source-map@0.6.1:
     optional: true
 
-  source-map@0.7.6: {}
+  source-map@0.7.6:
+    optional: true
 
   space-separated-tokens@2.0.2: {}
 
@@ -10443,7 +10441,8 @@ snapshots:
 
   sqlstring@2.3.3: {}
 
-  srvx@0.11.15: {}
+  srvx@0.11.15:
+    optional: true
 
   stackback@0.0.2:
     optional: true
@@ -10580,13 +10579,15 @@ snapshots:
 
   typescript@5.9.3: {}
 
-  ufo@1.6.1: {}
+  ufo@1.6.1:
+    optional: true
 
   ufo@1.6.3: {}
 
   undici-types@6.21.0: {}
 
-  undici@7.16.0: {}
+  undici@7.16.0:
+    optional: true
 
   unified@11.0.5:
     dependencies:
@@ -10779,6 +10780,7 @@ snapshots:
   vitefu@1.1.1(vite@7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)):
     optionalDependencies:
       vite: 7.3.0(@types/node@22.19.17)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)
+    optional: true
 
   vitefu@1.1.1(vite@7.3.2(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)):
     optionalDependencies:
@@ -10907,8 +10909,10 @@ snapshots:
   whatwg-encoding@3.1.1:
     dependencies:
       iconv-lite: 0.6.3
+    optional: true
 
-  whatwg-mimetype@4.0.0: {}
+  whatwg-mimetype@4.0.0:
+    optional: true
 
   whatwg-mimetype@5.0.0:
     optional: true
@@ -10941,6 +10945,7 @@ snapshots:
       '@oozcitak/infra': 2.0.2
       '@oozcitak/util': 10.0.0
       js-yaml: 4.1.1
+    optional: true
 
   xmlchars@2.2.0:
     optional: true
