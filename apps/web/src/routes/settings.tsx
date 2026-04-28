@@ -352,7 +352,7 @@ function SectionCard({
 
 const STORAGE_KEY = "sysdesign:apikey"
 
-interface StoredKey { id: string; provider: string; keyHint: string; validatedAt: string | null }
+interface StoredKey { id: string; provider: string; keyHint: string; baseUrl?: string | null; validatedAt: string | null }
 
 function ApiKeySection({
   toast,
@@ -362,6 +362,7 @@ function ApiKeySection({
   const qc = useQueryClient()
   const [showNew, setShowNew] = useState(false)
   const [draft, setDraft] = useState("")
+  const [draftBaseUrl, setDraftBaseUrl] = useState("")
   const [showDraft, setShowDraft] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -393,7 +394,12 @@ function ApiKeySection({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ provider: "openai", key: trimmed, validate: true }),
+        body: JSON.stringify({
+          provider: "openai",
+          key: trimmed,
+          baseUrl: draftBaseUrl.trim() || undefined,
+          validate: true,
+        }),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string }
@@ -404,6 +410,7 @@ function ApiKeySection({
       localStorage.setItem(STORAGE_KEY, `****${saved.keyHint}`)
       await qc.invalidateQueries({ queryKey: ["api-keys"] })
       setDraft("")
+      setDraftBaseUrl("")
       setShowNew(false)
       toast("Key saved & validated", "success")
     } catch (err) {
@@ -447,6 +454,11 @@ function ApiKeySection({
             <p className="mt-0.5 font-mono text-xs" style={{ color: "#464554" }}>
               ••••••••{activeKey.keyHint}
             </p>
+            {activeKey.baseUrl && (
+              <p className="mt-0.5 text-xs truncate max-w-xs" style={{ color: "#464554" }}>
+                {activeKey.baseUrl}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -501,6 +513,21 @@ function ApiKeySection({
               {showDraft ? <EyeOff size={13} /> : <Eye size={13} />}
             </button>
           </div>
+          <div>
+            <input
+              type="url"
+              value={draftBaseUrl}
+              onChange={(e) => setDraftBaseUrl(e.target.value)}
+              placeholder="API base URL (optional) — e.g. https://openrouter.ai/api/v1"
+              className="w-full rounded px-3 py-2.5 text-sm outline-none transition-all"
+              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#dae2fd" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#8083ff" }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+            />
+            <p className="mt-1 text-[10px]" style={{ color: "#464554" }}>
+              Leave blank to use the default OpenAI endpoint.
+            </p>
+          </div>
           <div className="flex gap-2">
             <button
               type="button"
@@ -527,7 +554,7 @@ function ApiKeySection({
             </button>
             <button
               type="button"
-              onClick={() => { setShowNew(false); setDraft("") }}
+              onClick={() => { setShowNew(false); setDraft(""); setDraftBaseUrl("") }}
               style={{ color: "#908fa0", background: "transparent", border: "1px solid #2d3449" }}
               className="px-4 py-2.5 rounded text-sm font-medium transition-colors active:scale-95"
               onMouseEnter={(e) => { e.currentTarget.style.color = "#dae2fd"; e.currentTarget.style.borderColor = "#464554" }}

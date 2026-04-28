@@ -29,12 +29,12 @@ async function resolveApiKey({
 }: {
   userId?: string
   sessionId?: string
-}): Promise<string | null> {
+}): Promise<{ apiKey: string; baseUrl: string | null } | null> {
   const record = await db.userApiKey.findFirst({
     where: userId ? { userId } : { sessionId },
   })
   if (!record) return null
-  return decryptKey(record.encryptedKey, record.iv)
+  return { apiKey: decryptKey(record.encryptedKey, record.iv), baseUrl: record.baseUrl ?? null }
 }
 
 async function saveMessage(
@@ -86,12 +86,13 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
   console.log(`[eval] Starting submission ${submissionId}`)
 
   // 1. Resolve API key
-  const apiKey = await resolveApiKey({ userId, sessionId })
-  if (!apiKey) {
+  const resolved = await resolveApiKey({ userId, sessionId })
+  if (!resolved) {
     await publish(submissionId, { type: "error", message: "NO_API_KEY: No OpenAI API key found." })
     await db.submission.update({ where: { id: submissionId }, data: { status: "FAILED" } })
     return
   }
+  const { apiKey, baseUrl } = resolved
 
   const question = await db.question.findUnique({ where: { id: questionId } })
   if (!question) {
@@ -128,6 +129,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     // 4. Clarification phase (LangGraph loop)
     const { messages: clarifiedMessages, followupRounds } = await runClarificationPhase({
       apiKey,
+      baseUrl: baseUrl ?? undefined,
       initialMessages,
       question: questionCtx,
       submissionId,
@@ -154,6 +156,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
 
     const componentScores = await runEvaluationPhase({
       apiKey,
+      baseUrl: baseUrl ?? undefined,
       messages: clarifiedMessages,
       question: questionCtx,
       submissionId,
@@ -165,6 +168,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     // 6. Narrative feedback
     const { narrative, improvements } = await generateNarrativeFeedback({
       apiKey,
+      baseUrl: baseUrl ?? undefined,
       messages: clarifiedMessages,
       componentScores,
       overallScore,

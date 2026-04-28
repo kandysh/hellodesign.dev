@@ -10,6 +10,7 @@ import type {
 import { z } from "zod";
 import { buildEvaluationPrompt } from "./prompts.js";
 import { clarificationTools } from "./tools.js";
+import { ChatDeepSeek } from "@langchain/deepseek";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,6 +22,7 @@ export interface QuestionContext {
 
 export interface ClarificationParams {
   apiKey: string;
+  baseUrl?: string;
   initialMessages: BaseMessage[];
   question: QuestionContext;
   submissionId: string;
@@ -35,6 +37,7 @@ export interface ClarificationResult {
 
 export interface EvaluationParams {
   apiKey: string;
+  baseUrl?: string;
   messages: BaseMessage[];
   question: QuestionContext;
   submissionId: string;
@@ -43,6 +46,7 @@ export interface EvaluationParams {
 
 export interface FeedbackParams {
   apiKey: string;
+  baseUrl?: string;
   messages: BaseMessage[];
   componentScores: ComponentScore[];
   overallScore: number;
@@ -101,6 +105,7 @@ export async function runClarificationPhase(
 ): Promise<ClarificationResult> {
   const {
     apiKey,
+    baseUrl,
     initialMessages,
     question,
     submissionId,
@@ -109,10 +114,11 @@ export async function runClarificationPhase(
   } = params;
 
   const model = new ChatOpenAI({
-    model: "gpt-5.4-mini",
+    model: "openai/gpt-oss-120b",
     temperature: 0.2,
     apiKey,
     streaming: true,
+    ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
   }).bindTools(clarificationTools);
 
   // Agent node: stream LLM response, publish reasoning chunks
@@ -224,6 +230,7 @@ export async function runEvaluationPhase(
 ): Promise<ComponentScore[]> {
   const {
     apiKey,
+    baseUrl,
     messages,
     question,
     submissionId: _submissionId,
@@ -237,6 +244,7 @@ export async function runEvaluationPhase(
     model: "gpt-5.4-mini",
     temperature: 0.1,
     apiKey,
+    ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
     // biome-ignore lint/suspicious/noExplicitAny: Zod v4 cross-package type conflict with withStructuredOutput
   }).withStructuredOutput(EvalOutputSchema as any);
 
@@ -266,12 +274,14 @@ export async function runEvaluationPhase(
 export async function generateNarrativeFeedback(
   params: FeedbackParams,
 ): Promise<FeedbackResult> {
-  const { apiKey, messages, componentScores, overallScore, rubric } = params;
+  const { apiKey, baseUrl, messages, componentScores, overallScore, rubric } =
+    params;
 
   const model = new ChatOpenAI({
     model: "gpt-5.4-mini",
     temperature: 0.3,
     apiKey,
+    ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
     // biome-ignore lint/suspicious/noExplicitAny: Zod v4 cross-package type conflict with withStructuredOutput
   }).withStructuredOutput(FeedbackOutputSchema as any);
 
@@ -302,16 +312,22 @@ Write a structured evaluation response with:
 
 // ─── Key validation ───────────────────────────────────────────────────────────
 
-export async function validateOpenAIKey(apiKey: string): Promise<boolean> {
+export async function validateOpenAIKey(
+  apiKey: string,
+  baseUrl?: string,
+): Promise<boolean> {
   try {
     const model = new ChatOpenAI({
-      model: "gpt-5.4-mini",
+      model: "openai/gpt-oss-120b",
       apiKey,
       maxTokens: 5,
+      ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
     });
-    await model.invoke([new HumanMessage("Hi")]);
+    const response = await model.invoke([new HumanMessage("Hi")]);
+    console.log(response);
     return true;
-  } catch {
+  } catch (error) {
+    console.error(error);
     return false;
   }
 }

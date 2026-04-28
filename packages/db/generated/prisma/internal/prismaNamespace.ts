@@ -1183,6 +1183,7 @@ export const UserApiKeyScalarFieldEnum = {
   encryptedKey: 'encryptedKey',
   iv: 'iv',
   keyHint: 'keyHint',
+  baseUrl: 'baseUrl',
   validatedAt: 'validatedAt',
   createdAt: 'createdAt'
 } as const

@@ -98,6 +98,7 @@ model UserApiKey {
   encryptedKey String
   iv           String
   keyHint      String // last 4 chars shown to user
+  baseUrl      String? // optional custom API base URL (e.g. OpenRouter, Azure)
   validatedAt  DateTime?
   createdAt    DateTime  @default(now())
 
