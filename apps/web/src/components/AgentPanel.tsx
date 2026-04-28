@@ -224,24 +224,22 @@ export function AgentPanel({
 // ── Status pill ────────────────────────────────────────────────────────────
 
 function StatusPill({ phase }: { phase: AgentPanelState["phase"] }) {
-  const config: Record<string, { label: string; classes: string }> = {
+  const config = {
     idle: { label: "Idle", classes: "bg-base-300/40 text-base-content/40" },
     processing: { label: "Processing", classes: "bg-primary/10 text-primary" },
     "follow-up": { label: "Follow-up", classes: "bg-warning/10 text-warning" },
     evaluating: { label: "Evaluating", classes: "bg-info/10 text-info" },
     done: { label: "Done", classes: "bg-success/10 text-success" },
-  }
-  const pill = config[phase as keyof typeof config] ?? config.idle
-  const label = pill.label
-  const classes = pill.classes
+  } as const
+  const pill = config[phase as keyof typeof config] || config.idle
   return (
     <span
       className={cn(
         "ml-auto rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-        classes,
+        pill.classes,
       )}
     >
-      {label}
+      {pill.label}
     </span>
   )
 }

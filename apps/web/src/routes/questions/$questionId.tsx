@@ -161,13 +161,17 @@ function WorkspacePage() {
         withCredentials: true,
       } as EventSourceInit)
       sseRef.current = es
+      
+      // Track if we've seen a terminal event to avoid double-toasting
+      let hasTerminated = false
 
       es.addEventListener("reasoning", (e) => {
         const ev = JSON.parse(e.data)
         const line = ev.content ?? ev.line ?? JSON.stringify(ev)
         setAgentState((prev) => {
-          if (prev.phase === "processing") {
-            return { phase: "processing", trace: [...prev.trace, line] }
+          // Accumulate trace in both processing and follow-up phases
+          if (prev.phase === "processing" || prev.phase === "follow-up") {
+            return { ...prev, trace: [...(prev.trace ?? []), line] }
           }
           return prev
         })
@@ -179,7 +183,7 @@ function WorkspacePage() {
         setAgentState((prev) => ({
           phase: "follow-up",
           question: q,
-          trace: prev.phase === "processing" ? prev.trace : [],
+          trace: prev.phase === "processing" ? prev.trace : (prev.phase === "follow-up" ? prev.trace : []),
         }))
         setAgentMessages((prev) => [
           ...prev,
@@ -205,6 +209,7 @@ function WorkspacePage() {
       })
 
       es.addEventListener("eval_done", () => {
+        hasTerminated = true
         setAgentState({
           phase: "done",
           submissionId,
@@ -215,6 +220,7 @@ function WorkspacePage() {
       })
 
       es.addEventListener("error", (e) => {
+        hasTerminated = true
         let errMsg = "Evaluation failed"
         try {
           errMsg = JSON.parse((e as MessageEvent).data)?.message ?? errMsg
@@ -226,11 +232,13 @@ function WorkspacePage() {
       })
 
       es.onerror = () => {
-        if (sseRef.current) {
+        // Only show connection error if we haven't already seen a terminal event
+        if (sseRef.current && !hasTerminated) {
           toast("Lost connection to agent", "error")
-          es.close()
-          sseRef.current = null
+          setAgentState({ phase: "idle" })
         }
+        es.close()
+        sseRef.current = null
       }
     },
     onError: (err: Error) => {
