@@ -30,26 +30,34 @@ Each service has a `railway.toml` that tells Railway exactly how to build and st
 
 ### PostgreSQL
 1. Click **+ New** → **Database** → **Add PostgreSQL**
-2. Railway auto-creates `DATABASE_URL` — reference it in service variables
+2. Railway creates two variables:
+   - `DATABASE_URL` — public URL (for migrations run from your machine)
+   - `DATABASE_PRIVATE_URL` — private URL (use this for API and Worker, stays on Railway's internal network)
 
 ### Redis
 1. Click **+ New** → **Database** → **Add Redis**
-2. Railway auto-creates `REDIS_URL` — reference it in service variables
+2. Railway creates:
+   - `REDIS_URL` — public URL
+   - `REDIS_PRIVATE_URL` — private URL (use this for API and Worker)
+
+> **Why private URLs?** Services in the same Railway project communicate over a private network (`.railway.internal`) — no public internet, faster, no egress cost. The browser-based web app is the only thing that needs to reach the API over a public domain, since requests originate from the user's browser, not from inside Railway.
 
 ---
 
 ## Step 3 — Configure the API service
 
+The API **needs a public domain** because the web SPA runs in the user's browser — those HTTP calls originate outside Railway.
+
 1. Open the `api` service → **Settings**
 2. Set **Config file path**: `/apps/api/railway.toml`
 3. Set **Root directory**: `/` (repo root — required for pnpm workspace)
-4. **Generate a domain** (you'll need it for the web service)
+4. **Generate a domain** (e.g. `api-production.up.railway.app`)
 5. Add **Environment Variables**:
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | (link from Postgres plugin) |
-| `REDIS_URL` | (link from Redis plugin) |
+| `DATABASE_URL` | (link `${{Postgres.DATABASE_PRIVATE_URL}}`) |
+| `REDIS_URL` | (link `${{Redis.REDIS_PRIVATE_URL}}`) |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | `https://<your-api-domain>.railway.app` |
 | `WEB_URL` | `https://<your-web-domain>.railway.app` |
@@ -63,6 +71,8 @@ Each service has a `railway.toml` that tells Railway exactly how to build and st
 
 ## Step 4 — Configure the Worker service
 
+The Worker has **no public domain** — it only talks to Redis (queue) and Postgres (DB) over the private network.
+
 1. Open the `worker` service → **Settings**
 2. Set **Config file path**: `/apps/worker/railway.toml`
 3. Set **Root directory**: `/`
@@ -70,12 +80,12 @@ Each service has a `railway.toml` that tells Railway exactly how to build and st
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | (link from Postgres plugin) |
-| `REDIS_URL` | (link from Redis plugin) |
+| `DATABASE_URL` | (link `${{Postgres.DATABASE_PRIVATE_URL}}`) |
+| `REDIS_URL` | (link `${{Redis.REDIS_PRIVATE_URL}}`) |
 | `OPENAI_API_KEY` | Your OpenAI key |
 | `NODE_ENV` | `production` |
 
-5. **Deploy**
+5. **Deploy** (no domain needed)
 
 ---
 

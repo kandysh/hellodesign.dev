@@ -10,7 +10,7 @@
 
 [build]
 builder = "RAILPACK"
-buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @sysdesign/web build"
+buildCommand = "pnpm install && pnpm --filter @sysdesign/web build"
 watchPatterns = [
   "apps/web/**",
   "packages/**",
