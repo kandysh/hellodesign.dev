@@ -1,0 +1,32 @@
+# Dependencies — reinstalled inside Docker
+**/node_modules
+
+# Git history
+.git
+.gitignore
+
+# Local environment — secrets must never bake into images
+.env
+.env.*
+!.env.example
+
+# Build artefacts (rebuilt inside Docker)
+**/dist
+**/.turbo
+**/.next
+**/.output
+
+# Dev tooling
+.vscode
+.idea
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# macOS
+.DS_Store
+
+# Test / docs that don't affect the build
+ui_docs
+RAILWAY.md
+README.md

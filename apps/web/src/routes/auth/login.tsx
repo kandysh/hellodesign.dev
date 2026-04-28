@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Eye, EyeOff, Mail, Lock, Github, ArrowRight } from "lucide-react";
-import { BrandingPanel, SocialButton, Divider, Field, GoogleIcon } from "@/components/auth-shared";
+import { BrandingPanel, SocialButton, Divider, Field, GoogleIcon, AuthHeader } from "@/components/auth-shared";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -34,9 +34,11 @@ function LoginPage() {
   const githubHref = `${API}/api/auth/sign-in/social?provider=github&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/me` : "/me")}`;
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#0b1326" }}>
-      {/* ── Left branding panel ─────────────────────────────── */}
-      <BrandingPanel />
+    <>
+      <AuthHeader />
+      <div className="min-h-screen flex pt-16" style={{ background: "#0b1326" }}>
+        {/* ── Left branding panel ─────────────────────────────── */}
+        <BrandingPanel />
 
       {/* ── Right form panel ────────────────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 py-16 relative">
@@ -136,6 +138,7 @@ function LoginPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

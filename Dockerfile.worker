@@ -1,0 +1,38 @@
+# ── Dockerfile.worker ───────────────────────────────────────────────────────
+# Build context: repo root (required for pnpm workspace packages)
+# Railway UI settings:
+#   Dockerfile path : Dockerfile.worker
+#   Root directory  : / (repo root)
+#
+# Worker has no HTTP port — it processes BullMQ jobs from Redis.
+
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy workspace manifests first — maximise Docker layer cache
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+
+COPY apps/api/package.json          ./apps/api/
+COPY apps/worker/package.json       ./apps/worker/
+COPY apps/web/package.json          ./apps/web/
+COPY packages/ai/package.json       ./packages/ai/
+COPY packages/auth/package.json     ./packages/auth/
+COPY packages/config/package.json   ./packages/config/
+COPY packages/db/package.json       ./packages/db/
+COPY packages/queue/package.json    ./packages/queue/
+COPY packages/shared/package.json   ./packages/shared/
+COPY packages/types/package.json    ./packages/types/
+COPY packages/ui/package.json       ./packages/ui/
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+RUN pnpm --filter @sysdesign/db exec prisma generate
+
+ENV NODE_ENV=production
+
+CMD ["node_modules/.bin/tsx", "apps/worker/src/index.ts"]

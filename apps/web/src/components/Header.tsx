@@ -243,32 +243,22 @@ function Avatar({ user, initials }: { user: SessionUser; initials: string }) {
 function HdLogo() {
   return (
     <svg
-      width="24"
-      height="24"
+      width="26"
+      height="26"
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
       className="shrink-0"
     >
-      {/* Dark rounded background */}
       <rect width="32" height="32" rx="7" fill="#0b1326" />
-      {/* Teal accent dot */}
-      <circle cx="26" cy="6" r="3" fill="#4edea3" />
-      {/* H — left bar */}
-      <rect x="4" y="8" width="3" height="16" rx="1" fill="#8083ff" />
-      {/* H — right bar */}
-      <rect x="13" y="8" width="3" height="16" rx="1" fill="#8083ff" />
-      {/* H — crossbar */}
-      <rect x="4" y="15" width="12" height="2.5" rx="1" fill="#8083ff" />
-      {/* D — vertical bar */}
-      <rect x="19" y="8" width="3" height="16" rx="1" fill="#8083ff" />
-      {/* D — top cap */}
-      <rect x="19" y="8" width="7" height="2.5" rx="1" fill="#8083ff" />
-      {/* D — bottom cap */}
-      <rect x="19" y="21.5" width="7" height="2.5" rx="1" fill="#8083ff" />
-      {/* D — right curve (two rects to fake bow) */}
-      <rect x="25" y="10" width="3" height="12" rx="1.5" fill="#8083ff" />
+      {/* Material Symbol: polyline (outlined, FILL=1), indigo */}
+      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
+        <path
+          d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
+          fill="#6366f1"
+        />
+      </svg>
     </svg>
   )
 }

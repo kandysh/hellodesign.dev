@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Eye, EyeOff, Mail, Lock, User, Github, ArrowRight } from "lucide-react";
-import { BrandingPanel, SocialButton, Divider, Field, GoogleIcon } from "@/components/auth-shared";
+import { BrandingPanel, SocialButton, Divider, Field, GoogleIcon, RightPanel, AuthHeader } from "@/components/auth-shared";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
@@ -42,11 +42,11 @@ function RegisterPage() {
   const githubHref = `${API}/api/auth/sign-in/social?provider=github&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/me` : "/me")}`;
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#0b1326" }}>
-      <BrandingPanel />
-
-      <div className="flex-1 flex flex-col items-center justify-center px-8 lg:px-16 py-16">
-        <div className="w-full max-w-sm">
+    <>
+      <AuthHeader />
+      <div className="min-h-screen flex pt-16" style={{ background: "#0b1326" }}>
+        <div className="w-1/2 flex flex-col items-center justify-center px-8 lg:px-16 py-16">
+          <div className="w-full max-w-sm">
           <div className="mb-8">
             <h1
               className="text-2xl font-bold mb-1.5"
@@ -159,7 +159,10 @@ function RegisterPage() {
           </p>
         </div>
       </div>
+
+      <RightPanel />
     </div>
+    </>
   );
 }
 

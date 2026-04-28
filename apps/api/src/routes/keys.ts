@@ -1,4 +1,5 @@
 import { Hono } from "hono"
+import { setCookie } from "hono/cookie"
 import { db, encryptKey } from "@sysdesign/db"
 import { validateOpenAIKey } from "@sysdesign/ai"
 import type { AppEnv } from "../lib/types.js"
@@ -66,6 +67,16 @@ app.post("/", async (c) => {
         },
       })
 
+  // Store encrypted key + IV in httpOnly cookie
+  const cookieValue = JSON.stringify({ encryptedKey, iv })
+  setCookie(c, "api_key_openai", cookieValue, {
+    httpOnly: true,
+    sameSite: "Lax",
+    maxAge: 60 * 60 * 24 * 365,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  })
+
   return c.json(
     {
       id: record.id,
@@ -105,6 +116,15 @@ app.delete("/:id", async (c) => {
   if (!isOwner) return c.json({ error: "Forbidden" }, 403)
 
   await db.userApiKey.delete({ where: { id } })
+
+  // Clear the httpOnly cookie
+  setCookie(c, "api_key_openai", "", {
+    httpOnly: true,
+    sameSite: "Lax",
+    maxAge: 0,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  })
 
   return c.json({ ok: true })
 })

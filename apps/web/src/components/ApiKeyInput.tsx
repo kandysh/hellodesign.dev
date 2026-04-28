@@ -31,7 +31,9 @@ export function ApiKeyInput({ className, onKeyChange }: ApiKeyInputProps) {
     const trimmed = draft.trim()
     setKey(trimmed)
     if (trimmed) {
-      localStorage.setItem(STORAGE_KEY, trimmed)
+      // Don't store actual key in localStorage - only store hint for UI gating
+      // Actual key is stored in httpOnly cookie set by backend
+      localStorage.setItem(STORAGE_KEY, "sk-****")
     } else {
       localStorage.removeItem(STORAGE_KEY)
     }

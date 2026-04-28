@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   BookOpen,
+  Check,
   CheckSquare,
   ChevronLeft,
   ChevronRight,
@@ -702,11 +703,11 @@ function WorkspacePage() {
 
         {/* Bottom action bar */}
         <div
-          className="flex items-center justify-between gap-4 px-4 py-2.5 shrink-0"
+          className="flex items-center gap-3 px-4 py-2.5 shrink-0"
           style={{ borderTop: "1px solid #1e2a3d", background: "#0b1326" }}
         >
           {/* Left: word count + diagram indicator */}
-          <div className="flex items-center gap-3 text-xs min-w-0" style={{ color: "#464554" }}>
+          <div className="flex items-center gap-3 text-xs shrink-0" style={{ color: "#464554" }}>
             <span style={{ color: wordCount > 0 ? "#908fa0" : "#464554" }}>{wordCount} words</span>
             {hasExcalidrawElements && (
               <span className="flex items-center gap-1">
@@ -716,71 +717,125 @@ function WorkspacePage() {
             )}
           </div>
 
-          {/* Center: submit */}
-          <div className="flex-1 flex justify-center">
-            <div
-              className={cn("tooltip", !canSubmit && "tooltip-open tooltip-top")}
-              data-tip={
-                answerCode.trim().length <= 20
-                  ? "Write at least a few sentences or some code before submitting"
-                  : checklistProgress === 0
-                    ? "Complete at least one checklist item before submitting"
-                    : undefined
+          <div className="flex-1" />
+
+          {/* Submit button + inline validation hint */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (!submitMutation.isSuccess) submitMutation.mutate()
+              }}
+              disabled={!canSubmit || submitMutation.isPending || submitMutation.isSuccess}
+              className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
+              style={
+                submitMutation.isSuccess
+                  ? {
+                      background: "rgba(78,222,163,0.12)",
+                      border: "1px solid rgba(78,222,163,0.3)",
+                      color: "#4edea3",
+                    }
+                  : canSubmit
+                    ? {
+                        background: "#6366f1",
+                        border: "1px solid rgba(99,102,241,0.5)",
+                        boxShadow: "0 0 12px rgba(99,102,241,0.25)",
+                        color: "#fff",
+                      }
+                    : {
+                        background: "rgba(99,102,241,0.15)",
+                        border: "1px solid rgba(99,102,241,0.2)",
+                        color: "rgba(99,102,241,0.5)",
+                      }
               }
+            >
+              {submitMutation.isPending ? (
+                <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              ) : submitMutation.isSuccess ? (
+                <Check size={14} />
+              ) : (
+                <Zap size={14} />
+              )}
+              {submitMutation.isSuccess ? "Submitted" : "Submit for Review"}
+            </button>
+
+            {/* Inline validation hint — shown when disabled and not yet submitted */}
+            {!canSubmit && !submitMutation.isSuccess && (
+              <span
+                className="flex items-center gap-1 text-xs"
+                style={{ color: "rgba(255,180,171,0.7)" }}
+              >
+                <AlertTriangle size={11} />
+                {answerCode.trim().length <= 20
+                  ? "Write more first"
+                  : "Check one item"}
+              </span>
+            )}
+          </div>
+
+          <div className="flex-1" />
+
+          {/* Right: mode toggle + interview link + info */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Interview link — hidden when deep agentic review is selected */}
+            {reviewMode !== "deep" && (
+              <Link
+                to="/questions/$questionId/interview"
+                params={{ questionId }}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
+                style={{ color: "#908fa0", border: "1px solid #2d3449" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#dae2fd"
+                  e.currentTarget.style.borderColor = "#464554"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#908fa0"
+                  e.currentTarget.style.borderColor = "#2d3449"
+                }}
+              >
+                <Mic size={12} />
+                Interview
+              </Link>
+            )}
+
+            {/* Review mode pill toggle */}
+            <div
+              className="flex items-center rounded-lg p-0.5 gap-0.5"
+              style={{ background: "#131b2e", border: "1px solid #2d3449" }}
             >
               <button
                 type="button"
-                onClick={() => submitMutation.mutate()}
-                disabled={!canSubmit || submitMutation.isPending}
-                className="inline-flex items-center justify-center gap-2 px-8 py-2.5 rounded-xl font-semibold text-sm text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: "#6366f1",
-                  border: "1px solid rgba(99,102,241,0.5)",
-                  boxShadow: "0 0 12px rgba(99,102,241,0.25)",
-                }}
+                onClick={() => setReviewMode("quick")}
+                className="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                style={
+                  reviewMode === "quick"
+                    ? { background: "#1e2a3d", color: "#dae2fd" }
+                    : { background: "transparent", color: "#464554" }
+                }
               >
-                {submitMutation.isPending ? (
-                  <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                ) : (
-                  <Zap size={15} />
-                )}
-                Submit for Review
+                Quick
+              </button>
+              <button
+                type="button"
+                onClick={() => setReviewMode("deep")}
+                className="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                style={
+                  reviewMode === "deep"
+                    ? { background: "#1e2a3d", color: "#8083ff" }
+                    : { background: "transparent", color: "#464554" }
+                }
+              >
+                Deep AI
               </button>
             </div>
-          </div>
 
-          {/* Right: mode selector + interview mode */}
-          <div className="flex items-center gap-2">
-            <Link
-              to="/questions/$questionId/interview"
-              params={{ questionId }}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-all"
-              style={{ color: "#908fa0", border: "1px solid #2d3449" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "#dae2fd"
-                e.currentTarget.style.borderColor = "#464554"
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "#908fa0"
-                e.currentTarget.style.borderColor = "#2d3449"
-              }}
-            >
-              <Mic size={12} />
-              Interview
-            </Link>
-            <select
-              value={reviewMode}
-              onChange={(e) => setReviewMode(e.target.value as "quick" | "deep")}
-              className="rounded text-xs px-2 py-1.5 outline-none transition-all cursor-pointer"
-              style={{ background: "#131b2e", border: "1px solid #2d3449", color: "#908fa0" }}
-              aria-label="Review mode"
-            >
-              <option value="quick">Quick Review</option>
-              <option value="deep">Deep Agentic Review</option>
-            </select>
             <span
               className="tooltip tooltip-left cursor-default"
-              data-tip="Deep review takes ~30s — the agent may ask follow-up questions"
+              data-tip={
+                reviewMode === "deep"
+                  ? "Deep AI: agent asks follow-up questions · ~30s"
+                  : "Quick: instant structured feedback · ~5s"
+              }
             >
               <Info size={13} style={{ color: "#464554" }} />
             </span>

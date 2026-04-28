@@ -66,14 +66,25 @@ const codeTheme = createTheme({
   },
   styles: [
     // Keywords — primary indigo
-    { tag: [t.keyword, t.modifier, t.operatorKeyword], color: "#8083ff", fontWeight: "600" },
+    {
+      tag: [t.keyword, t.modifier, t.operatorKeyword],
+      color: "#8083ff",
+      fontWeight: "600",
+    },
     // Control flow
     { tag: t.controlKeyword, color: "#c0c1ff", fontWeight: "600" },
     // Definitions
     { tag: [t.definitionKeyword, t.moduleKeyword], color: "#8083ff" },
     // Functions / methods
-    { tag: [t.function(t.variableName), t.function(t.propertyName)], color: "#c0c1ff" },
-    { tag: t.definition(t.function(t.variableName)), color: "#dae2fd", fontWeight: "600" },
+    {
+      tag: [t.function(t.variableName), t.function(t.propertyName)],
+      color: "#c0c1ff",
+    },
+    {
+      tag: t.definition(t.function(t.variableName)),
+      color: "#dae2fd",
+      fontWeight: "600",
+    },
     // Types / classes
     { tag: [t.typeName, t.className, t.namespace, t.self], color: "#a5b4fc" },
     { tag: t.definition(t.typeName), color: "#c0c1ff", fontWeight: "600" },
@@ -95,7 +106,11 @@ const codeTheme = createTheme({
     { tag: [t.meta, t.derefOperator], color: "#908fa0" },
     { tag: t.annotation, color: "#4edea3" },
     // Comments — muted
-    { tag: [t.comment, t.lineComment, t.blockComment, t.docComment], color: "#464554", fontStyle: "italic" },
+    {
+      tag: [t.comment, t.lineComment, t.blockComment, t.docComment],
+      color: "#464554",
+      fontStyle: "italic",
+    },
     // Errors
     { tag: t.invalid, color: "#ffb4ab", textDecoration: "underline wavy" },
     // Tags (HTML-style in JSX)
@@ -110,7 +125,8 @@ const codeTheme = createTheme({
 const editorBaseStyle = EditorView.baseTheme({
   "&": { fontSize: "13px" },
   ".cm-scroller": {
-    fontFamily: "'Space Grotesk', ui-monospace, 'Cascadia Code', Menlo, monospace",
+    fontFamily:
+      "'Space Grotesk', ui-monospace, 'Cascadia Code', Menlo, monospace",
     overflowX: "auto",
   },
   ".cm-content": { padding: "12px 0" },
@@ -162,7 +178,10 @@ const editorBaseStyle = EditorView.baseTheme({
   },
   ".cm-completionIcon": { opacity: "0.7" },
   // Active line number
-  ".cm-activeLineGutter": { background: "rgba(128,131,255,0.08)", color: "#8083ff" },
+  ".cm-activeLineGutter": {
+    background: "rgba(128,131,255,0.08)",
+    color: "#8083ff",
+  },
   // Folding
   ".cm-foldGutter span": { color: "#464554" },
   ".cm-foldGutter span:hover": { color: "#8083ff" },
@@ -173,9 +192,9 @@ const editorBaseStyle = EditorView.baseTheme({
 const LANG_BADGE: Record<LangKey, string> = {
   javascript: "text-yellow-300",
   typescript: "text-blue-400",
-  python:     "text-green-400",
-  go:         "text-cyan-400",
-  java:       "text-orange-400",
+  python: "text-green-400",
+  go: "text-cyan-400",
+  java: "text-orange-400",
 };
 
 // ── Props ──────────────────────────────────────────────────────────────────
@@ -222,13 +241,13 @@ export function CodeEditor({
   return (
     <div
       className={cn(
-        "flex flex-col h-full overflow-hidden rounded-lg border border-[#222a3d]",
-        "bg-[#060e20] shadow-[0_0_0_1px_rgba(128,131,255,0.08),0_4px_24px_rgba(0,0,0,0.4)]",
+        "flex flex-col h-full overflow-hidden rounded-lg border border-surface-container-high",
+        "bg-surface-container-lowest shadow-[0_0_0_1px_rgba(128,131,255,0.08),0_4px_24px_rgba(0,0,0,0.4)]",
         className,
       )}
     >
       {/* ── Toolbar ────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-[#222a3d] bg-[#0b1326] shrink-0">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-surface-container-high bg-[#0b1326] shrink-0">
         {/* Dot decorations */}
         <span className="flex gap-1.5 mr-1">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57] opacity-80" />
@@ -237,11 +256,13 @@ export function CodeEditor({
         </span>
 
         {/* Filename */}
-        <span className="font-mono text-xs text-[#908fa0] mr-auto">{displayFilename}</span>
+        <span className="font-mono text-xs text-outline mr-auto">
+          {displayFilename}
+        </span>
 
         {/* Language tabs */}
         <div
-          className="flex items-center gap-0.5 rounded-md bg-[#131b2e] p-0.5 border border-[#222a3d]"
+          className="flex items-center gap-0.5 rounded-md bg-surface-container-low p-0.5 border border-surface-container-high"
           role="tablist"
           aria-label="Select language"
         >
@@ -254,8 +275,8 @@ export function CodeEditor({
               className={cn(
                 "px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all",
                 lang === key
-                  ? cn("bg-[#222a3d] shadow-sm", LANG_BADGE[key])
-                  : "text-[#464554] hover:text-[#908fa0]",
+                  ? cn("bg-surface-container-high shadow-sm", LANG_BADGE[key])
+                  : "text-outline-variant hover:text-outline",
               )}
             >
               {def.label}
@@ -264,7 +285,7 @@ export function CodeEditor({
         </div>
 
         {/* Hint */}
-        <span className="hidden sm:block text-[10px] text-[#464554] font-mono select-none">
+        <span className="hidden sm:block text-[10px] text-outline-variant font-mono select-none">
           ⌃F search
         </span>
       </div>

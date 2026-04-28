@@ -1,12 +1,32 @@
 // Shared components used by both login and register pages
 
+import { Terminal, BookOpen, Users, Zap } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+
 export function BrandingPanel() {
   return (
     <div
-      className="hidden lg:flex w-[480px] shrink-0 flex-col justify-between p-12"
+      className="hidden lg:flex w-120 shrink-0 flex-col justify-between p-12 relative overflow-hidden"
       style={{ background: "#0b1326", borderRight: "1px solid #1e2a3d" }}
     >
-      <div>
+      {/* Background Image */}
+      <img
+        src="/login.png"
+        alt="Abstract technical architectural wireframe"
+        className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity"
+      />
+
+      {/* Gradient overlay */}
+      <div
+        className="absolute inset-0 opacity-40 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(128,131,255,0.15) 0%, rgba(78,222,163,0.05) 100%)",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10">
         <div
           className="text-xl font-black tracking-tighter mb-12"
           style={{ color: "#dae2fd" }}
@@ -24,73 +44,31 @@ export function BrandingPanel() {
               fontFamily: "'Space Grotesk', monospace",
             }}
           >
-            <span
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: "#4edea3" }}
-            />
-            AI Interview Platform
+            <Terminal size={12} style={{ color: "#8083ff" }} />
+            SYS.AUTH.INIT
           </div>
 
           <h2
             className="text-3xl font-extrabold leading-tight mb-4"
             style={{ color: "#dae2fd", letterSpacing: "-0.02em" }}
           >
-            Design systems.
+            Technical Precision
             <br />
-            <span style={{ color: "#8083ff" }}>Get evaluated.</span>
+            <span style={{ color: "#8083ff" }}>in System Design.</span>
           </h2>
 
           <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
-            Practice real-world architectural challenges with AI-guided
-            evaluation across scalability, reliability, performance, and more.
+            Access the high-density environment engineered for power users,
+            developers, and architects.
           </p>
-        </div>
-
-        <div
-          className="rounded-lg p-4 space-y-2"
-          style={{ background: "#131b2e", border: "1px solid #2d3449" }}
-        >
-          {[
-            { label: "Scalability", score: 92, color: "#4edea3" },
-            { label: "Reliability", score: 88, color: "#c0c1ff" },
-            { label: "Performance", score: 76, color: "#ffb4ab" },
-          ].map((row) => (
-            <div key={row.label} className="flex items-center gap-3">
-              <span
-                className="text-xs w-24 shrink-0"
-                style={{
-                  color: "#908fa0",
-                  fontFamily: "'Space Grotesk', monospace",
-                }}
-              >
-                {row.label}
-              </span>
-              <div
-                className="flex-1 h-1.5 rounded-full overflow-hidden"
-                style={{ background: "#2d3449" }}
-              >
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${row.score}%`, background: row.color }}
-                />
-              </div>
-              <span
-                className="text-xs w-8 text-right"
-                style={{
-                  color: row.color,
-                  fontFamily: "'Space Grotesk', monospace",
-                }}
-              >
-                {row.score}
-              </span>
-            </div>
-          ))}
         </div>
       </div>
 
-      <p className="text-xs" style={{ color: "#2d3449" }}>
-        © 2025 Hello Design. All rights reserved.
-      </p>
+      <div className="relative z-10">
+        <p className="text-xs" style={{ color: "#2d3449" }}>
+          © 2025 Hello Design. All rights reserved.
+        </p>
+      </div>
     </div>
   );
 }
@@ -189,6 +167,225 @@ export function GoogleIcon() {
         fill="#EA4335"
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
       />
+    </svg>
+  );
+}
+
+export function RightPanel() {
+  return (
+    <div
+      className="hidden lg:flex w-1/2 flex-col justify-end p-12 relative overflow-hidden"
+      style={{
+        background: "#0b1326",
+        borderLeft: "1px solid #1e2a3d",
+      }}
+    >
+      {/* Background Image */}
+      <img
+        alt="Abstract optical fibers and server architecture"
+        src="/register.png"
+        className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity"
+      />
+
+      {/* Gradient overlays */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(11,19,38,0.6), rgba(11,19,38,0.3), transparent)",
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to right, rgba(11,19,38,0.7) 0%, rgba(11,19,38,0.3) 33%, transparent)",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 space-y-6">
+        {/* Status Badge */}
+        <div
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs w-fit"
+          style={{
+            background: "rgba(11, 19, 38, 0.6)",
+            border: "1px solid rgba(78,222,163,0.3)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <span
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{
+              background: "#4edea3",
+              boxShadow: "0 0 8px rgba(78,222,163,0.8)",
+            }}
+          />
+          <span
+            style={{
+              color: "#4edea3",
+              fontFamily: "'Space Grotesk', monospace",
+            }}
+          >
+            System Status: Optimal
+          </span>
+        </div>
+
+        {/* Quote */}
+        <p className="text-sm leading-relaxed" style={{ color: "#c7c4d7" }}>
+          "The Hello Design infrastructure provides an uncompromising foundation
+          for high-density data visualization and technical application
+          development."
+        </p>
+
+        {/* Social Proof */}
+        <div
+          className="flex items-center gap-3 pt-4"
+          style={{ borderTop: "1px solid rgba(78,222,163,0.1)" }}
+        >
+          {/* Avatars */}
+          <div className="flex -space-x-2">
+            {["A", "B", "C"].map((letter) => (
+              <div
+                key={letter}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{
+                  background: "#131b2e",
+                  border: "1px solid #2d3449",
+                  color: "#dae2fd",
+                }}
+              >
+                {letter}
+              </div>
+            ))}
+          </div>
+          {/* Text */}
+          <div className="text-xs" style={{ color: "#c7c4d7" }}>
+            Join{" "}
+            <span style={{ color: "#dae2fd", fontWeight: 600 }}>10,000+</span>{" "}
+            engineers building the future.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AuthHeader() {
+  return (
+    <header
+      className="fixed top-0 w-full z-50 border-b"
+      style={{
+        background: "rgba(6, 8, 20, 0.9)",
+        backdropFilter: "blur(12px)",
+        borderColor: "#1e293b",
+      }}
+    >
+      <nav className="flex items-center justify-between h-16 px-6 max-w-[1440px] mx-auto">
+        {/* Brand */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-xl font-black tracking-tighter text-slate-50 hover:text-white transition-colors duration-150 shrink-0"
+        >
+          <HdLogo />
+          Hello Design
+        </Link>
+
+        {/* Nav links */}
+        <div className="hidden md:flex items-center gap-6">
+          <AuthNavLink to="/questions" label="Explore" icon={<BookOpen size={14} />} />
+          <AuthNavLink to="/community" label="Community" icon={<Users size={14} />} />
+          <AuthNavLink to="/pricing" label="Pricing" icon={<Zap size={14} />} />
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+function AuthNavLink({ to, label, icon }: { to: string; label: string; icon?: React.ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors duration-150 active:scale-95"
+    >
+      {icon}
+      {label}
+    </Link>
+  );
+}
+
+function HdLogo() {
+  return (
+    <svg
+      width="26"
+      height="26"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <rect width="32" height="32" rx="7" fill="#0b1326" />
+      <line
+        x1="8.5"
+        y1="9"
+        x2="23.5"
+        y2="9"
+        stroke="#8083ff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="8.5"
+        y1="9"
+        x2="16"
+        y2="18"
+        stroke="#8083ff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="23.5"
+        y1="9"
+        x2="16"
+        y2="18"
+        stroke="#8083ff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="16"
+        y1="18"
+        x2="8.5"
+        y2="26"
+        stroke="#8083ff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="16"
+        y1="18"
+        x2="23.5"
+        y2="26"
+        stroke="#8083ff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="8.5"
+        y1="26"
+        x2="23.5"
+        y2="26"
+        stroke="#8083ff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <circle cx="8.5" cy="9" r="2.5" fill="#6366f1" />
+      <circle cx="23.5" cy="9" r="2.5" fill="#6366f1" />
+      <circle cx="8.5" cy="26" r="2.5" fill="#6366f1" />
+      <circle cx="23.5" cy="26" r="2.5" fill="#6366f1" />
+      <circle cx="16" cy="18" r="3.5" fill="#4edea3" />
+      <circle cx="16" cy="18" r="1.5" fill="#0b1326" opacity="0.4" />
     </svg>
   );
 }

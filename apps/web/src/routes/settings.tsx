@@ -399,7 +399,9 @@ function ApiKeySection({
         const err = await res.json().catch(() => ({})) as { error?: string }
         throw new Error((err as { error?: string }).error ?? "Failed to save key")
       }
-      localStorage.setItem(STORAGE_KEY, trimmed)
+      const saved = await res.json() as { keyHint: string }
+      // Store only masked hint in localStorage for UI gating, not the actual key
+      localStorage.setItem(STORAGE_KEY, `****${saved.keyHint}`)
       await qc.invalidateQueries({ queryKey: ["api-keys"] })
       setDraft("")
       setShowNew(false)
