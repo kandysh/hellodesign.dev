@@ -2,7 +2,8 @@
   "extends": "@sysdesign/config/tsconfig/node",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "noEmit": false
   },
   "include": ["src"]
 }

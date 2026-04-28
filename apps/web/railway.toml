@@ -22,5 +22,5 @@ watchPatterns = [
 [deploy]
 # vite preview serves the built dist/ at the Railway-assigned $PORT
 # --root points vite at apps/web so it picks up vite.config.ts and dist/
-startCommand = "node_modules/.bin/vite preview --root apps/web --port ${PORT:-3000} --host 0.0.0.0"
+startCommand = "pnpm --filter @sysdesign/web exec vite preview --port ${PORT:-3000} --host 0.0.0.0"
 restartPolicyType = "ON_FAILURE"
