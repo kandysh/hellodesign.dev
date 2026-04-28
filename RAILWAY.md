@@ -1,116 +1,101 @@
 # Deploying Hello Design to Railway
 
-This guide walks through deploying all five services on [Railway](https://railway.app).
+This guide walks through deploying all five services on [Railway](https://railway.app) using **Railpack** (no Dockerfiles needed).
 
 ---
 
 ## Overview
 
-| Service | Type | Dockerfile |
-|---------|------|------------|
+| Service | Type | Config file |
+|---------|------|-------------|
 | `postgres` | Railway plugin | — |
 | `redis` | Railway plugin | — |
-| `api` | Node.js (Hono) | `Dockerfile.api` |
-| `worker` | Node.js (BullMQ) | `Dockerfile.worker` |
-| `web` | Nginx (Vite SPA) | `Dockerfile.web` |
+| `api` | Node.js (Hono) | `apps/api/railway.toml` |
+| `worker` | Node.js (BullMQ) | `apps/worker/railway.toml` |
+| `web` | Vite SPA | `apps/web/railway.toml` |
+
+Each service has a `railway.toml` that tells Railway exactly how to build and start it. **Push to GitHub → Railway auto-deploys. No manual builder config required.**
 
 ---
 
-## Prerequisites
-
-- Railway account + CLI: `npm install -g @railway/cli && railway login`
-- Repo pushed to GitHub (Railway deploys from Git)
-- An OpenAI API key
-
----
-
-## Step 1 — Create a new Railway project
+## Step 1 — Import the monorepo
 
 1. Go to [railway.app/new](https://railway.app/new)
 2. **Deploy from GitHub repo** → select `hellodesign.dev`
-3. **Do not** auto-deploy yet; click **Empty project** instead (you'll add services manually)
+3. Railway auto-detects it as a pnpm monorepo and stages services — **confirm and create the project**
 
 ---
 
 ## Step 2 — Add managed infrastructure
 
 ### PostgreSQL
-
 1. Click **+ New** → **Database** → **Add PostgreSQL**
-2. Railway auto-sets `DATABASE_URL` as a shared variable — note the value
+2. Railway auto-creates `DATABASE_URL` — reference it in service variables
 
 ### Redis
-
 1. Click **+ New** → **Database** → **Add Redis**
-2. Railway auto-sets `REDIS_URL` — note the value
+2. Railway auto-creates `REDIS_URL` — reference it in service variables
 
 ---
 
-## Step 3 — Deploy the API service
+## Step 3 — Configure the API service
 
-1. Click **+ New** → **GitHub Repo** → select your repo
-2. In service settings:
-   - **Root Directory**: `/` (leave blank — repo root)
-   - **Builder**: Dockerfile
-   - **Dockerfile Path**: `Dockerfile.api`
-3. **Generate a domain** (e.g. `api-production.up.railway.app`) — you'll need it for the web service
-4. Add the following **environment variables**:
+1. Open the `api` service → **Settings**
+2. Set **Config file path**: `/apps/api/railway.toml`
+3. Set **Root directory**: `/` (repo root — required for pnpm workspace)
+4. **Generate a domain** (you'll need it for the web service)
+5. Add **Environment Variables**:
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | (link to Postgres plugin variable) |
-| `REDIS_URL` | (link to Redis plugin variable) |
-| `BETTER_AUTH_SECRET` | Random 32+ char string (e.g. `openssl rand -base64 32`) |
+| `DATABASE_URL` | (link from Postgres plugin) |
+| `REDIS_URL` | (link from Redis plugin) |
+| `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | `https://<your-api-domain>.railway.app` |
-| `WEB_URL` | `https://<your-web-domain>.railway.app` (set after step 5) |
-| `ENCRYPTION_KEY` | Random 32+ char string |
+| `WEB_URL` | `https://<your-web-domain>.railway.app` |
+| `ENCRYPTION_KEY` | `openssl rand -base64 32` |
 | `OPENAI_API_KEY` | Your OpenAI key |
 | `NODE_ENV` | `production` |
 
-> **Tip:** Use Railway's **"Link variable"** feature to reference `DATABASE_URL` and `REDIS_URL` directly from the plugin services.
-
-5. Click **Deploy**. The first deploy runs DB migrations automatically.
+6. **Deploy** — DB migrations run automatically via `preDeployCommand`
 
 ---
 
-## Step 4 — Deploy the Worker service
+## Step 4 — Configure the Worker service
 
-1. Click **+ New** → **GitHub Repo** → same repo
-2. Service settings:
-   - **Root Directory**: `/`
-   - **Builder**: Dockerfile
-   - **Dockerfile Path**: `Dockerfile.worker`
-3. Environment variables:
+1. Open the `worker` service → **Settings**
+2. Set **Config file path**: `/apps/worker/railway.toml`
+3. Set **Root directory**: `/`
+4. Add **Environment Variables**:
 
 | Variable | Value |
 |----------|-------|
-| `DATABASE_URL` | (link to Postgres plugin) |
-| `REDIS_URL` | (link to Redis plugin) |
+| `DATABASE_URL` | (link from Postgres plugin) |
+| `REDIS_URL` | (link from Redis plugin) |
 | `OPENAI_API_KEY` | Your OpenAI key |
 | `NODE_ENV` | `production` |
 
-4. Click **Deploy**
+5. **Deploy**
 
 ---
 
-## Step 5 — Deploy the Web service
+## Step 5 — Configure the Web service
 
-`VITE_API_URL` is **baked into the JavaScript bundle at build time** — it must be set as a Docker **build argument**, not a runtime env var.
+> `VITE_API_URL` is baked into the JS bundle at build time — set it as a **regular service variable** (Railpack makes all env vars available during build).
 
-1. Click **+ New** → **GitHub Repo** → same repo
-2. Service settings:
-   - **Root Directory**: `/`
-   - **Builder**: Dockerfile
-   - **Dockerfile Path**: `Dockerfile.web`
-3. Under **Build Arguments** (not Environment Variables):
-
-| Build Arg | Value |
-|-----------|-------|
-| `VITE_API_URL` | `https://<your-api-domain>.railway.app` |
-
+1. Open the `web` service → **Settings**
+2. Set **Config file path**: `/apps/web/railway.toml`
+3. Set **Root directory**: `/`
 4. **Generate a domain** for the web service
-5. Go back to the **api service** → update `WEB_URL` to the web domain → redeploy
-6. Click **Deploy**
+5. Add **Environment Variables**:
+
+| Variable | Value |
+|----------|-------|
+| `VITE_API_URL` | `https://<your-api-domain>.railway.app` |
+| `NODE_ENV` | `production` |
+
+6. Go back to the **api service** → set `WEB_URL` to the web domain → redeploy
+7. **Deploy**
 
 ---
 
@@ -127,6 +112,12 @@ open https://<web-domain>.railway.app
 
 ---
 
+## Auto-deploy on push
+
+Railway auto-deploys each service when relevant files change, thanks to `watchPatterns` in each `railway.toml`. A change in `apps/api/**` only triggers the API rebuild — not worker or web.
+
+---
+
 ## Environment Variable Reference
 
 ### API service
@@ -135,7 +126,7 @@ open https://<web-domain>.railway.app
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `REDIS_URL` | Redis connection string |
-| `BETTER_AUTH_SECRET` | Session signing secret (keep secret) |
+| `BETTER_AUTH_SECRET` | Session signing secret |
 | `BETTER_AUTH_URL` | Full URL of the API service (for OAuth callbacks) |
 | `WEB_URL` | Full URL of the web service (CORS allow-origin) |
 | `ENCRYPTION_KEY` | Key used to encrypt stored API keys |
@@ -156,19 +147,12 @@ open https://<web-domain>.railway.app
 | `OPENAI_API_KEY` | OpenAI key for AI evaluation agents |
 | `NODE_ENV` | `production` |
 
-### Web service (build arguments)
+### Web service
 
-| Build Arg | Description |
-|-----------|-------------|
-| `VITE_API_URL` | Public URL of the API service |
-
----
-
-## Re-deploying after code changes
-
-Railway auto-deploys on `git push` to your connected branch. No manual steps needed after initial setup.
-
-To trigger a manual redeploy: Railway UI → service → **Redeploy**.
+| Variable | Description |
+|----------|-------------|
+| `VITE_API_URL` | Public URL of the API service (baked in at build time) |
+| `NODE_ENV` | `production` |
 
 ---
 
@@ -178,3 +162,4 @@ To trigger a manual redeploy: Railway UI → service → **Redeploy**.
 # BETTER_AUTH_SECRET and ENCRYPTION_KEY
 openssl rand -base64 32
 ```
+

@@ -1,0 +1,26 @@
+# ── apps/web ─────────────────────────────────────────────────────────────────
+# Railway config-as-code for the Vite SPA (static site).
+#
+# In Railway dashboard, set the config file path to: /apps/web/railway.toml
+# Root directory must stay at / (repo root).
+#
+# Required build-time environment variables (set in Railway service variables):
+#   VITE_API_URL   Public URL of the API service (e.g. https://api.hello.design)
+#                  Must be set BEFORE the build — Vite bakes it in at build time.
+
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @sysdesign/web build"
+watchPatterns = [
+  "apps/web/**",
+  "packages/**",
+  "pnpm-lock.yaml",
+  "package.json",
+  "pnpm-workspace.yaml"
+]
+
+[deploy]
+# vite preview serves the built dist/ at the Railway-assigned $PORT
+# --root points vite at apps/web so it picks up vite.config.ts and dist/
+startCommand = "node_modules/.bin/vite preview --root apps/web --port ${PORT:-3000} --host 0.0.0.0"
+restartPolicyType = "ON_FAILURE"

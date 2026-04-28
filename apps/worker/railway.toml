@@ -1,0 +1,25 @@
+# ── apps/worker ──────────────────────────────────────────────────────────────
+# Railway config-as-code for the BullMQ worker service.
+#
+# In Railway dashboard, set the config file path to: /apps/worker/railway.toml
+# Root directory must stay at / (repo root).
+#
+# Required environment variables:
+#   DATABASE_URL   PostgreSQL connection string
+#   REDIS_URL      Redis connection string
+#   OPENAI_API_KEY OpenAI API key
+
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @sysdesign/db exec prisma generate"
+watchPatterns = [
+  "apps/worker/**",
+  "packages/**",
+  "pnpm-lock.yaml",
+  "package.json",
+  "pnpm-workspace.yaml"
+]
+
+[deploy]
+startCommand = "node_modules/.bin/tsx apps/worker/src/index.ts"
+restartPolicyType = "ON_FAILURE"

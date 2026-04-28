@@ -1,0 +1,29 @@
+# ── apps/api ─────────────────────────────────────────────────────────────────
+# Railway config-as-code for the Hono API service.
+#
+# In Railway dashboard, set the config file path to: /apps/api/railway.toml
+# Root directory must stay at / (repo root) so pnpm workspace packages resolve.
+#
+# Required environment variables (set in Railway service variables):
+#   DATABASE_URL        PostgreSQL connection string
+#   REDIS_URL           Redis connection string
+#   BETTER_AUTH_SECRET  Random secret ≥ 32 chars
+#   WEB_URL             Public URL of the web service (for CORS)
+#   OPENAI_API_KEY      OpenAI API key
+
+[build]
+builder = "RAILPACK"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @sysdesign/db exec prisma generate"
+watchPatterns = [
+  "apps/api/**",
+  "packages/**",
+  "pnpm-lock.yaml",
+  "package.json",
+  "pnpm-workspace.yaml"
+]
+
+[deploy]
+startCommand = "node_modules/.bin/tsx apps/api/src/index.ts"
+preDeployCommand = "pnpm --filter @sysdesign/db db:deploy"
+healthcheckPath = "/health"
+restartPolicyType = "ON_FAILURE"
