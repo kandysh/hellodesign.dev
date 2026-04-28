@@ -11,7 +11,7 @@
 
 [build]
 builder = "RAILPACK"
-buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @sysdesign/db exec prisma generate"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter @sysdesign/db exec prisma generate && pnpm --filter @sysdesign/worker build"
 watchPatterns = [
   "apps/worker/**",
   "packages/**",
@@ -21,5 +21,5 @@ watchPatterns = [
 ]
 
 [deploy]
-startCommand = "node_modules/.bin/tsx apps/worker/src/index.ts"
+startCommand = "node apps/worker/dist/index.js"
 restartPolicyType = "ON_FAILURE"
