@@ -13,6 +13,10 @@ import { buildEvaluationPrompt } from "./prompts.js";
 import { clarificationTools } from "./tools.js";
 import { ChatDeepSeek } from "@langchain/deepseek";
 
+// ─── Model Configuration ──────────────────────────────────────────────────────
+
+const MODEL_NAME = "deepseek/deepseek-v3.2";
+
 // ─── Logger for capturing LangGraph execution ──────────────────────────────────
 
 export function createAgentFlowLogger(publishEvent: (event: AgentEvent) => Promise<void>) {
@@ -175,7 +179,7 @@ export async function runClarificationPhase(
   } = params;
 
   const model = new ChatOpenAI({
-    model: "openai/gpt-oss-120b",
+    model: MODEL_NAME,
     temperature: 0.2,
     apiKey,
     streaming: true,
@@ -310,7 +314,7 @@ export async function runEvaluationPhase(
   await publishEvent({ type: "eval_start", dimensions: dimensionIds });
 
   const model = new ChatOpenAI({
-    model: "gpt-5.4-mini",
+    model: MODEL_NAME,
     temperature: 0.1,
     apiKey,
     ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
@@ -355,7 +359,7 @@ export async function generateNarrativeFeedback(
     params;
 
   const model = new ChatOpenAI({
-    model: "gpt-5.4-mini",
+    model: MODEL_NAME,
     temperature: 0.3,
     apiKey,
     ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
@@ -395,7 +399,7 @@ export async function validateOpenAIKey(
 ): Promise<boolean> {
   try {
     const model = new ChatOpenAI({
-      model: "openai/gpt-oss-120b",
+      model: MODEL_NAME,
       apiKey,
       maxTokens: 5,
       ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
