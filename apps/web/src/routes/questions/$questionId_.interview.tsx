@@ -196,6 +196,9 @@ function InterviewPage() {
       } as EventSourceInit)
       sseRef.current = es
 
+      // Track if we've seen a terminal event to avoid double-toasting
+      let hasTerminated = false
+
       es.addEventListener("reasoning", (e) => {
         const data = JSON.parse((e as MessageEvent).data) as { type: string; content: string }
         const entry = parseReasoningToLog(data.content)
@@ -252,6 +255,7 @@ function InterviewPage() {
       })
 
       es.addEventListener("eval_done", (e) => {
+        hasTerminated = true
         const evt = JSON.parse((e as MessageEvent).data) as SSEEvalDoneEvent
         setSubmissionId(evt.submissionId)
         setPhase("done")
@@ -267,6 +271,7 @@ function InterviewPage() {
       })
 
       es.addEventListener("error", (e) => {
+        hasTerminated = true
         try {
           const evt = JSON.parse((e as MessageEvent).data) as SSEErrorEvent
           toast(evt.message ?? "An error occurred", "error")
@@ -279,7 +284,8 @@ function InterviewPage() {
       })
 
       es.onerror = () => {
-        if (sseRef.current && phaseRef.current !== "done") {
+        // Only show connection error if we haven't already seen a terminal event
+        if (sseRef.current && phaseRef.current !== "done" && !hasTerminated) {
           toast("Connection to AI lost", "error")
           setPhase("setup")
         }
