@@ -9,6 +9,10 @@
 
 FROM node:20-alpine
 
+# Declare build-time args up front so Railway can inject them via
+# "Build Arguments" in the service settings before any RUN step needs them.
+ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
+
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
@@ -35,7 +39,13 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate the Prisma client into packages/db/generated/
+# DATABASE_URL must be a valid-format PostgreSQL URL at generate time so
+# prisma.config.ts can resolve env("DATABASE_URL") — the actual value is
+# irrelevant for client generation; it is overridden at runtime.
+ENV DATABASE_URL=${DATABASE_URL}
 RUN pnpm --filter @sysdesign/db exec prisma generate
+# Clear the build-time placeholder — real URL is injected by Railway at runtime
+ENV DATABASE_URL=
 
 ENV NODE_ENV=production
 

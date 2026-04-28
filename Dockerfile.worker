@@ -8,6 +8,8 @@
 
 FROM node:20-alpine
 
+ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
+
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
@@ -31,7 +33,9 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
+ENV DATABASE_URL=${DATABASE_URL}
 RUN pnpm --filter @sysdesign/db exec prisma generate
+ENV DATABASE_URL=
 
 ENV NODE_ENV=production
 
