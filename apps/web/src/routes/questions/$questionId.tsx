@@ -15,7 +15,6 @@ import {
   ListTodo,
   Lock,
   Map,
-  Mic,
   Square,
   Unlock,
   X,
@@ -28,6 +27,7 @@ import { AgentPanel, type AgentPanelState, type Message } from "@/components/Age
 import { useApiKey } from "@/components/ApiKeyInput"
 import { CodeEditor } from "@/components/CodeEditor"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
+import { ModelCombobox } from "@/components/ModelCombobox"
 import { useToast } from "@/components/Toast"
 import { questionQueryOptions } from "@/lib/queries/questions"
 import { cn } from "@/lib/utils"
@@ -37,6 +37,9 @@ const Excalidraw = lazy(() =>
 )
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+const WS_API = API.replace(/^http/, "ws")
+
+const EXCALIDRAW_UI_OPTIONS = { canvasActions: { export: false } } as const
 
 const EDITOR_PLACEHOLDER = `/*
  * Walk through your design step by step:
@@ -90,6 +93,9 @@ function WorkspacePage() {
   const [checklist, setChecklist] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<"diagram" | "code">("code")
   const [reviewMode, setReviewMode] = useState<"quick" | "deep">("quick")
+  const [mood, setMood] = useState<"pragmatist" | "systems" | "sre" | "pm">("pragmatist")
+  const [modelName, setModelName] = useState("openai/gpt-oss-20b:nitro")
+  const [modelOverridden, setModelOverridden] = useState(false)
   const [apiBannerDismissed, setApiBannerDismissed] = useState(false)
 
   // Content state
@@ -111,8 +117,12 @@ function WorkspacePage() {
   const [agentVisible, setAgentVisible] = useState(false)
   const [agentState, setAgentState] = useState<AgentPanelState>({ phase: "idle" })
   const [agentMessages, setAgentMessages] = useState<Message[]>([])
+  const [riskFlags, setRiskFlags] = useState<Array<{ component: string; risk: string; severity: "critical" | "high" | "medium" }>>([])
   const [currentSubmissionId, setCurrentSubmissionId] = useState<string | null>(null)
-  const sseRef = useRef<EventSource | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+  // Buffer for accumulating rapid reasoning token chunks before flushing to trace
+  const reasoningBufRef = useRef("")
+  const reasoningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { data: question, isLoading } = useQuery(questionQueryOptions(questionId))
 
@@ -140,7 +150,9 @@ function WorkspacePage() {
           questionId,
           answerText: answerCode,
           excalidrawData: (excalidrawData as any)?.elements ?? [],
-          strategy: reviewMode === "deep" ? "agentic" : "quick",
+          agentType: reviewMode,
+          mood,
+          modelName,
         }),
       })
       if (!res.ok) {
@@ -154,111 +166,140 @@ function WorkspacePage() {
       setAgentVisible(true)
       setAgentState({ phase: "processing", trace: [] })
       setAgentMessages([])
+      setRiskFlags([])
       toast("Submission received — agent is reading your answer", "success")
 
-      // Open SSE stream
-      const es = new EventSource(`${API}/api/submissions/${submissionId}/events`, {
-        withCredentials: true,
-      } as EventSourceInit)
-      sseRef.current = es
-      
-      // Track if we've seen a terminal event to avoid double-toasting
-      let hasTerminated = false
+      // Open WebSocket stream
+      const ws = new WebSocket(`${WS_API}/api/submissions/${submissionId}/ws`)
+      wsRef.current = ws
 
-      es.addEventListener("reasoning", (e) => {
+      const cleanupReasoningBuf = () => {
+        if (reasoningTimerRef.current) {
+          clearTimeout(reasoningTimerRef.current)
+          reasoningTimerRef.current = null
+        }
+        reasoningBufRef.current = ""
+      }
+
+      ws.onmessage = (e) => {
         const ev = JSON.parse(e.data)
-        const line = ev.content ?? ev.line ?? JSON.stringify(ev)
-        setAgentState((prev) => {
-          // Accumulate trace in both processing and follow-up phases
-          if (prev.phase === "processing" || prev.phase === "follow-up") {
-            return { ...prev, trace: [...(prev.trace ?? []), line] }
+        switch (ev.type) {
+          case "ping":
+          case "submission_status":
+            break
+
+          case "reasoning": {
+            const content = ev.content ?? ev.line ?? ""
+            if (!content) break
+            // Accumulate rapid token chunks and flush after 100ms of silence
+            reasoningBufRef.current += content
+            if (reasoningTimerRef.current) clearTimeout(reasoningTimerRef.current)
+            reasoningTimerRef.current = setTimeout(() => {
+              const line = reasoningBufRef.current.trim()
+              reasoningBufRef.current = ""
+              if (!line) return
+              setAgentState((prev) => {
+                if (prev.phase === "processing" || prev.phase === "follow-up") {
+                  return { ...prev, trace: [...(prev.trace ?? []), line] }
+                }
+                return prev
+              })
+            }, 100)
+            break
           }
-          return prev
-        })
-      })
 
-      es.addEventListener("agent_flow", (e) => {
-        const ev = JSON.parse(e.data)
-        const flowStep = ev.step ?? "Agent progress"
-        const details = ev.details ? ` (${JSON.stringify(ev.details)})` : ""
-        const flowLine = `→ ${flowStep}${details}`
-        
-        setAgentState((prev) => {
-          if (prev.phase === "processing" || prev.phase === "follow-up") {
-            return { ...prev, trace: [...(prev.trace ?? []), flowLine] }
+          case "agent_flow": {
+            const flowLine = `→ ${ev.step ?? "Agent progress"}${ev.details ? ` (${JSON.stringify(ev.details)})` : ""}`
+            setAgentState((prev) => {
+              if (prev.phase === "processing" || prev.phase === "follow-up") {
+                return { ...prev, trace: [...(prev.trace ?? []), flowLine] }
+              }
+              return prev
+            })
+            break
           }
-          return prev
-        })
-      })
 
-      es.addEventListener("submission_status", (e) => {
-        const ev = JSON.parse(e.data)
-        console.log("[sse] Submission status:", ev.status)
-        // Status event signals connection is live, no UI update needed
-      })
-
-      es.addEventListener("followup", (e) => {
-        const ev = JSON.parse(e.data)
-        const q = ev.question ?? ev.content ?? ""
-        setAgentState((prev) => ({
-          phase: "follow-up",
-          question: q,
-          trace: prev.phase === "processing" ? prev.trace : (prev.phase === "follow-up" ? prev.trace : []),
-        }))
-        setAgentMessages((prev) => [
-          ...prev,
-          { id: crypto.randomUUID(), role: "agent", content: q, timestamp: new Date() },
-        ])
-      })
-
-      es.addEventListener("eval_start", () => {
-        setAgentState((_prev) => ({
-          phase: "evaluating",
-          agentResults: [],
-        }))
-      })
-
-      es.addEventListener("eval_progress", (e) => {
-        const ev = JSON.parse(e.data)
-        setAgentState((prev) => {
-          if (prev.phase === "evaluating") {
-            return { phase: "evaluating", agentResults: [...prev.agentResults, ev] }
+          case "followup": {
+            const q = ev.question ?? ev.content ?? ""
+            setAgentState((prev) => ({
+              phase: "follow-up",
+              question: q,
+              trace: prev.phase === "processing" || prev.phase === "follow-up" ? prev.trace : [],
+            }))
+            setAgentMessages((prev) => [
+              ...prev,
+              { id: crypto.randomUUID(), role: "agent", content: q, timestamp: new Date() },
+            ])
+            break
           }
-          return prev
-        })
-      })
 
-      es.addEventListener("eval_done", () => {
-        hasTerminated = true
-        setAgentState({
-          phase: "done",
-          submissionId,
-          agentResults: [],
-        })
-        es.close()
-        sseRef.current = null
-      })
+          case "user_reply":
+            setAgentState((prev) => {
+              if (prev.phase === "follow-up") {
+                return { phase: "processing", trace: prev.trace ?? [] }
+              }
+              return prev
+            })
+            break
 
-      es.addEventListener("error", (e) => {
-        hasTerminated = true
-        let errMsg = "Evaluation failed"
-        try {
-          errMsg = JSON.parse((e as MessageEvent).data)?.message ?? errMsg
-        } catch {}
-        toast(errMsg, "error")
-        es.close()
-        sseRef.current = null
-        setAgentState({ phase: "idle" })
-      })
+          case "eval_start":
+            setAgentState({
+              phase: "evaluating",
+              agentResults: [],
+              dimensionLabels: ev.dimensions?.map((id: string) => ev.dimensionLabels?.[id] ?? id) ?? [],
+            })
+            break
 
-      es.onerror = () => {
-        // Only show connection error if we haven't already seen a terminal event
-        if (sseRef.current && !hasTerminated) {
+          case "eval_progress":
+            setAgentState((prev) => {
+              if (prev.phase === "evaluating") {
+                return { phase: "evaluating", agentResults: [...prev.agentResults, ev], dimensionLabels: prev.dimensionLabels }
+              }
+              return prev
+            })
+            break
+
+          case "eval_done":
+            cleanupReasoningBuf()
+            setAgentState((prev) => ({
+              phase: "done",
+              submissionId,
+              agentResults: prev.phase === "evaluating" ? prev.agentResults : [],
+              dimensionLabels: prev.phase === "evaluating" ? prev.dimensionLabels : [],
+            }))
+            ws.close()
+            wsRef.current = null
+            break
+
+          case "risk_flag":
+            setRiskFlags((prev) => [
+              ...prev,
+              { component: ev.component, risk: ev.risk, severity: ev.severity },
+            ])
+            break
+
+          case "error":
+            cleanupReasoningBuf()
+            toast(ev.message ?? "Evaluation failed", "error")
+            ws.close()
+            wsRef.current = null
+            setAgentState({ phase: "idle" })
+            break
+        }
+      }
+
+      ws.onclose = () => {
+        wsRef.current = null
+      }
+
+      ws.onerror = () => {
+        if (wsRef.current) {
+          cleanupReasoningBuf()
           toast("Lost connection to agent", "error")
           setAgentState({ phase: "idle" })
         }
-        es.close()
-        sseRef.current = null
+        ws.close()
+        wsRef.current = null
       }
     },
     onError: (err: Error) => {
@@ -266,32 +307,38 @@ function WorkspacePage() {
     },
   })
 
-  // Cleanup SSE on unmount
+  // Cleanup WebSocket and buffering on unmount
   useEffect(() => {
     return () => {
-      sseRef.current?.close()
+      wsRef.current?.close()
+      if (reasoningTimerRef.current) clearTimeout(reasoningTimerRef.current)
     }
   }, [])
+
+  const MODE_DEFAULTS: Record<"quick" | "deep", string> = {
+    quick: "openai/gpt-oss-20b:nitro",
+    deep: "deepseek/deepseek-v3.2",
+  }
+
+  // Auto-switch model to mode default unless user manually overrode it
+  useEffect(() => {
+    if (!modelOverridden) setModelName(MODE_DEFAULTS[reviewMode])
+  }, [reviewMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSendAgentMessage(msg: string) {
     setAgentMessages((prev) => [
       ...prev,
       { id: crypto.randomUUID(), role: "user", content: msg, timestamp: new Date() },
     ])
-    fetch(`${API}/api/submissions/${currentSubmissionId}/reply`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ content: msg }),
-    }).catch(console.error)
+    wsRef.current?.send(JSON.stringify({ type: "reply", content: msg }))
   }
 
-  function handleViewFeedback(submissionId: string) {
+  const handleViewFeedback = useCallback((submissionId: string) => {
     navigate({
       to: "/questions/$questionId/result/$submissionId",
       params: { questionId, submissionId },
     } as never)
-  }
+  }, [navigate, questionId])
 
   if (isLoading) {
     return (
@@ -721,7 +768,7 @@ function WorkspacePage() {
               >
                 <Excalidraw
                   theme="dark"
-                  UIOptions={{ canvasActions: { export: false } }}
+                  UIOptions={EXCALIDRAW_UI_OPTIONS}
                   onChange={handleExcalidrawChange}
                 />
               </Suspense>
@@ -752,31 +799,18 @@ function WorkspacePage() {
             <button
               type="button"
               onClick={() => {
-                if (reviewMode === "deep") {
-                  // Deep AI = interview mode — pass content to interview page via sessionStorage
-                  sessionStorage.setItem(
-                    `hd:prefill:${questionId}`,
-                    JSON.stringify({
-                      answerText: answerCode,
-                      elements: (excalidrawData as any)?.elements ?? [],
-                    }),
-                  )
-                  navigate({
-                    to: "/questions/$questionId/interview",
-                    params: { questionId },
-                  } as never)
-                } else if (!submitMutation.isSuccess) {
+                if (!submitMutation.isSuccess) {
                   submitMutation.mutate()
                 }
               }}
               disabled={
                 !canSubmit ||
                 submitMutation.isPending ||
-                (reviewMode === "quick" && submitMutation.isSuccess)
+                submitMutation.isSuccess
               }
               className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
               style={
-                reviewMode === "quick" && submitMutation.isSuccess
+                submitMutation.isSuccess
                   ? {
                       background: "rgba(78,222,163,0.12)",
                       border: "1px solid rgba(78,222,163,0.3)",
@@ -798,17 +832,15 @@ function WorkspacePage() {
             >
               {submitMutation.isPending ? (
                 <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              ) : reviewMode === "quick" && submitMutation.isSuccess ? (
+              ) : submitMutation.isSuccess ? (
                 <Check size={14} />
-              ) : reviewMode === "deep" ? (
-                <Mic size={14} />
               ) : (
                 <Zap size={14} />
               )}
-              {reviewMode === "deep"
-                ? "Start AI Interview"
-                : submitMutation.isSuccess
-                  ? "Submitted"
+              {submitMutation.isSuccess
+                ? "Submitted"
+                : reviewMode === "deep"
+                  ? "Submit for Deep Review"
                   : "Submit for Review"}
             </button>
 
@@ -830,28 +862,7 @@ function WorkspacePage() {
 
           {/* Right: mode toggle + interview link + info */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Interview link — hidden when deep agentic review is selected */}
-            {reviewMode !== "deep" && (
-              <Link
-                to="/questions/$questionId/interview"
-                params={{ questionId }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={{ color: "#908fa0", border: "1px solid #2d3449" }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#dae2fd"
-                  e.currentTarget.style.borderColor = "#464554"
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#908fa0"
-                  e.currentTarget.style.borderColor = "#2d3449"
-                }}
-              >
-                <Mic size={12} />
-                Interview
-              </Link>
-            )}
-
-            {/* Review mode pill toggle */}
+            {/* Agent type pill toggle */}
             <div
               className="flex items-center rounded-lg p-0.5 gap-0.5"
               style={{ background: "#131b2e", border: "1px solid #2d3449" }}
@@ -878,15 +889,48 @@ function WorkspacePage() {
                     : { background: "transparent", color: "#464554" }
                 }
               >
-                Deep AI
+                Deep
               </button>
             </div>
+
+            {/* Mood / persona selector */}
+            <div
+              className="flex items-center rounded-lg p-0.5 gap-0.5"
+              style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+            >
+              {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
+                const labels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMood(m)}
+                    className="px-2 py-1 rounded text-xs font-medium transition-all"
+                    style={
+                      mood === m
+                        ? { background: "#1e2a3d", color: "#8083ff" }
+                        : { background: "transparent", color: "#464554" }
+                    }
+                  >
+                    {labels[m]}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Model selector */}
+            <ModelCombobox
+              value={modelName}
+              onChange={(v) => { setModelName(v); setModelOverridden(true) }}
+              providers={["openai", "google", "anthropic", "deepseek"]}
+            />
+
 
             <span
               className="tooltip tooltip-left cursor-default"
               data-tip={
                 reviewMode === "deep"
-                  ? "Deep AI: agent asks follow-up questions · ~30s"
+                  ? "Deep: agent asks 2–3 follow-up questions then evaluates"
                   : "Quick: instant structured feedback · ~5s"
               }
             >
@@ -906,6 +950,7 @@ function WorkspacePage() {
         <AgentPanel
           state={agentState}
           messages={agentMessages}
+          riskFlags={riskFlags}
           onSendMessage={handleSendAgentMessage}
           onViewFeedback={handleViewFeedback}
           className="h-full"

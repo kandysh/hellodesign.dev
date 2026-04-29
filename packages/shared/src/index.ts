@@ -23,6 +23,17 @@ export interface ComponentScore {
   improvements: string[]
 }
 
+// ─── Agent modes & personas ───────────────────────────────────────────────────
+
+export type InterviewerMood = "pragmatist" | "systems" | "sre" | "pm"
+
+export const MOOD_LABELS: Record<InterviewerMood, string> = {
+  pragmatist: "The Pragmatist",
+  systems: "The Systems Thinker",
+  sre: "The SRE",
+  pm: "The PM",
+}
+
 // ─── Job payloads ─────────────────────────────────────────────────────────────
 
 export interface EvalJobData {
@@ -30,7 +41,9 @@ export interface EvalJobData {
   questionId: string
   userId?: string
   sessionId?: string
-  strategy: "quick" | "agentic"
+  agentType: "quick" | "deep"
+  mood: InterviewerMood
+  modelName?: string
   lexicalContent: string // plain text from Lexical JSON
   excalidrawSummary?: string // text summary of diagram
 }
@@ -48,11 +61,12 @@ export type AgentEvent =
   | { type: "reasoning"; content: string }
   | { type: "followup"; question: string; submissionId: string }
   | { type: "user_reply"; content: string }
-  | { type: "eval_start"; dimensions: string[] }
+  | { type: "eval_start"; dimensions: string[]; dimensionLabels: Record<string, string> }
   | { type: "eval_progress"; dimensionId: string; score: number }
   | { type: "eval_done"; submissionId: string }
   | { type: "error"; message: string }
   | { type: "agent_flow"; step: string; details?: Record<string, unknown> }
+  | { type: "risk_flag"; component: string; risk: string; severity: "critical" | "high" | "medium" }
 
 // ─── Zod schemas ─────────────────────────────────────────────────────────────
 
@@ -82,7 +96,8 @@ export const EvalJobDataSchema = z.object({
   questionId: z.string(),
   userId: z.string().optional(),
   sessionId: z.string().optional(),
-  strategy: z.enum(["quick", "agentic"]),
+  agentType: z.enum(["quick", "deep"]),
+  mood: z.enum(["pragmatist", "systems", "sre", "pm"]),
   lexicalContent: z.string(),
   excalidrawSummary: z.string().optional(),
 })

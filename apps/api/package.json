@@ -11,14 +11,17 @@
     "lint": "biome lint ./src"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^10.0.2",
+    "@fastify/websocket": "^11.0.2",
     "@sysdesign/ai": "workspace:*",
     "@sysdesign/auth": "workspace:*",
     "@sysdesign/db": "workspace:*",
     "@sysdesign/queue": "workspace:*",
     "@sysdesign/shared": "workspace:*",
+    "better-auth": "^1.6.9",
     "dotenv": "^17.4.2",
-    "hono": "^4.7.7",
+    "fastify": "^5.4.0",
     "ioredis": "^5.6.1"
   },
   "devDependencies": {

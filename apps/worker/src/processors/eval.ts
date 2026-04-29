@@ -15,13 +15,18 @@ import {
   type AgentEvent,
   type RubricConfig,
 } from "@sysdesign/shared"
-import { redisPub, createSubscriber, submissionChannel, replyChannel } from "../lib/redis.js"
+import { redisPub, createSubscriber, submissionChannel, replyChannel, eventBufKey } from "../lib/redis.js"
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function publish(submissionId: string, event: AgentEvent) {
   console.log(`[worker:publish] ${submissionId} -> ${event.type}`)
-  await redisPub.publish(submissionChannel(submissionId), JSON.stringify(event))
+  const serialized = JSON.stringify(event)
+  const bufKey = eventBufKey(submissionId)
+  // Buffer alongside pub/sub so late SSE subscribers can replay missed events
+  await redisPub.rpush(bufKey, serialized)
+  await redisPub.expire(bufKey, 300)
+  await redisPub.publish(submissionChannel(submissionId), serialized)
 }
 
 async function resolveApiKey({
@@ -81,7 +86,7 @@ async function waitForReply(
 // ─── Main processor ───────────────────────────────────────────────────────────
 
 export const evalProcessor: Processor<EvalJobData> = async (job) => {
-  const { submissionId, questionId, userId, sessionId, lexicalContent, excalidrawSummary } =
+  const { submissionId, questionId, userId, sessionId, lexicalContent, excalidrawSummary, agentType, mood, modelName } =
     job.data
 
   console.log(`[eval] Starting submission ${submissionId}`)
@@ -122,7 +127,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
 
   try {
     // 3. Build initial messages
-    const systemPrompt = buildSystemPrompt(questionCtx)
+    const systemPrompt = buildSystemPrompt(questionCtx, mood)
     const answerPrompt = buildAnswerPrompt(questionCtx, lexicalContent, excalidrawSummary)
 
     const initialMessages = [
@@ -134,13 +139,16 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     await saveMessage(submissionId, "SYSTEM", systemPrompt)
     await saveMessage(submissionId, "USER", answerPrompt)
 
-    // 4. Clarification phase (LangGraph loop)
+    // 4. Clarification phase — quick skips (0 rounds), deep uses rubric max
+    const maxFollowupOverride = agentType === "quick" ? 0 : undefined
     const { messages: clarifiedMessages, followupRounds } = await runClarificationPhase({
       apiKey,
       baseUrl: baseUrl ?? undefined,
+      modelName: modelName ?? undefined,
       initialMessages,
       question: questionCtx,
       submissionId,
+      maxFollowupOverride,
       publishEvent: (event) => {
         // Also persist agent messages from the clarification phase
         if (event.type === "reasoning") {
@@ -165,6 +173,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     const componentScores = await runEvaluationPhase({
       apiKey,
       baseUrl: baseUrl ?? undefined,
+      modelName: modelName ?? undefined,
       messages: clarifiedMessages,
       question: questionCtx,
       submissionId,
@@ -177,6 +186,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     const { narrative, improvements } = await generateNarrativeFeedback({
       apiKey,
       baseUrl: baseUrl ?? undefined,
+      modelName: modelName ?? undefined,
       messages: clarifiedMessages,
       componentScores,
       overallScore,

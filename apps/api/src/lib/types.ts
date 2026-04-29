@@ -1,9 +1,9 @@
 import type { auth } from "@sysdesign/auth"
 
-export type AppEnv = {
-  Variables: {
+declare module "fastify" {
+  interface FastifyRequest {
     user: typeof auth.$Infer.Session.user | null
-    session: typeof auth.$Infer.Session.session | null
+    authSession: typeof auth.$Infer.Session.session | null
     sessionId: string
   }
 }

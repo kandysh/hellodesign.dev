@@ -88,11 +88,14 @@ export interface QuestionContext {
 export interface ClarificationParams {
   apiKey: string;
   baseUrl?: string;
+  modelName?: string;
   initialMessages: BaseMessage[];
   question: QuestionContext;
   submissionId: string;
   publishEvent: (event: AgentEvent) => Promise<void>;
   waitForReply: (submissionId: string) => Promise<string | null>;
+  /** Override max follow-up rounds; 0 = skip clarification and evaluate immediately */
+  maxFollowupOverride?: number;
 }
 
 export interface ClarificationResult {
@@ -103,6 +106,7 @@ export interface ClarificationResult {
 export interface EvaluationParams {
   apiKey: string;
   baseUrl?: string;
+  modelName?: string;
   messages: BaseMessage[];
   question: QuestionContext;
   submissionId: string;
@@ -112,6 +116,7 @@ export interface EvaluationParams {
 export interface FeedbackParams {
   apiKey: string;
   baseUrl?: string;
+  modelName?: string;
   messages: BaseMessage[];
   componentScores: ComponentScore[];
   overallScore: number;
@@ -171,15 +176,17 @@ export async function runClarificationPhase(
   const {
     apiKey,
     baseUrl,
+    modelName,
     initialMessages,
     question,
     submissionId,
     publishEvent,
     waitForReply,
+    maxFollowupOverride,
   } = params;
 
   const model = new ChatOpenAI({
-    model: MODEL_NAME,
+    model: modelName ?? MODEL_NAME,
     temperature: 0.2,
     apiKey,
     streaming: true,
@@ -212,7 +219,8 @@ export async function runClarificationPhase(
 
     if (!toolCall) return {};
 
-    const questionText = toolCall.args.question as string;
+    // Extract question from any reply-type tool (ask_followup, probe_trade_off, request_estimation)
+    const questionText = (toolCall.args.question ?? toolCall.args.aspect ?? String(toolCall.args)) as string;
     const toolCallId =
       typeof toolCall.id === "string" ? toolCall.id : "followup_call";
 
@@ -246,7 +254,31 @@ export async function runClarificationPhase(
     };
   };
 
-  const maxRounds = question.rubric.maxFollowupRounds;
+  // Risk flag node: publish risk_flag event instantly, return ToolMessage, loop back to agent
+  const flagRiskNode = async (state: typeof ClarificationState.State) => {
+    const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
+    const toolCall = lastMessage.tool_calls?.[0];
+
+    if (!toolCall) return {};
+
+    const { component, risk, severity } = toolCall.args as {
+      component: string;
+      risk: string;
+      severity: "critical" | "high" | "medium";
+    };
+    const toolCallId = typeof toolCall.id === "string" ? toolCall.id : "flag_risk_call";
+
+    await publishEvent({ type: "risk_flag", component, risk, severity });
+
+    const toolResult = new ToolMessage({
+      tool_call_id: toolCallId,
+      content: `Risk flagged (${severity}): ${component} — ${risk}`,
+    });
+
+    return { messages: [toolResult] };
+  };
+
+  const maxRounds = maxFollowupOverride !== undefined ? maxFollowupOverride : question.rubric.maxFollowupRounds;
 
   const shouldContinue = (state: typeof ClarificationState.State): string => {
     const lastMessage = state.messages[state.messages.length - 1];
@@ -258,7 +290,16 @@ export async function runClarificationPhase(
 
     const toolName = aiMsg.tool_calls[0]?.name;
 
-    if (toolName === "ask_followup" && state.followupRounds < maxRounds) {
+    // Annotation tool: fires instantly, loops back to agent (no quota cost)
+    if (toolName === "flag_risk") {
+      return "flag_risk_node";
+    }
+
+    // Reply tools: block for user response (count toward quota)
+    if (
+      (toolName === "ask_followup" || toolName === "probe_trade_off" || toolName === "request_estimation") &&
+      state.followupRounds < maxRounds
+    ) {
       return "wait_reply";
     }
 
@@ -269,12 +310,15 @@ export async function runClarificationPhase(
   const workflow = new StateGraph(ClarificationState)
     .addNode("agent", agentNode)
     .addNode("wait_reply", waitReplyNode)
+    .addNode("flag_risk_node", flagRiskNode)
     .addEdge(START, "agent")
     .addConditionalEdges("agent", shouldContinue, {
       wait_reply: "wait_reply",
+      flag_risk_node: "flag_risk_node",
       [END]: END,
     })
     .addEdge("wait_reply", "agent")
+    .addEdge("flag_risk_node", "agent")
     .compile();
 
   const logger = createAgentFlowLogger(publishEvent);
@@ -302,6 +346,7 @@ export async function runEvaluationPhase(
   const {
     apiKey,
     baseUrl,
+    modelName,
     messages,
     question,
     submissionId: _submissionId,
@@ -309,12 +354,16 @@ export async function runEvaluationPhase(
   } = params;
 
   const dimensionIds = question.rubric.dimensions.map((d) => d.id);
+  const dimensionLabels: Record<string, string> = {};
+  for (const d of question.rubric.dimensions) {
+    dimensionLabels[d.id] = d.label;
+  }
   
   await publishEvent({ type: "agent_flow", step: "Evaluation starting", details: { dimensions: dimensionIds.length } });
-  await publishEvent({ type: "eval_start", dimensions: dimensionIds });
+  await publishEvent({ type: "eval_start", dimensions: dimensionIds, dimensionLabels });
 
   const model = new ChatOpenAI({
-    model: MODEL_NAME,
+    model: modelName ?? MODEL_NAME,
     temperature: 0.1,
     apiKey,
     ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
@@ -355,11 +404,11 @@ export async function runEvaluationPhase(
 export async function generateNarrativeFeedback(
   params: FeedbackParams,
 ): Promise<FeedbackResult> {
-  const { apiKey, baseUrl, messages, componentScores, overallScore, rubric } =
+  const { apiKey, baseUrl, modelName, messages, componentScores, overallScore, rubric } =
     params;
 
   const model = new ChatOpenAI({
-    model: MODEL_NAME,
+    model: modelName ?? MODEL_NAME,
     temperature: 0.3,
     apiKey,
     ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),

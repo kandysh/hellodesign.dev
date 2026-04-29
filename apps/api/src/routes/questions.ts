@@ -1,7 +1,5 @@
-import { Hono } from "hono"
+import type { FastifyPluginAsync } from "fastify"
 import { db } from "@sysdesign/db"
-
-const app = new Hono()
 
 /** Extract a short description from the first line of the prompt. */
 function shortDescription(prompt: string): string {
@@ -9,65 +7,64 @@ function shortDescription(prompt: string): string {
   return first.length > 120 ? `${first.slice(0, 117)}…` : first
 }
 
-app.get("/", async (c) => {
-  const category = c.req.query("category")
-  const difficulty = c.req.query("difficulty")
+const questionsPlugin: FastifyPluginAsync = async (fastify) => {
+  fastify.get("/", async (req) => {
+    const { category, difficulty } = req.query as Record<string, string | undefined>
 
-  const questions = await db.question.findMany({
-    where: {
-      isPublished: true,
-      ...(category ? { category } : {}),
-      ...(difficulty
-        ? { difficulty: difficulty.toUpperCase() as "EASY" | "MEDIUM" | "HARD" }
-        : {}),
-    },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      title: true,
-      prompt: true,
-      difficulty: true,
-      category: true,
-      estimatedMins: true,
-      createdAt: true,
-    },
-  })
+    const questions = await db.question.findMany({
+      where: {
+        isPublished: true,
+        ...(category ? { category } : {}),
+        ...(difficulty
+          ? { difficulty: difficulty.toUpperCase() as "EASY" | "MEDIUM" | "HARD" }
+          : {}),
+      },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        title: true,
+        prompt: true,
+        difficulty: true,
+        category: true,
+        estimatedMins: true,
+        createdAt: true,
+      },
+    })
 
-  return c.json(
-    questions.map(({ prompt, difficulty, ...q }) => ({
+    return questions.map(({ prompt, difficulty, ...q }) => ({
       ...q,
       description: shortDescription(prompt),
       difficulty: difficulty.toLowerCase() as "easy" | "medium" | "hard",
-    })),
-  )
-})
-
-app.get("/:id", async (c) => {
-  const id = c.req.param("id")
-
-  const question = await db.question.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      title: true,
-      prompt: true,
-      difficulty: true,
-      category: true,
-      estimatedMins: true,
-      hints: true,
-      coverageChecklist: true,
-      rubric: true,
-      createdAt: true,
-    },
+    }))
   })
 
-  if (!question) return c.json({ error: "Not found" }, 404)
+  fastify.get<{ Params: { id: string } }>("/:id", async (req, reply) => {
+    const { id } = req.params
 
-  return c.json({
-    ...question,
-    difficulty: question.difficulty.toLowerCase() as "easy" | "medium" | "hard",
+    const question = await db.question.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        prompt: true,
+        difficulty: true,
+        category: true,
+        estimatedMins: true,
+        hints: true,
+        coverageChecklist: true,
+        rubric: true,
+        createdAt: true,
+      },
+    })
+
+    if (!question) return reply.code(404).send({ error: "Not found" })
+
+    return {
+      ...question,
+      difficulty: question.difficulty.toLowerCase() as "easy" | "medium" | "hard",
+    }
   })
-})
+}
 
-export default app
+export default questionsPlugin
 

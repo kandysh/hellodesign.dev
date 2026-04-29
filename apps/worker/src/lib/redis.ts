@@ -23,3 +23,7 @@ export function submissionChannel(submissionId: string) {
 export function replyChannel(submissionId: string) {
   return `submission:${submissionId}:reply`
 }
+
+export function eventBufKey(submissionId: string) {
+  return `submission:${submissionId}:eventbuf`
+}
