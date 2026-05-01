@@ -96,10 +96,31 @@ html {
 body {
   @apply m-0 antialiased;
   background-color: #0b1326;
-  color: #dae2fd;
+  color: #b8c1e3;
   font-family: 'Manrope Variable', 'Manrope', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+/* ── Grain texture background ────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.03),
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  pointer-events: none;
+  z-index: -1;
 }
 
 code, pre, .font-mono {
@@ -132,14 +153,22 @@ code, pre, .font-mono {
 /* ── Glass panel ───────────────────────────────────────────── */
 .glass-panel {
   backdrop-filter: blur(12px);
-  background-color: rgba(11, 19, 38, 0.8);
+  background: linear-gradient(135deg, rgba(11, 19, 38, 0.95), rgba(19, 27, 46, 0.9));
   border: 1px solid #464554;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
 /* ── Bento card ────────────────────────────────────────────── */
 .bento-card {
-  background-color: #171f33;
+  background: linear-gradient(135deg, rgba(23, 31, 51, 0.8), rgba(34, 42, 61, 0.6));
   border: 1px solid #2d3449;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.bento-card:hover {
+  box-shadow: 0 8px 20px rgba(128, 131, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
 }
 
 /* ── Indigo glow (active state) ────────────────────────────── */
@@ -190,4 +219,23 @@ code, pre, .font-mono {
 .auth-input:focus {
   border-color: #c0c1ff;
   box-shadow: 0 0 0 2px rgba(192,193,255,0.15);
+}
+
+/* ── Error, Warning, Success state utilities ────────────────── */
+.state-error {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.state-warning {
+  color: #fbbf24;
+  border-color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.state-success {
+  color: #4edea3;
+  border-color: #4edea3;
+  background: rgba(78, 222, 163, 0.1);
 }

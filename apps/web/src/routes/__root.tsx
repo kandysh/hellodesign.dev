@@ -3,6 +3,7 @@ import { createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react
 import { Footer } from "../components/Footer"
 import Header from "../components/Header"
 import { ToastProvider } from "../components/Toast"
+import { ErrorBoundary, OfflineIndicator } from "../components/ErrorBoundary"
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -22,13 +23,16 @@ function RootLayout() {
 
   return (
     <ToastProvider>
-      <div className="flex flex-col min-h-screen">
-        {!isAuthPage && <Header />}
-        <main className={`${isAuthPage ? "" : "pt-16"} flex-1`}>
-          <Outlet />
-        </main>
-        {!isAuthPage && !isFullScreenWorkspace && <Footer />}
-      </div>
+      <ErrorBoundary>
+        <div className="flex flex-col min-h-screen">
+          {!isAuthPage && <Header />}
+          <main className={`${isAuthPage ? "" : "pt-16"} flex-1`}>
+            <Outlet />
+          </main>
+          {!isAuthPage && !isFullScreenWorkspace && <Footer />}
+        </div>
+        <OfflineIndicator />
+      </ErrorBoundary>
     </ToastProvider>
   )
 }

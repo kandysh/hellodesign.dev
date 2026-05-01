@@ -81,9 +81,10 @@ export const AgentPanel = memo(function AgentPanel({
 }: AgentPanelProps) {
   const [input, setInput] = useState("")
   const [showTrace, setShowTrace] = useState(false)
-  const [showRisks, setShowRisks] = useState(true)
+  const [showRisks, setShowRisks] = useState(false)
   const traceRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const prevMessageLengthRef = useRef(messages.length)
 
   // Auto-scroll trace
   // biome-ignore lint/correctness/useExhaustiveDependencies: traceRef is a stable ref, state is the trigger
@@ -93,10 +94,16 @@ export const AgentPanel = memo(function AgentPanel({
     }
   }, [state])
 
-  // Auto-scroll messages
+  // Smart auto-scroll: only on agent messages (not user input)
   // biome-ignore lint/correctness/useExhaustiveDependencies: messagesEndRef is a stable ref
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (messages.length > prevMessageLengthRef.current) {
+      const newMsg = messages[messages.length - 1]
+      if (newMsg?.role === "agent") {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+      }
+    }
+    prevMessageLengthRef.current = messages.length
   }, [messages])
 
   // Open trace automatically when processing starts
@@ -242,9 +249,12 @@ export const AgentPanel = memo(function AgentPanel({
         {/* ── Evaluating ── */}
         {state.phase === "evaluating" && (
           <div className="flex flex-col gap-0">
-            {/* Status banner */}
+            {/* Status banner w/ skeleton */}
             <div className="flex items-center gap-3 px-5 py-4 border-b border-base-300/30">
-              <Loader2 size={15} className="shrink-0 animate-spin text-primary" />
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-info opacity-60" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-info" />
+              </span>
               <div>
                 <p className="text-sm font-medium text-base-content">Scoring your design…</p>
                 <p className="text-[11px] text-base-content/40 mt-0.5">
@@ -337,7 +347,7 @@ export const AgentPanel = memo(function AgentPanel({
           </div>
         )}
 
-        {/* ── Risk flags (persistent, collapsible) ── */}
+        {/* ── Risk flags (persistent, collapsible, collapse by default) ── */}
         {riskFlags.length > 0 && state.phase !== "idle" && (
           <div className="border-t border-base-300/30 px-5 py-3">
             <button
@@ -510,6 +520,7 @@ function ChatBubble({
 }) {
   const isAgent = message.role === "agent"
   const time = message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  const fullTime = message.timestamp.toLocaleString()
 
   return (
     <div className={cn("chat", isAgent ? "chat-start" : "chat-end")}>
@@ -517,7 +528,9 @@ function ChatBubble({
         <div
           className={cn(
             "w-7 rounded-full flex items-center justify-center text-xs font-semibold",
-            isAgent ? "bg-primary/15 text-primary" : "bg-base-300/60 text-base-content/60",
+            isAgent 
+              ? "bg-cyan-500/15 text-cyan-400" 
+              : "bg-indigo-600/15 text-indigo-400",
           )}
         >
           {isAgent ? (
@@ -532,12 +545,19 @@ function ChatBubble({
       <div
         className={cn(
           "chat-bubble text-sm leading-relaxed",
-          isAgent ? "bg-base-300/50 text-base-content" : "bg-primary/15 text-base-content",
+          isAgent 
+            ? "bg-cyan-500/10 text-base-content border border-cyan-500/20" 
+            : "bg-indigo-600/10 text-base-content border border-indigo-600/20",
         )}
       >
         {message.content}
       </div>
-      <div className="chat-footer text-[10px] text-base-content/30 mt-0.5">{time}</div>
+      <div 
+        className="chat-footer text-[10px] text-base-content/30 mt-0.5 tooltip"
+        data-tip={fullTime}
+      >
+        {time}
+      </div>
     </div>
   )
 }

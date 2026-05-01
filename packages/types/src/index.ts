@@ -95,3 +95,35 @@ export type SSEEvent =
   | { type: "agent:result"; data: AgentResult }
   | { type: "evaluation:complete"; data: { evaluationId: string; orchestrator: OrchestratorResult } }
   | { type: "evaluation:error"; data: { message: string } }
+
+// ── Submission stats (for results page enhancement) ────────────────────────
+
+export interface SubmissionStats {
+  /** Overall score 0-100 */
+  overallScore: number
+  /** Percentile rank (0-100): how many % of submissions this user ranked better than */
+  percentileRank: number
+  /** Scores across dimensions for trend visualization */
+  dimensionScores: {
+    id: string
+    label: string
+    score: number
+  }[]
+  /** Weak areas (dimensions with lowest scores) */
+  weakAreas: {
+    dimensionId: string
+    label: string
+    score: number
+    suggestion: string
+  }[]
+  /** User's historical scores on this problem (for trend) */
+  submissionHistory: {
+    submissionId: string
+    score: number
+    createdAt: Date
+  }[]
+  /** Expert reference design score (for comparison) */
+  expertScore?: number
+  /** Overall feedback summary */
+  feedbackSummary: string
+}

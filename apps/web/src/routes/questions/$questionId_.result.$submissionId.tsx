@@ -20,7 +20,10 @@ import {
   Zap,
   GitBranch,
   Activity,
+  TrendingUp,
+  AlertCircle,
 } from "lucide-react"
+import { generateMockSubmissionStats } from "@/lib/mockSubmissionStats"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -117,6 +120,9 @@ function ResultPage() {
     ? (result!.componentScores as ComponentScore[])
     : []
   const isEvaluating = !result && submission?.status !== "FAILED"
+
+  // Generate mock stats (replace with real API when backend is ready)
+  const mockStats = overallScore != null ? generateMockSubmissionStats(overallScore, questionId) : null
 
   const answerText = extractLexicalText(submission?.lexicalState ?? {})
 
@@ -223,6 +229,21 @@ function ResultPage() {
                 {statusLabel}
               </span>
             </div>
+            {/* Percentile (new) */}
+            {mockStats && (
+              <div className="flex flex-col">
+                <span
+                  className="text-[10px] font-bold uppercase tracking-widest mb-1"
+                  style={{ color: DS.textSecondary }}
+                >
+                  Percentile
+                </span>
+                <span className="flex items-center gap-2 text-sm font-medium" style={{ color: DS.indigoPale }}>
+                  <TrendingUp size={14} />
+                  Top {Math.round(100 - mockStats.percentileRank)}%
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -376,6 +397,56 @@ function ResultPage() {
                 </ul>
               </div>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Weak Areas Section (new) ── */}
+      {mockStats && mockStats.weakAreas.length > 0 && (
+        <section
+          className="mb-8 p-6 rounded-xl border"
+          style={{ background: DS.cardBg, border: DS.cardBorder }}
+        >
+          <div className="flex items-start gap-3 mb-4">
+            <AlertCircle size={18} style={{ color: DS.amber, flexShrink: 0, marginTop: "2px" }} />
+            <div>
+              <h2 className="text-lg font-bold" style={{ color: DS.textPrimary }}>
+                Areas for Improvement
+              </h2>
+              <p className="text-sm mt-1" style={{ color: DS.textSecondary }}>
+                Focus on these weak areas to strengthen your design skills
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {mockStats.weakAreas.map((area) => (
+              <div
+                key={area.dimensionId}
+                className="flex items-center justify-between p-3 rounded-lg"
+                style={{
+                  background: `rgba(251, 191, 36, 0.08)`,
+                  border: `1px solid rgba(251, 191, 36, 0.2)`,
+                }}
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-sm" style={{ color: DS.textPrimary }}>
+                    {area.label}
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: DS.textSecondary }}>
+                    {area.suggestion}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <span
+                    className="text-sm font-bold"
+                    style={{ color: area.score >= 50 ? DS.green : DS.red }}
+                  >
+                    {Math.round(area.score)}/100
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       )}

@@ -36,6 +36,7 @@ export const Route = createFileRoute("/questions/")({
 function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string | null>(null) // new
 
   const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
 
@@ -43,8 +44,17 @@ function QuestionsPage() {
   const filtered = questions.filter((q) => {
     const diffOk = selectedDifficulties.size === 0 || selectedDifficulties.has(q.difficulty)
     const catOk = !selectedCategory || q.category === selectedCategory
-    return diffOk && catOk
+    // Time filter (new)
+    const timeOk = !selectedTimeRange || (
+      (selectedTimeRange === "quick" && q.estimatedMins <= 15) ||
+      (selectedTimeRange === "medium" && q.estimatedMins > 15 && q.estimatedMins <= 30) ||
+      (selectedTimeRange === "long" && q.estimatedMins > 30)
+    )
+    return diffOk && catOk && timeOk
   })
+
+  // Popular (most popular sorted by random for now, ideally sorted by views)
+  const popular = [...questions].sort(() => Math.random() - 0.5).slice(0, 4)
 
   function toggleDifficulty(d: string) {
     setSelectedDifficulties((prev) => {
@@ -99,6 +109,40 @@ function QuestionsPage() {
           </div>
         ))}
       </div>
+
+      {/* ── Popular This Week ──────────────────────────────────────── */}
+      {popular.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#8083ff" }}>
+              🔥 Popular This Week
+            </span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {popular.map((q) => (
+              <Link
+                key={q.id}
+                to="/questions/$questionId"
+                params={{ questionId: q.id }}
+                className="rounded-lg p-4 group transition-all duration-200 hover:shadow-lg hover:shadow-indigo-950/40"
+                style={{
+                  background: "linear-gradient(135deg, rgba(23, 31, 51, 0.8), rgba(34, 42, 61, 0.6))",
+                  border: "1px solid #2d3449",
+                }}
+              >
+                <DifficultyBadge difficulty={q.difficulty} />
+                <p className="text-sm font-semibold mt-2 line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ color: "#dae2fd" }}>
+                  {q.title}
+                </p>
+                <div className="flex items-center gap-1 text-xs mt-3" style={{ color: "#908fa0" }}>
+                  <Clock size={12} />
+                  {q.estimatedMins}m
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-5">
         {/* ── Sidebar ──────────────────────────────────────────── */}
@@ -165,10 +209,40 @@ function QuestionsPage() {
             </div>
           </div>
 
-          {(selectedDifficulties.size > 0 || selectedCategory) && (
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
+              Time to Complete
+            </p>
+            <div className="flex flex-col gap-1">
+              {[
+                { id: "quick", label: "Quick (≤15 min)" },
+                { id: "medium", label: "Medium (15-30 min)" },
+                { id: "long", label: "Long (30+ min)" },
+              ].map((opt) => {
+                const active = selectedTimeRange === opt.id
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setSelectedTimeRange(active ? null : opt.id)}
+                    className="rounded px-3 py-1.5 text-left text-sm transition-colors duration-150"
+                    style={{
+                      background: active ? "rgba(99,102,241,0.1)" : "transparent",
+                      border: active ? "1px solid rgba(192,193,255,0.2)" : "1px solid transparent",
+                      color: active ? "#dae2fd" : "#908fa0",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {(selectedDifficulties.size > 0 || selectedCategory || selectedTimeRange) && (
             <button
               type="button"
-              onClick={() => { setSelectedDifficulties(new Set()); setSelectedCategory(null) }}
+              onClick={() => { setSelectedDifficulties(new Set()); setSelectedCategory(null); setSelectedTimeRange(null) }}
               className="text-xs transition-colors hover:underline underline-offset-2"
               style={{ color: "#464554" }}
               onMouseEnter={(e) => { e.currentTarget.style.color = "#908fa0" }}
