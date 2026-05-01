@@ -34,12 +34,12 @@ function RegisterPage() {
       setError(authError.message ?? "Registration failed");
       setLoading(false);
     } else if (data) {
-      window.location.href = "/me";
+      window.location.href = "/questions";
     }
   }
 
-  const googleHref = `${API}/api/auth/sign-in/social?provider=google&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/me` : "/me")}`;
-  const githubHref = `${API}/api/auth/sign-in/social?provider=github&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/me` : "/me")}`;
+  const googleHref = `${API}/api/auth/sign-in/social?provider=google&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/questions` : "/questions")}`;
+  const githubHref = `${API}/api/auth/sign-in/social?provider=github&callbackURL=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/questions` : "/questions")}`;
 
   return (
     <>

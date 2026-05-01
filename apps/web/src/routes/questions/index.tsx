@@ -5,7 +5,7 @@ import type { QuestionSummary } from "@sysdesign/types"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { MetricsCard } from "@/components/MetricsCard"
 import { useSession } from "@/lib/auth-client"
-import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal, Trophy, Flame, CheckCircle2 } from "lucide-react"
+import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal, Trophy, Flame, CheckCircle2, Search, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { questionsQueryOptions } from "@/lib/queries/questions"
 
@@ -39,6 +39,7 @@ function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedTimeRange, setSelectedTimeRange] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
   const { data: session } = useSession()
@@ -47,13 +48,13 @@ function QuestionsPage() {
   const filtered = questions.filter((q) => {
     const diffOk = selectedDifficulties.size === 0 || selectedDifficulties.has(q.difficulty)
     const catOk = !selectedCategory || q.category === selectedCategory
-    // Time filter (new)
     const timeOk = !selectedTimeRange || (
       (selectedTimeRange === "quick" && q.estimatedMins <= 15) ||
       (selectedTimeRange === "medium" && q.estimatedMins > 15 && q.estimatedMins <= 30) ||
       (selectedTimeRange === "long" && q.estimatedMins > 30)
     )
-    return diffOk && catOk && timeOk
+    const searchOk = !searchQuery || q.title.toLowerCase().includes(searchQuery.toLowerCase()) || q.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    return diffOk && catOk && timeOk && searchOk
   })
 
   // Popular (most popular sorted by random for now, ideally sorted by views)
@@ -90,35 +91,12 @@ function QuestionsPage() {
         </p>
       </div>
 
-      {/* ── Stats strip ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        {[
-          { label: "Easy", count: totalEasy, color: "#4edea3" },
-          { label: "Medium", count: totalMedium, color: "#fbbf24" },
-          { label: "Hard", count: totalHard, color: "#ffb4ab" },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-lg px-4 py-3 flex items-center gap-3"
-            style={{ background: "#131b2e", border: "1px solid #2d3449" }}
-          >
-            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: stat.color }} />
-            <div>
-              <p className="text-base font-bold" style={{ color: stat.color, fontFamily: "'Space Grotesk', monospace" }}>
-                {stat.count}
-              </p>
-              <p className="text-xs" style={{ color: "#908fa0" }}>{stat.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {/* ── Dashboard Metrics (if logged in) ───────────────────── */}
       {session?.user && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#8083ff" }}>
-              📊 Your Progress
+              Your Progress
             </span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -153,12 +131,61 @@ function QuestionsPage() {
         </div>
       )}
 
+      {/* ── Search + Filter Bar ────────────────────────────────────── */}
+      <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between p-4 rounded-lg" style={{ background: "#131b2e", border: "1px solid #2d3449" }}>
+        <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:max-w-md" style={{ position: "relative" }}>
+          <Search size={16} style={{ color: "#908fa0", position: "absolute", left: "12px" }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search challenges..."
+            className="w-full pl-10 pr-4 py-2 rounded text-sm"
+            style={{
+              background: "#0b1326",
+              border: "1px solid #2d3449",
+              color: "#dae2fd",
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "#464554" }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+          />
+        </div>
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 rounded text-sm whitespace-nowrap transition-colors"
+            style={{
+              background: selectedDifficulties.size > 0 ? "rgba(99,102,241,0.1)" : "#0b1326",
+              border: selectedDifficulties.size > 0 ? "1px solid #464554" : "1px solid #2d3449",
+              color: selectedDifficulties.size > 0 ? "#dae2fd" : "#908fa0",
+            }}
+            title="Filter by difficulty"
+          >
+            <Filter size={14} />
+            Difficulty
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-2 px-4 py-2 rounded text-sm whitespace-nowrap transition-colors"
+            style={{
+              background: selectedCategory ? "rgba(99,102,241,0.1)" : "#0b1326",
+              border: selectedCategory ? "1px solid #464554" : "1px solid #2d3449",
+              color: selectedCategory ? "#dae2fd" : "#908fa0",
+            }}
+            title="Filter by topic"
+          >
+            <Filter size={14} />
+            Topics
+          </button>
+        </div>
+      </div>
+
       {/* ── Popular This Week ──────────────────────────────────────── */}
       {popular.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#8083ff" }}>
-              🔥 Popular This Week
+              Popular This Week
             </span>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
