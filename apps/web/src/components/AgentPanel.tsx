@@ -55,8 +55,8 @@ interface AgentPanelProps {
 // ── Score colors ───────────────────────────────────────────────────────────
 
 function scoreColor(score: number) {
-  if (score >= 85) return { hex: "#4edea3", label: "Excellent" }
-  if (score >= 70) return { hex: "#8083ff", label: "Solid" }
+  if (score >= 85) return { hex: "var(--app-green)", label: "Excellent" }
+  if (score >= 70) return { hex: "var(--app-indigo)", label: "Solid" }
   if (score >= 50) return { hex: "#f5a623", label: "Adequate" }
   return { hex: "#ff6b6b", label: "Needs work" }
 }
@@ -268,7 +268,7 @@ export const AgentPanel = memo(function AgentPanel({
               {state.dimensionLabels.map((label, i) => {
                 const result = state.agentResults[i]
                 const scored = result !== undefined
-                const { hex } = scored ? scoreColor(result.score) : { hex: "#4edea3" }
+                const { hex } = scored ? scoreColor(result.score) : { hex: "var(--app-green)" }
                 return (
                   <ScoreRow
                     key={label}

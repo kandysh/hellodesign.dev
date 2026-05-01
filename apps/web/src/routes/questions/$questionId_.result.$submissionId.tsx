@@ -46,22 +46,22 @@ const dimensionIcon: Record<string, React.ReactNode> = {
 
 // ── Design system color tokens ─────────────────────────────────────────────
 const DS = {
-  pageBg: "#0b1326",
-  cardBg: "#171f33",
-  cardBorder: "1px solid #2d3449",
-  elevatedBg: "#131b2e",
-  codeBg: "#060e20",
-  textPrimary: "#dae2fd",
-  textSecondary: "#908fa0",
-  textMuted: "#464554",
-  textBody: "#c7c4d7",
-  indigo: "#8083ff",
-  indigoPale: "#c0c1ff",
-  green: "#4edea3",
-  red: "#ffb4ab",
-  amber: "#fbbf24",
-  surfaceHigh: "#222a3d",
-  surfaceVariant: "#2d3449",
+  pageBg: "var(--app-bg)",
+  cardBg: "var(--app-surface-2)",
+  cardBorder: "1px solid var(--app-border)",
+  elevatedBg: "var(--app-surface)",
+  codeBg: "var(--app-bg-deep)",
+  textPrimary: "var(--app-fg)",
+  textSecondary: "var(--app-subtle)",
+  textMuted: "var(--app-muted)",
+  textBody: "var(--app-body)",
+  indigo: "var(--app-indigo)",
+  indigoPale: "var(--app-indigo-pale)",
+  green: "var(--app-green)",
+  red: "var(--app-red)",
+  amber: "var(--app-amber)",
+  surfaceHigh: "var(--app-surface-4)",
+  surfaceVariant: "var(--app-border)",
 } as const
 
 /** Returns the accent colour for a given 0-100 score */
@@ -159,9 +159,9 @@ function ResultPage() {
           style={{
             background: "rgba(128,131,255,0.12)",
             border: "1px solid rgba(128,131,255,0.25)",
-            color: "#c0c1ff",
+            color: "var(--app-indigo-pale)",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(128,131,255,0.2)" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--app-indigo-20)" }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(128,131,255,0.12)" }}
         >
           <RefreshCw size={13} />

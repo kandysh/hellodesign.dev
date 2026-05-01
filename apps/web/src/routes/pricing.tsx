@@ -103,8 +103,8 @@ function PricingPage() {
         <div
           style={{
             background: "rgba(192,193,255,0.08)",
-            border: "1px solid rgba(192,193,255,0.2)",
-            color: "#c0c1ff",
+            border: "1px solid var(--app-indigo-20)",
+            color: "var(--app-indigo-pale)",
           }}
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-4"
         >
@@ -112,13 +112,13 @@ function PricingPage() {
           Unlock advanced AI evaluation
         </div>
         <h1
-          style={{ color: "#dae2fd", letterSpacing: "-0.02em" }}
+          style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
           className="mb-3 text-4xl font-extrabold md:text-5xl"
         >
           Upgrade to{" "}
-          <span style={{ color: "#8083ff" }}>Hello Design</span>
+          <span style={{ color: "var(--app-indigo)" }}>Hello Design</span>
         </h1>
-        <p style={{ color: "#908fa0" }} className="mx-auto max-w-xl leading-relaxed text-sm">
+        <p style={{ color: "var(--app-subtle)" }} className="mx-auto max-w-xl leading-relaxed text-sm">
           Unlock advanced evaluation metrics, unlimited AI interviews, and secure cloud sync.
           Choose the technical tier that matches your architectural demands.
         </p>
@@ -134,20 +134,20 @@ function PricingPage() {
       {/* ── Feature comparison table ──────────────────────────── */}
       <section className="mb-16">
         <h2
-          style={{ color: "#dae2fd" }}
+          style={{ color: "var(--app-fg)" }}
           className="mb-6 text-center text-xl font-bold tracking-tight"
         >
           Compare plans
         </h2>
         <div
-          style={{ background: "#171f33", border: "1px solid #2d3449" }}
+          style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
           className="overflow-hidden rounded-xl"
         >
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ background: "#131b2e", borderBottom: "1px solid #2d3449" }}>
+              <tr style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
                 <th
-                  style={{ color: "#908fa0" }}
+                  style={{ color: "var(--app-subtle)" }}
                   className="px-5 py-3.5 text-left font-medium"
                 >
                   Feature
@@ -155,7 +155,7 @@ function PricingPage() {
                 {TIERS.map((t) => (
                   <th
                     key={t.id}
-                    style={{ color: t.popular ? "#c0c1ff" : "#908fa0" }}
+                    style={{ color: t.popular ? "var(--app-indigo-pale)" : "var(--app-subtle)" }}
                     className="px-4 py-3.5 text-center font-semibold"
                   >
                     {t.name}
@@ -176,35 +176,35 @@ function PricingPage() {
                   key={feature}
                   style={{
                     background: i % 2 === 0 ? "rgba(19,27,46,0.4)" : "transparent",
-                    borderBottom: "1px solid #2d3449",
+                    borderBottom: "1px solid var(--app-border)",
                   }}
                   className="last:border-0"
                 >
-                  <td className="px-5 py-3" style={{ color: "#908fa0" }}>
+                  <td className="px-5 py-3" style={{ color: "var(--app-subtle)" }}>
                     {feature}
                   </td>
-                  <td className="px-4 py-3 text-center text-xs" style={{ color: "#464554" }}>
+                  <td className="px-4 py-3 text-center text-xs" style={{ color: "var(--app-muted)" }}>
                     {feature === "AI Interviews" ? (
-                      <span style={{ color: "#908fa0" }}>5 / mo</span>
+                      <span style={{ color: "var(--app-subtle)" }}>5 / mo</span>
                     ) : (
-                      <XCircle size={14} className="mx-auto" style={{ color: "#464554" }} />
+                      <XCircle size={14} className="mx-auto" style={{ color: "var(--app-muted)" }} />
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     {["AI Interviews", "Cloud Sync", "Private Solutions", "Advanced Metrics"].includes(feature) ? (
                       feature === "AI Interviews" ? (
-                        <span className="text-xs font-medium" style={{ color: "#c0c1ff" }}>
+                        <span className="text-xs font-medium" style={{ color: "var(--app-indigo-pale)" }}>
                           Unlimited
                         </span>
                       ) : (
-                        <CheckCircle2 size={14} className="mx-auto" style={{ color: "#4edea3" }} />
+                        <CheckCircle2 size={14} className="mx-auto" style={{ color: "var(--app-green)" }} />
                       )
                     ) : (
-                      <XCircle size={14} className="mx-auto" style={{ color: "#464554" }} />
+                      <XCircle size={14} className="mx-auto" style={{ color: "var(--app-muted)" }} />
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <CheckCircle2 size={14} className="mx-auto" style={{ color: "#4edea3" }} />
+                    <CheckCircle2 size={14} className="mx-auto" style={{ color: "var(--app-green)" }} />
                   </td>
                 </tr>
               ))}
@@ -216,7 +216,7 @@ function PricingPage() {
       {/* ── Security notice ───────────────────────────────────── */}
       <div
         className="mb-12 flex items-center justify-center gap-2 text-xs"
-        style={{ color: "#464554" }}
+        style={{ color: "var(--app-muted)" }}
       >
         <Shield size={12} />
         Secure 256-bit encryption. Cancel anytime from your settings.
@@ -225,7 +225,7 @@ function PricingPage() {
       {/* ── FAQ ──────────────────────────────────────────────── */}
       <section>
         <h2
-          style={{ color: "#dae2fd" }}
+          style={{ color: "var(--app-fg)" }}
           className="mb-6 text-center text-xl font-bold tracking-tight"
         >
           Frequently asked questions
@@ -234,13 +234,13 @@ function PricingPage() {
           {FAQS.map((faq) => (
             <div
               key={faq.q}
-              style={{ background: "#171f33", border: "1px solid #2d3449" }}
+              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
               className="rounded-lg p-5"
             >
-              <p style={{ color: "#dae2fd" }} className="mb-2 font-semibold text-sm">
+              <p style={{ color: "var(--app-fg)" }} className="mb-2 font-semibold text-sm">
                 {faq.q}
               </p>
-              <p style={{ color: "#908fa0" }} className="text-sm leading-relaxed">
+              <p style={{ color: "var(--app-subtle)" }} className="text-sm leading-relaxed">
                 {faq.a}
               </p>
             </div>
@@ -252,15 +252,15 @@ function PricingPage() {
       <div
         style={{
           background: "rgba(99,102,241,0.08)",
-          border: "1px solid rgba(128,131,255,0.2)",
+          border: "1px solid var(--app-indigo-20)",
         }}
         className="mt-12 rounded-xl p-8 text-center"
       >
-        <Zap size={24} className="mx-auto mb-3" style={{ color: "#8083ff" }} />
-        <h3 style={{ color: "#dae2fd" }} className="mb-2 text-xl font-bold">
+        <Zap size={24} className="mx-auto mb-3" style={{ color: "var(--app-indigo)" }} />
+        <h3 style={{ color: "var(--app-fg)" }} className="mb-2 text-xl font-bold">
           Ready to level up your designs?
         </h3>
-        <p style={{ color: "#908fa0" }} className="mb-5 text-sm">
+        <p style={{ color: "var(--app-subtle)" }} className="mb-5 text-sm">
           Join engineers at top companies who use Hello Design to ace system design interviews.
         </p>
         <Link
@@ -268,7 +268,7 @@ function PricingPage() {
           style={{
             background: "#6366f1",
             color: "white",
-            boxShadow: "0 0 12px rgba(99,102,241,0.3)",
+            boxShadow: "0 0 12px var(--app-indigo-glow)",
           }}
           className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold transition-all active:scale-95"
         >
@@ -285,8 +285,8 @@ function TierCard({ tier }: { tier: PricingTier }) {
   return (
     <div
       style={{
-        background: tier.popular ? "rgba(99,102,241,0.08)" : "#171f33",
-        border: tier.popular ? "1px solid rgba(128,131,255,0.4)" : "1px solid #2d3449",
+        background: tier.popular ? "rgba(99,102,241,0.08)" : "var(--app-surface-2)",
+        border: tier.popular ? "1px solid rgba(128,131,255,0.4)" : "1px solid var(--app-border)",
         boxShadow: tier.popular ? "0 0 24px rgba(99,102,241,0.15)" : undefined,
       }}
       className="relative flex flex-col rounded-xl p-6"
@@ -297,7 +297,7 @@ function TierCard({ tier }: { tier: PricingTier }) {
             style={{
               background: "rgba(99,102,241,0.2)",
               border: "1px solid rgba(128,131,255,0.4)",
-              color: "#c0c1ff",
+              color: "var(--app-indigo-pale)",
             }}
             className="rounded-full px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap"
           >
@@ -309,23 +309,23 @@ function TierCard({ tier }: { tier: PricingTier }) {
       {/* Header */}
       <div className="mb-5">
         <p
-          style={{ color: "#908fa0" }}
+          style={{ color: "var(--app-subtle)" }}
           className="text-xs font-bold uppercase tracking-wider mb-1"
         >
           {tier.name}
         </p>
         <div className="flex items-baseline gap-1">
           <span
-            style={{ color: "#dae2fd", letterSpacing: "-0.02em" }}
+            style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
             className="text-4xl font-extrabold"
           >
             {tier.price}
           </span>
-          <span style={{ color: "#464554" }} className="text-sm">
+          <span style={{ color: "var(--app-muted)" }} className="text-sm">
             {tier.period}
           </span>
         </div>
-        <p style={{ color: "#908fa0" }} className="text-sm mt-2 leading-relaxed">
+        <p style={{ color: "var(--app-subtle)" }} className="text-sm mt-2 leading-relaxed">
           {tier.description}
         </p>
       </div>
@@ -335,11 +335,11 @@ function TierCard({ tier }: { tier: PricingTier }) {
         {tier.features.map((f) => (
           <li key={f.label} className="flex items-center gap-2.5 text-sm">
             {f.included ? (
-              <CheckCircle2 size={14} className="shrink-0" style={{ color: "#4edea3" }} />
+              <CheckCircle2 size={14} className="shrink-0" style={{ color: "var(--app-green)" }} />
             ) : (
-              <XCircle size={14} className="shrink-0" style={{ color: "#464554" }} />
+              <XCircle size={14} className="shrink-0" style={{ color: "var(--app-muted)" }} />
             )}
-            <span style={{ color: f.included ? "#c7c4d7" : "#464554" }}>{f.label}</span>
+            <span style={{ color: f.included ? "var(--app-body)" : "var(--app-muted)" }}>{f.label}</span>
           </li>
         ))}
       </ul>
@@ -353,18 +353,18 @@ function TierCard({ tier }: { tier: PricingTier }) {
                 background: "#6366f1",
                 color: "white",
                 border: "1px solid rgba(99,102,241,0.5)",
-                boxShadow: "0 0 12px rgba(99,102,241,0.3)",
+                boxShadow: "0 0 12px var(--app-indigo-glow)",
               }
             : tier.ctaVariant === "secondary"
             ? {
                 background: "transparent",
-                color: "#c0c1ff",
+                color: "var(--app-indigo-pale)",
                 border: "1px solid rgba(192,193,255,0.3)",
               }
             : {
                 background: "transparent",
-                color: "#908fa0",
-                border: "1px solid #2d3449",
+                color: "var(--app-subtle)",
+                border: "1px solid var(--app-border)",
               }
         }
         className="w-full py-2.5 rounded text-sm font-semibold transition-all active:scale-95"

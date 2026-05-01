@@ -122,7 +122,7 @@ const CATEGORIES = [
 function difficultyStyle(d: string): React.CSSProperties {
   if (d === "Hard") return {
     background: "rgba(255,180,171,0.1)",
-    color: "#ffb4ab",
+    color: "var(--app-red)",
     border: "1px solid rgba(255,180,171,0.2)",
     borderRadius: 6,
     padding: "2px 10px",
@@ -131,7 +131,7 @@ function difficultyStyle(d: string): React.CSSProperties {
   }
   if (d === "Medium") return {
     background: "rgba(251,191,36,0.1)",
-    color: "#fbbf24",
+    color: "var(--app-amber)",
     border: "1px solid rgba(251,191,36,0.2)",
     borderRadius: 6,
     padding: "2px 10px",
@@ -140,7 +140,7 @@ function difficultyStyle(d: string): React.CSSProperties {
   }
   return {
     background: "rgba(78,222,163,0.1)",
-    color: "#4edea3",
+    color: "var(--app-green)",
     border: "1px solid rgba(78,222,163,0.2)",
     borderRadius: 6,
     padding: "2px 10px",
@@ -150,9 +150,9 @@ function difficultyStyle(d: string): React.CSSProperties {
 }
 
 function scoreColor(score: number): string {
-  if (score >= 85) return "#4edea3"
-  if (score >= 70) return "#fbbf24"
-  return "#ffb4ab"
+  if (score >= 85) return "var(--app-green)"
+  if (score >= 70) return "var(--app-amber)"
+  return "var(--app-red)"
 }
 
 function matchesFilters(
@@ -184,10 +184,10 @@ function CommunityPage() {
     <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 16px" }}>
       {/* ── Page Header ──────────────────────────────────────── */}
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ color: "#dae2fd", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 6 }}>
+        <h1 style={{ color: "var(--app-fg)", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", marginBottom: 6 }}>
           Community Solutions
         </h1>
-        <p style={{ color: "#908fa0", fontSize: 14, maxWidth: 560 }}>
+        <p style={{ color: "var(--app-subtle)", fontSize: 14, maxWidth: 560 }}>
           Explore real-world system designs reviewed by AI and peer architects. Discover patterns for
           scaling, fault tolerance, and data engineering.
         </p>
@@ -200,7 +200,7 @@ function CommunityPage() {
             size={14}
             style={{
               position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-              color: "#464554", pointerEvents: "none",
+              color: "var(--app-muted)", pointerEvents: "none",
             }}
           />
           <input
@@ -209,10 +209,10 @@ function CommunityPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{
-              background: "#131b2e",
-              border: "1px solid #2d3449",
+              background: "var(--app-surface)",
+              border: "1px solid var(--app-border)",
               borderRadius: 10,
-              color: "#dae2fd",
+              color: "var(--app-fg)",
               padding: "10px 16px 10px 36px",
               fontSize: 14,
               outline: "none",
@@ -220,12 +220,12 @@ function CommunityPage() {
               boxSizing: "border-box",
             }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(128,131,255,0.5)" }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
           />
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Filter size={13} style={{ color: "#464554", flexShrink: 0 }} />
+          <Filter size={13} style={{ color: "var(--app-muted)", flexShrink: 0 }} />
 
           {/* Difficulty filter */}
           <div style={{ display: "flex", gap: 4 }}>
@@ -240,8 +240,8 @@ function CommunityPage() {
                   style={{
                     ...(active ? base : {
                       background: "transparent",
-                      border: "1px solid #2d3449",
-                      color: "#908fa0",
+                      border: "1px solid var(--app-border)",
+                      color: "var(--app-subtle)",
                       borderRadius: 6,
                       padding: "2px 10px",
                       fontSize: 11,
@@ -263,10 +263,10 @@ function CommunityPage() {
             value={category ?? ""}
             onChange={(e) => setCategory(e.target.value || null)}
             style={{
-              background: "#131b2e",
-              border: "1px solid #2d3449",
+              background: "var(--app-surface)",
+              border: "1px solid var(--app-border)",
               borderRadius: 10,
-              color: "#dae2fd",
+              color: "var(--app-fg)",
               padding: "8px 12px",
               fontSize: 13,
               outline: "none",
@@ -284,7 +284,7 @@ function CommunityPage() {
       </div>
 
       {/* ── Stats bar ────────────────────────────────────────── */}
-      <p style={{ marginBottom: 24, fontSize: 12, color: "#464554" }}>
+      <p style={{ marginBottom: 24, fontSize: 12, color: "var(--app-muted)" }}>
         {filtered.length} solution{filtered.length !== 1 ? "s" : ""}{" "}
         {difficulty || category || query ? "matching filters" : "from the community"}
       </p>
@@ -293,16 +293,16 @@ function CommunityPage() {
       {filtered.length === 0 ? (
         <div style={{
           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-          borderRadius: 12, border: "1px dashed #2d3449",
+          borderRadius: 12, border: "1px dashed var(--app-border)",
           padding: "64px 24px", textAlign: "center",
         }}>
-          <p style={{ color: "#464554", marginBottom: 8, fontSize: 14 }}>No solutions match your filters</p>
+          <p style={{ color: "var(--app-muted)", marginBottom: 8, fontSize: 14 }}>No solutions match your filters</p>
           <button
             type="button"
             onClick={() => { setQuery(""); setDifficulty(null); setCategory(null) }}
             style={{
               background: "transparent", border: "none",
-              color: "#8083ff", fontSize: 13, cursor: "pointer",
+              color: "var(--app-indigo)", fontSize: 13, cursor: "pointer",
               textDecoration: "underline", padding: 0,
             }}
           >
@@ -326,16 +326,16 @@ function PostCard({ post }: { post: CommunityPost }) {
   return (
     <article
       style={{
-        background: "#171f33",
-        border: "1px solid #2d3449",
+        background: "var(--app-surface-2)",
+        border: "1px solid var(--app-border)",
         borderRadius: 12,
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         transition: "border-color 0.15s",
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#464554" }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--app-muted)" }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "20px 24px", flex: 1 }}>
         {/* Author + Score */}
@@ -344,16 +344,16 @@ function PostCard({ post }: { post: CommunityPost }) {
             <div style={{
               width: 32, height: 32, borderRadius: "50%",
               background: "rgba(99,102,241,0.15)",
-              border: "1px solid rgba(99,102,241,0.3)",
-              color: "#8083ff",
+              border: "1px solid var(--app-indigo-glow)",
+              color: "var(--app-indigo)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 11, fontWeight: 700, flexShrink: 0,
             }}>
               {post.authorInitials}
             </div>
             <div>
-              <p style={{ fontSize: 13, fontWeight: 500, color: "#dae2fd", lineHeight: 1 }}>{post.author}</p>
-              <p style={{ marginTop: 3, fontSize: 11, color: "#464554" }}>{post.timeAgo}</p>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "var(--app-fg)", lineHeight: 1 }}>{post.author}</p>
+              <p style={{ marginTop: 3, fontSize: 11, color: "var(--app-muted)" }}>{post.timeAgo}</p>
             </div>
           </div>
 
@@ -364,7 +364,7 @@ function PostCard({ post }: { post: CommunityPost }) {
             background: "rgba(78,222,163,0.08)",
             padding: "4px 10px", fontSize: 11,
           }}>
-            <Sparkles size={10} style={{ color: "#4edea3" }} />
+            <Sparkles size={10} style={{ color: "var(--app-green)" }} />
             <span style={{ fontWeight: 700, color: scoreColor(post.aiScore) }}>{post.aiScore}</span>
           </div>
         </div>
@@ -372,14 +372,14 @@ function PostCard({ post }: { post: CommunityPost }) {
         {/* Difficulty + Category */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={difficultyStyle(post.difficulty)}>{post.difficulty}</span>
-          <span style={{ fontSize: 12, color: "#464554", textTransform: "capitalize" }}>
+          <span style={{ fontSize: 12, color: "var(--app-muted)", textTransform: "capitalize" }}>
             {CATEGORIES.find((c) => c.slug === post.category)?.label ?? post.category}
           </span>
         </div>
 
         {/* Title */}
         <h3 style={{
-          fontWeight: 600, lineHeight: 1.35, color: "#dae2fd", fontSize: 14,
+          fontWeight: 600, lineHeight: 1.35, color: "var(--app-fg)", fontSize: 14,
           display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
           overflow: "hidden",
         }}>
@@ -393,8 +393,8 @@ function PostCard({ post }: { post: CommunityPost }) {
               key={tag}
               style={{
                 background: "rgba(192,193,255,0.08)",
-                border: "1px solid rgba(192,193,255,0.15)",
-                color: "#c0c1ff",
+                border: "1px solid var(--app-indigo-15)",
+                color: "var(--app-indigo-pale)",
                 borderRadius: 6,
                 padding: "2px 10px",
                 fontSize: 11,
@@ -411,34 +411,34 @@ function PostCard({ post }: { post: CommunityPost }) {
       {/* Footer */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        borderTop: "1px solid #1e2a3d",
-        background: "#131b2e",
+        borderTop: "1px solid var(--app-border-2)",
+        background: "var(--app-surface)",
         padding: "12px 24px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button
             type="button"
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#464554", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--app-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-indigo)" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-muted)" }}
           >
             <ThumbsUp size={12} />
             {post.upvotes}
           </button>
           <button
             type="button"
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#464554", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--app-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-indigo)" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-muted)" }}
           >
             <MessageSquare size={12} />
             {post.comments}
           </button>
           <button
             type="button"
-            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#464554", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#8083ff" }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+            style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--app-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-indigo)" }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-muted)" }}
           >
             <GitFork size={12} />
             Fork
@@ -448,7 +448,7 @@ function PostCard({ post }: { post: CommunityPost }) {
         <Link
           to="/community/$threadId"
           params={{ threadId: post.id }}
-          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: "#8083ff", textDecoration: "none" }}
+          style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: "var(--app-indigo)", textDecoration: "none" }}
         >
           View
           <ArrowRight size={11} />

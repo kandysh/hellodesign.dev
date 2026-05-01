@@ -54,7 +54,7 @@ function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <h1
-        style={{ color: "#dae2fd", letterSpacing: "-0.02em" }}
+        style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
         className="mb-8 text-2xl font-extrabold"
       >
         Settings
@@ -64,7 +64,7 @@ function SettingsPage() {
         <>
           {/* ── Account Profile ── */}
           <SectionCard
-            icon={<UserIcon size={15} style={{ color: "#8083ff" }} />}
+            icon={<UserIcon size={15} style={{ color: "var(--app-indigo)" }} />}
             title="Account Profile"
             subtitle="Your identity and linked account"
           >
@@ -75,8 +75,8 @@ function SettingsPage() {
                   width: 48,
                   height: 48,
                   background: "rgba(192,193,255,0.1)",
-                  border: "1px solid rgba(192,193,255,0.2)",
-                  color: "#c0c1ff",
+                  border: "1px solid var(--app-indigo-20)",
+                  color: "var(--app-indigo-pale)",
                 }}
                 className="rounded-full flex items-center justify-center text-sm font-bold shrink-0 overflow-hidden"
               >
@@ -97,10 +97,10 @@ function SettingsPage() {
                 )}
               </div>
               <div>
-                <p style={{ color: "#dae2fd" }} className="font-semibold text-sm">
+                <p style={{ color: "var(--app-fg)" }} className="font-semibold text-sm">
                   {user.name}
                 </p>
-                <p style={{ color: "#908fa0" }} className="text-xs">
+                <p style={{ color: "var(--app-subtle)" }} className="text-xs">
                   {user.email}
                 </p>
               </div>
@@ -120,16 +120,16 @@ function SettingsPage() {
               ].map((s) => (
                 <div
                   key={s.label}
-                  style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+                  style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
                   className="rounded-lg px-4 py-3 text-center"
                 >
                   <p
-                    style={{ color: "#c0c1ff", fontFamily: "'Space Grotesk', monospace" }}
+                    style={{ color: "var(--app-indigo-pale)", fontFamily: "'Space Grotesk', monospace" }}
                     className="text-xl font-bold"
                   >
                     {s.val ?? "—"}
                   </p>
-                  <p style={{ color: "#464554" }} className="text-xs mt-0.5">
+                  <p style={{ color: "var(--app-muted)" }} className="text-xs mt-0.5">
                     {s.label}
                   </p>
                 </div>
@@ -139,7 +139,7 @@ function SettingsPage() {
 
           {/* ── API Keys ── */}
           <SectionCard
-            icon={<Key size={15} style={{ color: "#8083ff" }} />}
+            icon={<Key size={15} style={{ color: "var(--app-indigo)" }} />}
             title="API Keys"
             subtitle="Manage your OpenAI integration key"
           >
@@ -148,30 +148,30 @@ function SettingsPage() {
 
           {/* ── Workspace Preferences ── */}
           <SectionCard
-            icon={<Moon size={15} style={{ color: "#8083ff" }} />}
+            icon={<Moon size={15} style={{ color: "var(--app-indigo)" }} />}
             title="Workspace Preferences"
             subtitle="Appearance and interface settings"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p style={{ color: "#dae2fd" }} className="text-sm font-medium">
+                <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">
                   Theme
                 </p>
-                <p style={{ color: "#908fa0" }} className="text-xs mt-0.5">
+                <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-0.5">
                   Interface appearance
                 </p>
               </div>
               <div
-                style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+                style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
                 className="flex items-center rounded-lg p-1 gap-1 text-xs"
               >
                 <span
-                  style={{ background: "#222a3d", color: "#dae2fd" }}
+                  style={{ background: "var(--app-surface-4)", color: "var(--app-fg)" }}
                   className="px-3 py-1.5 rounded font-medium"
                 >
                   Dark
                 </span>
-                <span style={{ color: "#464554" }} className="px-3 py-1.5">
+                <span style={{ color: "var(--app-muted)" }} className="px-3 py-1.5">
                   Light
                 </span>
               </div>
@@ -181,12 +181,12 @@ function SettingsPage() {
           {/* ── Security notice ── */}
           <div
             role="note"
-            style={{ background: "rgba(128,131,255,0.05)", border: "1px solid rgba(128,131,255,0.15)" }}
+            style={{ background: "rgba(128,131,255,0.05)", border: "1px solid var(--app-indigo-15)" }}
             className="flex gap-3 rounded-xl p-4 text-sm mb-4"
           >
-            <Shield size={15} className="mt-0.5 shrink-0" style={{ color: "#8083ff" }} />
-            <div style={{ color: "#908fa0" }} className="leading-relaxed">
-              <span style={{ color: "#c7c4d7" }} className="font-medium">
+            <Shield size={15} className="mt-0.5 shrink-0" style={{ color: "var(--app-indigo)" }} />
+            <div style={{ color: "var(--app-subtle)" }} className="leading-relaxed">
+              <span style={{ color: "var(--app-body)" }} className="font-medium">
                 Encrypted storage.
               </span>{" "}
               Your keys are encrypted with AES-256-GCM before storage. They are never
@@ -197,7 +197,7 @@ function SettingsPage() {
           {/* ── Danger Zone ── */}
           <div
             style={{
-              background: "#171f33",
+              background: "var(--app-surface-2)",
               border: "1px solid rgba(255,180,171,0.2)",
             }}
             className="rounded-xl overflow-hidden mb-4"
@@ -207,7 +207,7 @@ function SettingsPage() {
               className="px-6 py-4"
             >
               <h2
-                style={{ color: "#ffb4ab" }}
+                style={{ color: "var(--app-red)" }}
                 className="text-base font-bold flex items-center gap-2"
               >
                 <AlertTriangle size={15} />
@@ -216,17 +216,17 @@ function SettingsPage() {
             </div>
             <div className="px-6 py-5 flex items-center justify-between">
               <div>
-                <p style={{ color: "#dae2fd" }} className="text-sm font-medium">
+                <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">
                   Sign out everywhere
                 </p>
-                <p style={{ color: "#908fa0" }} className="text-xs mt-0.5">
+                <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-0.5">
                   Revoke all active sessions
                 </p>
               </div>
               <button
                 onClick={handleSignOut}
                 style={{
-                  color: "#ffb4ab",
+                  color: "var(--app-red)",
                   background: "rgba(255,180,171,0.08)",
                   border: "1px solid rgba(255,180,171,0.3)",
                 }}
@@ -242,15 +242,15 @@ function SettingsPage() {
           {/* ── Guest: Sync CTA ── */}
           <div
             style={{
-              background: "#171f33",
-              border: "1px solid rgba(128,131,255,0.2)",
+              background: "var(--app-surface-2)",
+              border: "1px solid var(--app-indigo-20)",
             }}
             className="rounded-xl p-10 text-center mb-4"
           >
             <div
               style={{
-                background: "rgba(128,131,255,0.1)",
-                color: "#8083ff",
+                background: "var(--app-indigo-10)",
+                color: "var(--app-indigo)",
                 width: 48,
                 height: 48,
               }}
@@ -258,10 +258,10 @@ function SettingsPage() {
             >
               <LogIn size={20} />
             </div>
-            <h2 style={{ color: "#dae2fd" }} className="text-xl font-bold mb-2">
+            <h2 style={{ color: "var(--app-fg)" }} className="text-xl font-bold mb-2">
               Sync Your Workflow
             </h2>
-            <p style={{ color: "#908fa0" }} className="text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+            <p style={{ color: "var(--app-subtle)" }} className="text-sm mb-6 max-w-sm mx-auto leading-relaxed">
               Sign in to save your API keys, track progress, and access your submissions
               from any device.
             </p>
@@ -270,7 +270,7 @@ function SettingsPage() {
               style={{
                 background: "#6366f1",
                 color: "white",
-                boxShadow: "0 0 12px rgba(99,102,241,0.3)",
+                boxShadow: "0 0 12px var(--app-indigo-glow)",
               }}
               className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold hover:bg-indigo-500 transition-colors active:scale-95"
             >
@@ -280,7 +280,7 @@ function SettingsPage() {
 
           {/* ── Guest API Keys ── */}
           <SectionCard
-            icon={<Key size={15} style={{ color: "#8083ff" }} />}
+            icon={<Key size={15} style={{ color: "var(--app-indigo)" }} />}
             title="API Keys"
             subtitle="Your key is stored locally in this browser"
           >
@@ -290,12 +290,12 @@ function SettingsPage() {
           {/* ── Security notice ── */}
           <div
             role="note"
-            style={{ background: "rgba(128,131,255,0.05)", border: "1px solid rgba(128,131,255,0.15)" }}
+            style={{ background: "rgba(128,131,255,0.05)", border: "1px solid var(--app-indigo-15)" }}
             className="flex gap-3 rounded-xl p-4 text-sm"
           >
-            <Shield size={15} className="mt-0.5 shrink-0" style={{ color: "#8083ff" }} />
-            <div style={{ color: "#908fa0" }} className="leading-relaxed">
-              <span style={{ color: "#c7c4d7" }} className="font-medium">
+            <Shield size={15} className="mt-0.5 shrink-0" style={{ color: "var(--app-indigo)" }} />
+            <div style={{ color: "var(--app-subtle)" }} className="leading-relaxed">
+              <span style={{ color: "var(--app-body)" }} className="font-medium">
                 Encrypted storage.
               </span>{" "}
               Your keys are encrypted with AES-256-GCM before storage. They are never
@@ -323,22 +323,22 @@ function SectionCard({
 }) {
   return (
     <div
-      style={{ background: "#171f33", border: "1px solid #2d3449" }}
+      style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
       className="rounded-xl overflow-hidden mb-4"
     >
       <div
-        style={{ background: "#131b2e", borderBottom: "1px solid #2d3449" }}
+        style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}
         className="px-6 py-4"
       >
         <h2
-          style={{ color: "#dae2fd" }}
+          style={{ color: "var(--app-fg)" }}
           className="text-base font-bold flex items-center gap-2"
         >
           {icon}
           {title}
         </h2>
         {subtitle && (
-          <p style={{ color: "#908fa0" }} className="text-xs mt-0.5">
+          <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-0.5">
             {subtitle}
           </p>
         )}
@@ -435,27 +435,27 @@ function ApiKeySection({
   return (
     <div className="space-y-3">
       {keysLoading ? (
-        <div className="animate-pulse h-12 rounded-lg" style={{ background: "#1e2a3d" }} />
+        <div className="animate-pulse h-12 rounded-lg" style={{ background: "var(--app-surface-3)" }} />
       ) : activeKey ? (
         <div
-          style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+          style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
           className="flex items-center justify-between rounded-lg px-4 py-3"
         >
           <div>
-            <p className="flex items-center gap-2 text-xs font-medium" style={{ color: "#908fa0" }}>
-              <span style={{ background: "#4edea3" }} className="inline-block h-1.5 w-1.5 rounded-full" />
+            <p className="flex items-center gap-2 text-xs font-medium" style={{ color: "var(--app-subtle)" }}>
+              <span style={{ background: "var(--app-green)" }} className="inline-block h-1.5 w-1.5 rounded-full" />
               OpenAI API Key
               {activeKey.validatedAt && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(78,222,163,0.1)", color: "#4edea3" }}>
+                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(78,222,163,0.1)", color: "var(--app-green)" }}>
                   Validated
                 </span>
               )}
             </p>
-            <p className="mt-0.5 font-mono text-xs" style={{ color: "#464554" }}>
+            <p className="mt-0.5 font-mono text-xs" style={{ color: "var(--app-muted)" }}>
               ••••••••{activeKey.keyHint}
             </p>
             {activeKey.baseUrl && (
-              <p className="mt-0.5 text-xs truncate max-w-xs" style={{ color: "#464554" }}>
+              <p className="mt-0.5 text-xs truncate max-w-xs" style={{ color: "var(--app-muted)" }}>
                 {activeKey.baseUrl}
               </p>
             )}
@@ -465,7 +465,7 @@ function ApiKeySection({
             onClick={() => handleDelete(activeKey.id)}
             className="rounded p-1 transition-colors"
             style={{ color: "rgba(255,180,171,0.5)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#ffb4ab" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-red)" }}
             onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,180,171,0.5)" }}
             aria-label="Remove API key"
           >
@@ -478,7 +478,7 @@ function ApiKeySection({
         <button
           type="button"
           onClick={() => setShowNew(true)}
-          style={{ color: "#8083ff", background: "transparent", border: "1px dashed rgba(128,131,255,0.3)" }}
+          style={{ color: "var(--app-indigo)", background: "transparent", border: "1px dashed rgba(128,131,255,0.3)" }}
           className="flex items-center gap-1.5 px-3 py-2 rounded text-xs font-medium transition-colors active:scale-95"
           onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(128,131,255,0.06)"; e.currentTarget.style.borderColor = "rgba(128,131,255,0.5)" }}
           onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "rgba(128,131,255,0.3)" }}
@@ -487,8 +487,8 @@ function ApiKeySection({
           {activeKey ? "Replace key" : "Add key"}
         </button>
       ) : (
-        <div style={{ background: "#131b2e", border: "1px solid #2d3449" }} className="rounded-lg p-4 space-y-3">
-          <p style={{ color: "#908fa0" }} className="text-xs font-bold uppercase tracking-widest">Add OpenAI API key</p>
+        <div style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }} className="rounded-lg p-4 space-y-3">
+          <p style={{ color: "var(--app-subtle)" }} className="text-xs font-bold uppercase tracking-widest">Add OpenAI API key</p>
           <div className="relative">
             <input
               type={showDraft ? "text" : "password"}
@@ -496,18 +496,18 @@ function ApiKeySection({
               onChange={(e) => setDraft(e.target.value)}
               placeholder="sk-..."
               className="w-full rounded px-3 py-2.5 text-sm outline-none transition-all font-mono"
-              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#dae2fd", paddingRight: "2.5rem" }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "#8083ff" }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+              style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-fg)", paddingRight: "2.5rem" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--app-indigo)" }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
             />
             <button
               type="button"
               onClick={() => setShowDraft((v) => !v)}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 transition-colors"
-              style={{ color: "#464554" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#908fa0" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+              style={{ color: "var(--app-muted)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-subtle)" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-muted)" }}
               aria-label={showDraft ? "Hide key" : "Show key"}
             >
               {showDraft ? <EyeOff size={13} /> : <Eye size={13} />}
@@ -520,11 +520,11 @@ function ApiKeySection({
               onChange={(e) => setDraftBaseUrl(e.target.value)}
               placeholder="API base URL (optional) — e.g. https://openrouter.ai/api/v1"
               className="w-full rounded px-3 py-2.5 text-sm outline-none transition-all"
-              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#dae2fd" }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "#8083ff" }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+              style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-fg)" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--app-indigo)" }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
             />
-            <p className="mt-1 text-[10px]" style={{ color: "#464554" }}>
+            <p className="mt-1 text-[10px]" style={{ color: "var(--app-muted)" }}>
               Leave blank to use the default OpenAI endpoint.
             </p>
           </div>
@@ -555,10 +555,10 @@ function ApiKeySection({
             <button
               type="button"
               onClick={() => { setShowNew(false); setDraft(""); setDraftBaseUrl("") }}
-              style={{ color: "#908fa0", background: "transparent", border: "1px solid #2d3449" }}
+              style={{ color: "var(--app-subtle)", background: "transparent", border: "1px solid var(--app-border)" }}
               className="px-4 py-2.5 rounded text-sm font-medium transition-colors active:scale-95"
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#dae2fd"; e.currentTarget.style.borderColor = "#464554" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#908fa0"; e.currentTarget.style.borderColor = "#2d3449" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-fg)"; e.currentTarget.style.borderColor = "var(--app-muted)" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-subtle)"; e.currentTarget.style.borderColor = "var(--app-border)" }}
             >
               Cancel
             </button>

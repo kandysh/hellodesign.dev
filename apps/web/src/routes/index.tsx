@@ -47,7 +47,7 @@ const STEPS = [
 
 function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: "#0b1326" }}>
+    <div className="flex flex-col min-h-screen" style={{ background: "var(--app-bg)" }}>
       {/* ── Hero ──────────────────────────────────────────────── */}
       <section className="w-full max-w-[1440px] mx-auto px-6 py-20 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
@@ -56,11 +56,11 @@ function HomePage() {
             {/* Live badge */}
             <div
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full w-fit text-xs font-medium"
-              style={{ background: "#171f33", border: "1px solid #2d3449", color: "#c7c4d7" }}
+              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)", color: "var(--app-body)" }}
             >
               <span
                 className="w-2 h-2 rounded-full animate-pulse"
-                style={{ background: "#4edea3" }}
+                style={{ background: "var(--app-green)" }}
               />
               <span style={{ fontFamily: "'Space Grotesk', monospace" }}>
                 System Design V2.0 is Live
@@ -72,14 +72,14 @@ function HomePage() {
               style={{
                 fontSize: "clamp(2.5rem,5vw,3.5rem)",
                 letterSpacing: "-0.02em",
-                color: "#dae2fd",
+                color: "var(--app-fg)",
               }}
             >
               Master Technical Interviews with{" "}
-              <span style={{ color: "#8083ff" }}>AI‑Led Precision.</span>
+              <span style={{ color: "var(--app-indigo)" }}>AI‑Led Precision.</span>
             </h1>
 
-            <p className="text-base leading-relaxed max-w-xl" style={{ color: "#c7c4d7" }}>
+            <p className="text-base leading-relaxed max-w-xl" style={{ color: "var(--app-body)" }}>
               High‑density environments for data‑driven architects. Simulate real‑world system
               design constraints with our Excalidraw canvas and CodeMirror technical editor.
             </p>
@@ -96,9 +96,9 @@ function HomePage() {
               <Link
                 to="/questions"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-medium transition-all duration-150 active:scale-95 border"
-                style={{ color: "#c0c1ff", borderColor: "#464554", background: "transparent" }}
+                style={{ color: "var(--app-indigo-pale)", borderColor: "var(--app-muted)", background: "transparent" }}
                 onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLElement).style.background = "#171f33"
+                  ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-2)"
                 }}
                 onMouseLeave={(e) => {
                   ;(e.currentTarget as HTMLElement).style.background = "transparent"
@@ -121,7 +121,7 @@ function HomePage() {
       </section>
 
       {/* ── Stats strip ───────────────────────────────────────── */}
-      <div className="border-y" style={{ borderColor: "#222a3d", background: "#131b2e" }}>
+      <div className="border-y" style={{ borderColor: "var(--app-surface-4)", background: "var(--app-surface)" }}>
         <div className="max-w-[1440px] mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { val: "30+", label: "Design problems" },
@@ -132,13 +132,13 @@ function HomePage() {
             <div key={stat.label} className="flex flex-col gap-1">
               <span
                 className="text-3xl font-extrabold"
-                style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}
+                style={{ color: "var(--app-indigo-pale)", letterSpacing: "-0.02em" }}
               >
                 {stat.val}
               </span>
               <span
                 className="text-xs font-bold uppercase tracking-wider"
-                style={{ color: "#908fa0" }}
+                style={{ color: "var(--app-subtle)" }}
               >
                 {stat.label}
               </span>
@@ -152,42 +152,42 @@ function HomePage() {
         <div className="mb-12 text-center">
           <p
             className="text-xs font-bold uppercase tracking-widest mb-2"
-            style={{ color: "#c0c1ff" }}
+            style={{ color: "var(--app-indigo-pale)" }}
           >
             Process
           </p>
-          <h2 className="text-3xl font-bold" style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}>
+          <h2 className="text-3xl font-bold" style={{ color: "var(--app-fg)", letterSpacing: "-0.01em" }}>
             How it works
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {STEPS.map((step) => {
             const Icon = step.icon
             return (
               <div
                 key={step.n}
                 className="flex flex-col gap-4 p-6 rounded-lg group hover:border-indigo-500/40 transition-all duration-200"
-                style={{ background: "#171f33", border: "1px solid #2d3449" }}
+                style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded flex items-center justify-center shrink-0"
-                    style={{ background: "rgba(192,193,255,0.1)", color: "#c0c1ff" }}
+                    style={{ background: "rgba(192,193,255,0.1)", color: "var(--app-indigo-pale)" }}
                   >
                     <Icon size={18} />
                   </div>
                   <span
                     className="font-bold text-xs uppercase tracking-widest"
-                    style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}
+                    style={{ color: "var(--app-muted)", fontFamily: "'Space Grotesk', monospace" }}
                   >
                     Step {step.n}
                   </span>
                 </div>
-                <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
+                <h3 className="font-bold text-base" style={{ color: "var(--app-fg)" }}>
                   {step.title}
                 </h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>
                   {step.desc}
                 </p>
               </div>
@@ -199,19 +199,19 @@ function HomePage() {
       {/* ── Categories ────────────────────────────────────────── */}
       <section
         className="border-t"
-        style={{ borderColor: "#222a3d", background: "rgba(23,31,51,0.5)" }}
+        style={{ borderColor: "var(--app-surface-4)", background: "rgba(23,31,51,0.5)" }}
       >
         <div className="w-full max-w-[1440px] mx-auto px-6 py-20">
           <div className="mb-12 text-center">
             <p
               className="text-xs font-bold uppercase tracking-widest mb-2"
-              style={{ color: "#4edea3" }}
+              style={{ color: "var(--app-green)" }}
             >
               Categories
             </p>
             <h2
               className="text-3xl font-bold"
-              style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}
+              style={{ color: "var(--app-fg)", letterSpacing: "-0.01em" }}
             >
               Question categories
             </h2>
@@ -227,27 +227,27 @@ function HomePage() {
                   search={{ category: cat.slug } as never}
                   className="group relative overflow-hidden flex flex-col gap-3 p-5 rounded-lg transition-all duration-200"
                   style={{
-                    background: "#171f33",
-                    border: "1px solid #2d3449",
+                    background: "var(--app-surface-2)",
+                    border: "1px solid var(--app-border)",
                   }}
                   onMouseEnter={(e) => {
                     ;(e.currentTarget as HTMLElement).style.borderColor = "rgba(128,131,255,0.5)"
                   }}
                   onMouseLeave={(e) => {
-                    ;(e.currentTarget as HTMLElement).style.borderColor = "#2d3449"
+                    ;(e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)"
                   }}
                 >
                   <div
                     className="w-10 h-10 rounded flex items-center justify-center transition-colors duration-200"
-                    style={{ background: "rgba(192,193,255,0.08)", color: "#c0c1ff" }}
+                    style={{ background: "rgba(192,193,255,0.08)", color: "var(--app-indigo-pale)" }}
                   >
                     <Icon size={20} />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm" style={{ color: "#dae2fd" }}>
+                    <p className="font-semibold text-sm" style={{ color: "var(--app-fg)" }}>
                       {cat.label}
                     </p>
-                    <p className="text-xs mt-0.5" style={{ color: "#464554" }}>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--app-muted)" }}>
                       {cat.count} questions
                     </p>
                   </div>
@@ -261,10 +261,10 @@ function HomePage() {
       {/* ── Feature Grid (Bento Style) ─────────────────────────── */}
       <section className="w-full max-w-[1440px] mx-auto px-6 py-20">
         <div className="mb-10">
-          <h2 className="text-2xl font-bold mb-2" style={{ color: "#dae2fd" }}>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--app-fg)" }}>
             Technical Tooling for Architects
           </h2>
-          <p className="text-sm" style={{ color: "#908fa0" }}>
+          <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
             High-fidelity components designed for rigorous system planning.
           </p>
         </div>
@@ -275,22 +275,22 @@ function HomePage() {
             <div className="flex items-center justify-between">
               <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
-                style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#8083ff" }}
+                style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-indigo)" }}
               >
                 <Layers size={18} />
               </div>
               <span
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded"
-                style={{ background: "#222a3d", color: "#908fa0" }}
+                style={{ background: "var(--app-surface-4)", color: "var(--app-subtle)" }}
               >
                 CANVAS V2
               </span>
             </div>
             <div className="flex flex-col gap-1 mt-2">
-              <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
+              <h3 className="font-bold text-base" style={{ color: "var(--app-fg)" }}>
                 Infinite Excalidraw-Style Canvas
               </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>
                 Map out complex microservices architectures with low-latency rendering and
                 snap-to-grid precision. Native support for AWS, GCP, and Azure iconography.
               </p>
@@ -299,9 +299,9 @@ function HomePage() {
             <div
               className="mt-2 h-28 rounded-lg relative overflow-hidden flex items-center justify-center"
               style={{
-                background: "#0b1326",
-                border: "1px solid #2d3449",
-                backgroundImage: "radial-gradient(#2d3449 1px, transparent 1px)",
+                background: "var(--app-bg)",
+                border: "1px solid var(--app-border)",
+                backgroundImage: "radial-gradient(var(--app-border) 1px, transparent 1px)",
                 backgroundSize: "16px 16px",
               }}
             >
@@ -309,21 +309,21 @@ function HomePage() {
                 <div
                   className="px-3 py-1.5 rounded text-[12px]"
                   style={{
-                    border: "1px solid #8083ff",
-                    background: "#131b2e",
-                    color: "#c0c1ff",
+                    border: "1px solid var(--app-indigo)",
+                    background: "var(--app-surface)",
+                    color: "var(--app-indigo-pale)",
                     fontFamily: "'Space Grotesk', monospace",
                   }}
                 >
                   Client
                 </div>
-                <div className="w-8 h-px" style={{ background: "#8083ff" }} />
+                <div className="w-8 h-px" style={{ background: "var(--app-indigo)" }} />
                 <div
                   className="px-3 py-1.5 rounded text-[12px]"
                   style={{
-                    border: "1px solid #464554",
-                    background: "#131b2e",
-                    color: "#dae2fd",
+                    border: "1px solid var(--app-muted)",
+                    background: "var(--app-surface)",
+                    color: "var(--app-fg)",
                     fontFamily: "'Space Grotesk', monospace",
                   }}
                 >
@@ -337,15 +337,15 @@ function HomePage() {
           <div className="flex flex-col gap-4 p-6 rounded-xl bento-card transition-colors hover:border-surface-bright">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#8083ff" }}
+              style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-indigo)" }}
             >
               <PenLine size={18} />
             </div>
             <div className="flex flex-col gap-1 mt-2">
-              <h3 className="font-bold text-base" style={{ color: "#dae2fd" }}>
+              <h3 className="font-bold text-base" style={{ color: "var(--app-fg)" }}>
                 CodeMirror Technical Editor
               </h3>
-              <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
+              <p className="text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>
                 Write API contracts and schema definitions with rich Markdown formatting,
                 syntax-highlighted code blocks, and multi-language support.
               </p>
@@ -354,30 +354,30 @@ function HomePage() {
             <div
               className="mt-auto rounded p-3 text-[11px] leading-relaxed"
               style={{
-                background: "#060e20",
-                border: "1px solid #2d3449",
+                background: "var(--app-bg-deep)",
+                border: "1px solid var(--app-border)",
                 fontFamily: "'Space Grotesk', monospace",
               }}
             >
               <div
                 className="flex items-center gap-1.5 mb-2 pb-2"
-                style={{ borderBottom: "1px solid #2d3449" }}
+                style={{ borderBottom: "1px solid var(--app-border)" }}
               >
-                <span className="w-2 h-2 rounded-full" style={{ background: "#ffb4ab" }} />
-                <span className="w-2 h-2 rounded-full" style={{ background: "#464554" }} />
-                <span className="w-2 h-2 rounded-full" style={{ background: "#4edea3" }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: "var(--app-red)" }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: "var(--app-muted)" }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: "var(--app-green)" }} />
               </div>
-              <span style={{ color: "#8083ff" }}>type</span>{" "}
-              <span style={{ color: "#4edea3" }}>User</span>
+              <span style={{ color: "var(--app-indigo)" }}>type</span>{" "}
+              <span style={{ color: "var(--app-green)" }}>User</span>
               {" = {\n"}
-              <span className="pl-4 block" style={{ color: "#c7c4d7" }}>
+              <span className="pl-4 block" style={{ color: "var(--app-body)" }}>
                 id: string;
               </span>
-              <span className="pl-4 block" style={{ color: "#c7c4d7" }}>
+              <span className="pl-4 block" style={{ color: "var(--app-body)" }}>
                 {"role: "}
-                <span style={{ color: "#4edea3" }}>{"'ADMIN'"}</span>
+                <span style={{ color: "var(--app-green)" }}>{"'ADMIN'"}</span>
                 {" | "}
-                <span style={{ color: "#4edea3" }}>{"'USER'"}</span>
+                <span style={{ color: "var(--app-green)" }}>{"'USER'"}</span>
                 {";"}
               </span>
               {"}"}
@@ -393,17 +393,17 @@ function HomePage() {
           style={{
             background:
               "linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(23,31,51,0.8) 100%)",
-            border: "1px solid rgba(128,131,255,0.2)",
+            border: "1px solid var(--app-indigo-20)",
           }}
         >
           <div className="flex flex-col gap-2">
             <h2
               className="text-2xl font-bold"
-              style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}
+              style={{ color: "var(--app-fg)", letterSpacing: "-0.01em" }}
             >
               Ready to level up your system design?
             </h2>
-            <p className="text-sm" style={{ color: "#908fa0" }}>
+            <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
               Start practicing with real-world challenges. Free forever.
             </p>
           </div>
@@ -428,22 +428,22 @@ function MockCanvas() {
     <div
       className="relative w-full rounded-xl overflow-hidden flex flex-col"
       style={{
-        background: "#131b2e",
-        border: "1px solid #2d3449",
+        background: "var(--app-surface)",
+        border: "1px solid var(--app-border)",
         height: 440,
       }}
     >
       {/* Faux header bar */}
       <div
         className="h-8 flex items-center px-4 gap-2 shrink-0"
-        style={{ background: "#0b1326", borderBottom: "1px solid #2d3449" }}
+        style={{ background: "var(--app-bg)", borderBottom: "1px solid var(--app-border)" }}
       >
-        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
-        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
-        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2d3449" }} />
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--app-border)" }} />
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--app-border)" }} />
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--app-border)" }} />
         <span
           className="ml-2 text-xs"
-          style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}
+          style={{ color: "var(--app-muted)", fontFamily: "'Space Grotesk', monospace" }}
         >
           design-workspace.canvas
         </span>
@@ -453,9 +453,9 @@ function MockCanvas() {
       <div
         className="flex-1 relative overflow-hidden"
         style={{
-          backgroundImage: "radial-gradient(#2d3449 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(var(--app-border) 1px, transparent 1px)",
           backgroundSize: "20px 20px",
-          background: "#0b1326",
+          background: "var(--app-bg)",
           backgroundRepeat: "repeat",
         }}
       >
@@ -473,11 +473,11 @@ function MockCanvas() {
             y1="1"
             x2="60"
             y2="1"
-            stroke="#464554"
+            stroke="var(--app-muted)"
             strokeWidth="1.5"
             strokeDasharray="4 3"
           />
-          <polygon points="58,0 62,1 58,2" fill="#464554" />
+          <polygon points="58,0 62,1 58,2" fill="var(--app-muted)" />
         </svg>
 
         {/* Node: Load Balancer (highlighted) */}
@@ -494,11 +494,11 @@ function MockCanvas() {
             y1="0"
             x2="1"
             y2="60"
-            stroke="#464554"
+            stroke="var(--app-muted)"
             strokeWidth="1.5"
             strokeDasharray="4 3"
           />
-          <polygon points="0,58 1,62 2,58" fill="#464554" />
+          <polygon points="0,58 1,62 2,58" fill="var(--app-muted)" />
         </svg>
 
         {/* Node: App Server */}
@@ -515,11 +515,11 @@ function MockCanvas() {
             y1="1"
             x2="60"
             y2="1"
-            stroke="#464554"
+            stroke="var(--app-muted)"
             strokeWidth="1.5"
             strokeDasharray="4 3"
           />
-          <polygon points="58,0 62,1 58,2" fill="#464554" />
+          <polygon points="58,0 62,1 58,2" fill="var(--app-muted)" />
         </svg>
 
         {/* Node: DB */}
@@ -533,7 +533,7 @@ function MockCanvas() {
             left: 196,
             background: "rgba(78,222,163,0.08)",
             border: "1px dashed rgba(78,222,163,0.4)",
-            color: "#4edea3",
+            color: "var(--app-green)",
             fontFamily: "'Space Grotesk', monospace",
           }}
         >
@@ -544,11 +544,11 @@ function MockCanvas() {
         {/* Score badge */}
         <div
           className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded text-xs"
-          style={{ background: "#131b2e", border: "1px solid #2d3449", color: "#908fa0" }}
+          style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)", color: "var(--app-subtle)" }}
         >
           <span
             className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: "#4edea3" }}
+            style={{ background: "var(--app-green)" }}
           />
           <span style={{ fontFamily: "'Space Grotesk', monospace" }}>AI evaluating…</span>
         </div>
@@ -557,9 +557,9 @@ function MockCanvas() {
       {/* Bottom editor strip */}
       <div
         className="px-4 py-3 text-xs"
-        style={{ background: "#131b2e", borderTop: "1px solid #2d3449", color: "#c7c4d7" }}
+        style={{ background: "var(--app-surface)", borderTop: "1px solid var(--app-border)", color: "var(--app-body)" }}
       >
-        <span style={{ color: "#8083ff", fontFamily: "'Space Grotesk', monospace" }}>
+        <span style={{ color: "var(--app-indigo)", fontFamily: "'Space Grotesk', monospace" }}>
           Design Notes:{" "}
         </span>
         Use read replicas for global latency reduction. Add CDN layer…
@@ -585,9 +585,9 @@ function CanvasNode({
       style={{
         top,
         left,
-        background: highlight ? "rgba(128,131,255,0.12)" : "#171f33",
-        border: highlight ? "1px solid rgba(128,131,255,0.5)" : "1px solid #2d3449",
-        color: highlight ? "#c0c1ff" : "#dae2fd",
+        background: highlight ? "rgba(128,131,255,0.12)" : "var(--app-surface-2)",
+        border: highlight ? "1px solid rgba(128,131,255,0.5)" : "1px solid var(--app-border)",
+        color: highlight ? "var(--app-indigo-pale)" : "var(--app-fg)",
         boxShadow: highlight ? "0 0 8px rgba(128,131,255,0.25)" : undefined,
         fontFamily: "'Space Grotesk', monospace",
       }}

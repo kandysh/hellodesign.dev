@@ -16,15 +16,15 @@ export function MetricsCard({
   value,
   unit,
   icon,
-  iconColor = "#4edea3",
+  iconColor = "var(--app-green)",
   progress,
   description,
   accentColor = "tertiary",
 }: MetricsCardProps) {
   const accentColors = {
-    tertiary: { bg: "#4edea3", light: "rgba(78,222,163,0.1)", darker: "rgba(78,222,163,0.2)" },
+    tertiary: { bg: "var(--app-green)", light: "rgba(78,222,163,0.1)", darker: "rgba(78,222,163,0.2)" },
     secondary: { bg: "#b9c8de", light: "rgba(185,200,222,0.1)", darker: "rgba(185,200,222,0.2)" },
-    primary: { bg: "#c0c1ff", light: "rgba(192,193,255,0.1)", darker: "rgba(192,193,255,0.2)" },
+    primary: { bg: "var(--app-indigo-pale)", light: "rgba(192,193,255,0.1)", darker: "var(--app-indigo-20)" },
   }
 
   const accent = accentColors[accentColor]
@@ -33,8 +33,8 @@ export function MetricsCard({
     <div
       className="rounded-xl p-6 flex flex-col gap-4 relative overflow-hidden group"
       style={{
-        background: "#171f33",
-        border: "1px solid #2d3449",
+        background: "var(--app-surface-2)",
+        border: "1px solid var(--app-border)",
       }}
     >
       {/* Gradient blur circles */}
@@ -49,7 +49,7 @@ export function MetricsCard({
       <div className="flex items-center justify-between relative z-10">
         <h3
           className="uppercase tracking-wider text-xs font-bold"
-          style={{ color: "#908fa0" }}
+          style={{ color: "var(--app-subtle)" }}
         >
           {label}
         </h3>
@@ -60,12 +60,12 @@ export function MetricsCard({
       <div className="flex items-baseline gap-2 relative z-10">
         <span
           className="text-5xl font-extrabold"
-          style={{ color: "#dae2fd", letterSpacing: "-0.02em" }}
+          style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
         >
           {value}
         </span>
         {unit && (
-          <span className="text-sm" style={{ color: "#908fa0" }}>
+          <span className="text-sm" style={{ color: "var(--app-subtle)" }}>
             {unit}
           </span>
         )}
@@ -86,7 +86,7 @@ export function MetricsCard({
 
       {/* Description */}
       {description && (
-        <p className="text-sm mt-2 relative z-10" style={{ color: "#908fa0" }}>
+        <p className="text-sm mt-2 relative z-10" style={{ color: "var(--app-subtle)" }}>
           {description}
         </p>
       )}

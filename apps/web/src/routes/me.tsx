@@ -33,25 +33,25 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; color: string; bg: string; border: string }> = {
     done: {
       label: "Done",
-      color: "#4edea3",
+      color: "var(--app-green)",
       bg: "rgba(78,222,163,0.08)",
       border: "rgba(78,222,163,0.3)",
     },
     failed: {
       label: "Failed",
-      color: "#ffb4ab",
+      color: "var(--app-red)",
       bg: "rgba(255,180,171,0.08)",
       border: "rgba(255,180,171,0.3)",
     },
     processing: {
       label: "Processing",
-      color: "#c0c1ff",
+      color: "var(--app-indigo-pale)",
       bg: "rgba(192,193,255,0.08)",
       border: "rgba(192,193,255,0.3)",
     },
     pending: {
       label: "Pending",
-      color: "#908fa0",
+      color: "var(--app-subtle)",
       bg: "rgba(144,143,160,0.08)",
       border: "rgba(144,143,160,0.3)",
     },
@@ -108,13 +108,13 @@ function MePage() {
 
       {/* ── Page header ─────────────────────────────────────── */}
       <div className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#8083ff" }}>
+        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--app-indigo)" }}>
           WORKSPACE
         </p>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-1" style={{ color: "#dae2fd", letterSpacing: "-0.02em" }}>
+        <h1 className="text-3xl font-extrabold tracking-tight mb-1" style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}>
           System Design Dashboard
         </h1>
-        <p className="text-sm" style={{ color: "#908fa0" }}>
+        <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
           Track your performance and mastery.
         </p>
       </div>
@@ -125,7 +125,7 @@ function MePage() {
           label="Problems Solved"
           value={String(submissions.filter((s) => s.status === "done").length)}
           icon={<CheckCircle2 size={20} />}
-          iconColor="#4edea3"
+          iconColor="var(--app-green)"
           accentColor="tertiary"
           progress={Math.min(100, Math.round(submissions.filter((s) => s.status === "done").length / Math.max(submissions.length, 1) * 100))}
           description={`${submissions.filter((s) => s.status === "done").length} of ${submissions.length} attempted`}
@@ -144,7 +144,7 @@ function MePage() {
           label="Total Attempted"
           value={String(submissions.length)}
           icon={<Layers size={20} />}
-          iconColor="#c0c1ff"
+          iconColor="var(--app-indigo-pale)"
           accentColor="primary"
           description={submissions.length === 0 ? "Start practicing today" : `Across ${Object.keys(masteryByCategory).length} categories`}
         />
@@ -153,11 +153,11 @@ function MePage() {
       {/* ── Mastery by category ──────────────────────────────── */}
       {masteryEntries.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "#464554" }}>
+          <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "var(--app-muted)" }}>
             Mastery by Category
           </h2>
           <div
-            style={{ background: "#171f33", border: "1px solid #2d3449" }}
+            style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
             className="rounded-lg px-6 py-5 flex flex-col gap-4"
           >
             {masteryEntries.map(([cat, entry]) => {
@@ -166,24 +166,24 @@ function MePage() {
                 : 0
               return (
                 <div key={cat} className="flex items-center gap-3">
-                  <span className="text-sm w-36 shrink-0" style={{ color: "#908fa0" }}>
+                  <span className="text-sm w-28 sm:w-36 shrink-0" style={{ color: "var(--app-subtle)" }}>
                     {categoryLabels[cat] ?? cat}
                   </span>
                   <div
                     className="flex-1 h-1.5 rounded-full overflow-hidden"
-                    style={{ background: "#2d3449" }}
+                    style={{ background: "var(--app-border)" }}
                   >
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${pct}%`,
-                        background: pct >= 75 ? "#4edea3" : pct >= 50 ? "#c0c1ff" : "#ffb4ab",
+                        background: pct >= 75 ? "var(--app-green)" : pct >= 50 ? "var(--app-indigo-pale)" : "var(--app-red)",
                       }}
                     />
                   </div>
                   <span
                     className="text-xs w-8 text-right font-medium"
-                    style={{ color: "#908fa0", fontFamily: "'Space Grotesk', monospace" }}
+                    style={{ color: "var(--app-subtle)", fontFamily: "'Space Grotesk', monospace" }}
                   >
                     {pct}%
                   </span>
@@ -196,7 +196,7 @@ function MePage() {
 
       {/* ── Recent submissions ───────────────────────────────── */}
       <section>
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "#464554" }}>
+        <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "var(--app-muted)" }}>
           Recent Submissions
         </h2>
 
@@ -208,7 +208,7 @@ function MePage() {
                 <div
                   key={i}
                   className="h-16 animate-pulse rounded-lg"
-                  style={{ background: "#131b2e" }}
+                  style={{ background: "var(--app-surface)" }}
                 />
               )
             })}
@@ -216,9 +216,9 @@ function MePage() {
         ) : submissions.length === 0 ? (
           <div
             className="text-center py-16 rounded-lg"
-            style={{ border: "1px dashed #2d3449" }}
+            style={{ border: "1px dashed var(--app-border)" }}
           >
-            <p className="text-sm mb-3" style={{ color: "#464554" }}>
+            <p className="text-sm mb-3" style={{ color: "var(--app-muted)" }}>
               No submissions yet
             </p>
             <Link
@@ -235,14 +235,14 @@ function MePage() {
                 key={s.id}
                 to="/questions/$questionId/result/$submissionId"
                 params={{ questionId: s.questionId, submissionId: s.id }}
-                style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+                style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
                 className="flex items-center justify-between px-5 py-4 rounded-lg hover:border-indigo-500/40 transition-colors"
               >
                 <div>
-                  <p className="font-semibold text-sm" style={{ color: "#dae2fd" }}>
+                  <p className="font-semibold text-sm" style={{ color: "var(--app-fg)" }}>
                     {s.questionTitle}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: "#908fa0" }}>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--app-subtle)" }}>
                     {categoryLabels[s.questionCategory] ?? s.questionCategory} ·{" "}
                     {new Date(s.createdAt).toLocaleDateString()}
                   </p>
@@ -254,17 +254,17 @@ function MePage() {
                       style={{
                         color:
                           s.overallScore >= 75
-                            ? "#4edea3"
+                            ? "var(--app-green)"
                             : s.overallScore >= 50
-                              ? "#c0c1ff"
-                              : "#ffb4ab",
+                              ? "var(--app-indigo-pale)"
+                              : "var(--app-red)",
                       }}
                     >
                       {s.overallScore.toFixed(0)}/100
                     </span>
                   )}
                   <StatusBadge status={s.status} />
-                  <ArrowRight size={14} style={{ color: "#464554" }} />
+                  <ArrowRight size={14} style={{ color: "var(--app-muted)" }} />
                 </div>
               </Link>
             ))}

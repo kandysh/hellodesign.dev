@@ -44,17 +44,17 @@ function RegisterPage() {
   return (
     <>
       <AuthHeader />
-      <div className="min-h-screen flex pt-16" style={{ background: "#0b1326" }}>
+      <div className="min-h-screen flex pt-16" style={{ background: "var(--app-bg)" }}>
         <div className="w-1/2 flex flex-col items-center justify-center px-8 lg:px-16 py-16">
           <div className="w-full max-w-sm">
           <div className="mb-8">
             <h1
               className="text-2xl font-bold mb-1.5"
-              style={{ color: "#dae2fd", letterSpacing: "-0.01em" }}
+              style={{ color: "var(--app-fg)", letterSpacing: "-0.01em" }}
             >
               Initialize Account
             </h1>
-            <p className="text-sm" style={{ color: "#908fa0" }}>
+            <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
               Deploy your workspace and join the Hello Design ecosystem.
             </p>
           </div>
@@ -67,7 +67,7 @@ function RegisterPage() {
           <Divider />
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Field label="Full Name" icon={<User size={15} style={{ color: "#464554" }} />}>
+            <Field label="Full Name" icon={<User size={15} style={{ color: "var(--app-muted)" }} />}>
               <input
                 type="text"
                 value={name}
@@ -79,7 +79,7 @@ function RegisterPage() {
               />
             </Field>
 
-            <Field label="Email Address" icon={<Mail size={15} style={{ color: "#464554" }} />}>
+            <Field label="Email Address" icon={<Mail size={15} style={{ color: "var(--app-muted)" }} />}>
               <input
                 type="email"
                 value={email}
@@ -93,7 +93,7 @@ function RegisterPage() {
 
             <Field
               label="Password"
-              icon={<Lock size={15} style={{ color: "#464554" }} />}
+              icon={<Lock size={15} style={{ color: "var(--app-muted)" }} />}
               trailingAction={
                 <button
                   type="button"
@@ -116,7 +116,7 @@ function RegisterPage() {
               />
             </Field>
 
-            <Field label="Confirm Password" icon={<Lock size={15} style={{ color: "#464554" }} />}>
+            <Field label="Confirm Password" icon={<Lock size={15} style={{ color: "var(--app-muted)" }} />}>
               <input
                 type="password"
                 value={confirmPassword}
@@ -131,7 +131,7 @@ function RegisterPage() {
             {error && (
               <p
                 className="text-sm rounded px-3 py-2"
-                style={{ color: "#ffb4ab", background: "rgba(147,0,10,0.2)", border: "1px solid rgba(255,180,171,0.2)" }}
+                style={{ color: "var(--app-red)", background: "rgba(147,0,10,0.2)", border: "1px solid rgba(255,180,171,0.2)" }}
               >
                 {error}
               </p>
@@ -141,7 +141,7 @@ function RegisterPage() {
               type="submit"
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded font-semibold text-sm transition-colors active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
-              style={{ background: "#6366f1", color: "white", boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}
+              style={{ background: "#6366f1", color: "white", boxShadow: "0 0 12px var(--app-indigo-glow)" }}
             >
               {loading ? (
                 <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -151,7 +151,7 @@ function RegisterPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-xs" style={{ color: "#464554" }}>
+          <p className="mt-6 text-center text-xs" style={{ color: "var(--app-muted)" }}>
             Already have an account?{" "}
             <Link to="/auth/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
               Sign in

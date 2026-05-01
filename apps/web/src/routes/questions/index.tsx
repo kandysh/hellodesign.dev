@@ -26,7 +26,7 @@ const estimatedTime: Record<string, string> = {
 }
 
 const difficultyColors: Record<string, string> = {
-  easy: "#4edea3", medium: "#fbbf24", hard: "#ffb4ab",
+  easy: "var(--app-green)", medium: "var(--app-amber)", hard: "var(--app-red)",
 }
 
 export const Route = createFileRoute("/questions/")({
@@ -82,19 +82,19 @@ function QuestionsPage() {
   const hasFilters = selectedDifficulties.size > 0 || selectedCategory !== null || searchQuery !== ""
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8" style={{ color: "#dae2fd" }}>
+    <div className="mx-auto max-w-7xl px-4 py-8" style={{ color: "var(--app-fg)" }}>
       {/* ── Page header ─────────────────────────────────────────── */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
-          <LayoutGrid size={16} style={{ color: "#8083ff" }} />
-          <span className="text-xs uppercase tracking-widest font-bold" style={{ color: "#8083ff", fontFamily: "'Space Grotesk', monospace" }}>
+          <LayoutGrid size={16} style={{ color: "var(--app-indigo)" }} />
+          <span className="text-xs uppercase tracking-widest font-bold" style={{ color: "var(--app-indigo)", fontFamily: "'Space Grotesk', monospace" }}>
             Problem Library
           </span>
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight mb-1" style={{ letterSpacing: "-0.02em" }}>
           Architecture Challenges
         </h1>
-        <p className="text-sm" style={{ color: "#908fa0" }}>
+        <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
           {filtered.length} challenge{filtered.length !== 1 ? "s" : ""}
           {hasFilters ? " matching filters" : " in the library"}
         </p>
@@ -104,17 +104,17 @@ function QuestionsPage() {
       {session?.user && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#8083ff" }}>
+            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
               Your Progress
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <MetricsCard
               label="Problems Solved"
               value="15"
               unit="/ 50"
               icon={<CheckCircle2 size={20} />}
-              iconColor="#4edea3"
+              iconColor="var(--app-green)"
               accentColor="tertiary"
               progress={30}
               description="28% of the library"
@@ -132,7 +132,7 @@ function QuestionsPage() {
               label="Global Rank"
               value="45,892"
               icon={<Trophy size={20} />}
-              iconColor="#c0c1ff"
+              iconColor="var(--app-indigo-pale)"
               accentColor="primary"
               description="Top 3% of all users"
             />
@@ -141,20 +141,20 @@ function QuestionsPage() {
       )}
 
       {/* ── Search + Filter Bar ────────────────────────────────────── */}
-      <div className="mb-6 rounded-lg" style={{ background: "#131b2e", border: "1px solid #2d3449" }}>
+      <div className="mb-6 rounded-lg" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
         {/* Row 1: search + filter buttons */}
         <div className="flex flex-col md:flex-row gap-3 items-center p-4">
           <div className="relative flex-1 w-full md:max-w-md">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#908fa0" }} />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--app-subtle)" }} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search challenges by name or topic..."
               className="w-full pl-9 pr-4 py-2 rounded text-sm"
-              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#dae2fd", outline: "none" }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "#8083ff" }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+              style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-fg)", outline: "none" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--app-indigo)" }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
             />
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
@@ -163,15 +163,15 @@ function QuestionsPage() {
               onClick={() => { setShowDiffFilter(!showDiffFilter); setShowTopicFilter(false) }}
               className="flex items-center gap-2 px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
               style={{
-                background: showDiffFilter || selectedDifficulties.size > 0 ? "rgba(128,131,255,0.15)" : "#0b1326",
-                border: showDiffFilter || selectedDifficulties.size > 0 ? "1px solid #8083ff" : "1px solid #2d3449",
-                color: showDiffFilter || selectedDifficulties.size > 0 ? "#dae2fd" : "#908fa0",
+                background: showDiffFilter || selectedDifficulties.size > 0 ? "var(--app-indigo-15)" : "var(--app-bg)",
+                border: showDiffFilter || selectedDifficulties.size > 0 ? "1px solid var(--app-indigo)" : "1px solid var(--app-border)",
+                color: showDiffFilter || selectedDifficulties.size > 0 ? "var(--app-fg)" : "var(--app-subtle)",
               }}
             >
               <SlidersHorizontal size={13} />
               Difficulty
               {selectedDifficulties.size > 0 && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "#8083ff", color: "#0b1326" }}>
+                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "var(--app-indigo)", color: "var(--app-bg)" }}>
                   {selectedDifficulties.size}
                 </span>
               )}
@@ -181,15 +181,15 @@ function QuestionsPage() {
               onClick={() => { setShowTopicFilter(!showTopicFilter); setShowDiffFilter(false) }}
               className="flex items-center gap-2 px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
               style={{
-                background: showTopicFilter || selectedCategory ? "rgba(128,131,255,0.15)" : "#0b1326",
-                border: showTopicFilter || selectedCategory ? "1px solid #8083ff" : "1px solid #2d3449",
-                color: showTopicFilter || selectedCategory ? "#dae2fd" : "#908fa0",
+                background: showTopicFilter || selectedCategory ? "var(--app-indigo-15)" : "var(--app-bg)",
+                border: showTopicFilter || selectedCategory ? "1px solid var(--app-indigo)" : "1px solid var(--app-border)",
+                color: showTopicFilter || selectedCategory ? "var(--app-fg)" : "var(--app-subtle)",
               }}
             >
               <LayoutGrid size={13} />
               Topics
               {selectedCategory && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "#8083ff", color: "#0b1326" }}>1</span>
+                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "var(--app-indigo)", color: "var(--app-bg)" }}>1</span>
               )}
             </button>
             {hasFilters && (
@@ -197,9 +197,9 @@ function QuestionsPage() {
                 type="button"
                 onClick={clearAll}
                 className="px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
-                style={{ background: "transparent", border: "1px solid transparent", color: "#908fa0" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#ffb4ab" }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "#908fa0" }}
+                style={{ background: "transparent", border: "1px solid transparent", color: "var(--app-subtle)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-red)" }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-subtle)" }}
               >
                 Clear all
               </button>
@@ -209,8 +209,8 @@ function QuestionsPage() {
 
         {/* Row 2: Difficulty chips (expand) */}
         {showDiffFilter && (
-          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid #2d3449" }}>
-            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "#464554" }}>Difficulty:</span>
+          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid var(--app-border)" }}>
+            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "var(--app-muted)" }}>Difficulty:</span>
             {DIFFICULTIES.map((d) => {
               const active = selectedDifficulties.has(d)
               return (
@@ -220,9 +220,9 @@ function QuestionsPage() {
                   onClick={() => toggleDifficulty(d)}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize mt-4 transition-all"
                   style={{
-                    background: active ? `${difficultyColors[d]}22` : "#0b1326",
-                    border: `1px solid ${active ? difficultyColors[d] : "#2d3449"}`,
-                    color: active ? difficultyColors[d] : "#908fa0",
+                    background: active ? `${difficultyColors[d]}22` : "var(--app-bg)",
+                    border: `1px solid ${active ? difficultyColors[d] : "var(--app-border)"}`,
+                    color: active ? difficultyColors[d] : "var(--app-subtle)",
                   }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: difficultyColors[d] }} />
@@ -235,8 +235,8 @@ function QuestionsPage() {
 
         {/* Row 3: Topic chips (expand) */}
         {showTopicFilter && (
-          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid #2d3449" }}>
-            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "#464554" }}>Topics:</span>
+          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid var(--app-border)" }}>
+            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "var(--app-muted)" }}>Topics:</span>
             {categories.map((cat) => {
               const active = selectedCategory === cat
               return (
@@ -246,9 +246,9 @@ function QuestionsPage() {
                   onClick={() => setSelectedCategory(active ? null : cat)}
                   className="px-3 py-1.5 rounded-full text-xs font-semibold mt-4 transition-all"
                   style={{
-                    background: active ? "rgba(128,131,255,0.15)" : "#0b1326",
-                    border: `1px solid ${active ? "#8083ff" : "#2d3449"}`,
-                    color: active ? "#dae2fd" : "#908fa0",
+                    background: active ? "var(--app-indigo-15)" : "var(--app-bg)",
+                    border: `1px solid ${active ? "var(--app-indigo)" : "var(--app-border)"}`,
+                    color: active ? "var(--app-fg)" : "var(--app-subtle)",
                   }}
                 >
                   {categoryLabels[cat] ?? cat}
@@ -263,7 +263,7 @@ function QuestionsPage() {
       {popular.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#8083ff" }}>
+            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
               Popular This Week
             </span>
           </div>
@@ -275,22 +275,22 @@ function QuestionsPage() {
                 params={{ questionId: q.id }}
                 className="rounded-lg p-4 group transition-all duration-200 hover:shadow-lg hover:shadow-indigo-950/40 relative overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg, rgba(128,131,255,0.1) 0%, rgba(78,222,163,0.05) 100%), rgba(23, 31, 51, 0.6)",
-                  border: "1px solid #2d3449",
+                  background: "var(--app-card-gradient), var(--app-popular-bg)",
+                  border: "1px solid var(--app-border)",
                 }}
               >
                 <div
                   className="absolute -right-8 -top-8 w-24 h-24 rounded-full blur-2xl group-hover:opacity-100 opacity-50 transition-all duration-500 pointer-events-none"
                   style={{
-                    background: "rgba(128,131,255,0.15)",
+                    background: "var(--app-indigo-15)",
                   }}
                 />
                 <div className="relative z-10">
                   <DifficultyBadge difficulty={q.difficulty} />
-                  <p className="text-sm font-semibold mt-2 line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ color: "#dae2fd" }}>
+                  <p className="text-sm font-semibold mt-2 line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ color: "var(--app-fg)" }}>
                     {q.title}
                   </p>
-                  <div className="flex items-center gap-1 text-xs mt-3" style={{ color: "#908fa0" }}>
+                  <div className="flex items-center gap-1 text-xs mt-3" style={{ color: "var(--app-subtle)" }}>
                     <Clock size={12} />
                     {q.estimatedMins}m
                   </div>
@@ -302,33 +302,33 @@ function QuestionsPage() {
       )}
 
       {/* ── Questions ────────────────────────────────────────── */}
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {isLoading ? (
-          <div className="space-y-2">
+          <>
             {[...Array(6)].map((_, i) => {
               // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
               return (
                 <div
                   key={i}
                   className="h-[72px] w-full rounded-lg animate-pulse"
-                  style={{ background: "#131b2e" }}
+                  style={{ background: "var(--app-surface)" }}
                 />
               )
             })}
-          </div>
+          </>
         ) : isError ? (
           <div
             className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
             style={{ border: "1px dashed rgba(255,180,171,0.3)" }}
           >
-            <p className="mb-3 text-sm" style={{ color: "#ffb4ab" }}>
+            <p className="mb-3 text-sm" style={{ color: "var(--app-red)" }}>
               Could not load questions — is the API running?
             </p>
             <button
               type="button"
               onClick={() => refetch()}
               className="px-4 py-2 rounded text-xs font-semibold transition-all"
-              style={{ background: "rgba(255,180,171,0.1)", border: "1px solid rgba(255,180,171,0.3)", color: "#ffb4ab" }}
+              style={{ background: "rgba(255,180,171,0.1)", border: "1px solid rgba(255,180,171,0.3)", color: "var(--app-red)" }}
             >
               Retry
             </button>
@@ -336,9 +336,9 @@ function QuestionsPage() {
         ) : filtered.length === 0 ? (
           <div
             className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
-            style={{ border: "1px dashed #2d3449" }}
+            style={{ border: "1px dashed var(--app-border)" }}
           >
-            <p className="text-sm mb-2" style={{ color: "#464554" }}>No questions match your filters</p>
+            <p className="text-sm mb-2" style={{ color: "var(--app-muted)" }}>No questions match your filters</p>
             <button
               type="button"
               onClick={clearAll}
@@ -348,11 +348,11 @@ function QuestionsPage() {
             </button>
           </div>
         ) : (
-          <div className="space-y-2">
+          <>
             {filtered.map((q) => (
               <QuestionCard key={q.id} question={q} />
             ))}
-          </div>
+          </>
         )}
       </div>
     </div>
@@ -369,30 +369,30 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
         "hover:shadow-lg hover:shadow-indigo-950/50",
       )}
       style={{ 
-        border: "1px solid #2d3449", 
-        background: "linear-gradient(135deg, rgba(128,131,255,0.1) 0%, rgba(78,222,163,0.05) 100%), rgba(23, 31, 51, 0.4)"
+        border: "1px solid var(--app-border)", 
+        background: "var(--app-card-gradient), var(--app-card-bg)"
       }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#464554" }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#2d3449" }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--app-muted)" }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)" }}
     >
       {/* Gradient blur circle */}
       <div
         className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-all duration-500 pointer-events-none"
         style={{
-          background: "rgba(128,131,255,0.1)",
+          background: "var(--app-indigo-10)",
         }}
       />
 
       {/* Left accent bar */}
       <div
         className="w-0.5 shrink-0 transition-colors duration-150 relative z-10"
-        style={{ background: "#2d3449" }}
+        style={{ background: "var(--app-border)" }}
         ref={(el) => {
           if (!el) return
           const parent = el.closest("a")
           if (!parent) return
           parent.addEventListener("mouseenter", () => { el.style.background = "#6366f1" })
-          parent.addEventListener("mouseleave", () => { el.style.background = "#2d3449" })
+          parent.addEventListener("mouseleave", () => { el.style.background = "var(--app-border)" })
         }}
       />
 
@@ -400,28 +400,28 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
         <div className="flex-1 min-w-0">
           <p
             className="font-semibold truncate transition-colors duration-150 group-hover:text-indigo-300"
-            style={{ color: "#dae2fd" }}
+            style={{ color: "var(--app-fg)" }}
           >
             {q.title}
           </p>
-          <p className="mt-0.5 text-sm line-clamp-1" style={{ color: "#908fa0" }}>
+          <p className="mt-0.5 text-sm line-clamp-1" style={{ color: "var(--app-subtle)" }}>
             {q.description}
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden sm:flex items-center gap-1 text-xs" style={{ color: "#464554" }}>
+          <div className="hidden sm:flex items-center gap-1 text-xs" style={{ color: "var(--app-muted)" }}>
             <Clock size={11} />
             {estimatedTime[q.difficulty] ?? "~25 min"}
           </div>
-          <span className="hidden sm:inline text-xs" style={{ color: "#464554", fontFamily: "'Space Grotesk', monospace" }}>
+          <span className="hidden sm:inline text-xs" style={{ color: "var(--app-muted)", fontFamily: "'Space Grotesk', monospace" }}>
             {categoryLabels[q.category] ?? q.category}
           </span>
           <DifficultyBadge difficulty={q.difficulty as "easy" | "medium" | "hard"} />
           <ArrowRight
             size={15}
             className="transition-transform duration-150 group-hover:translate-x-0.5"
-            style={{ color: "#464554" }}
+            style={{ color: "var(--app-muted)" }}
           />
         </div>
       </div>
