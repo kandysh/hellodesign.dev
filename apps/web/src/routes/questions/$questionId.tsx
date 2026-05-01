@@ -347,21 +347,6 @@ function WorkspacePage() {
     setDraftRestored(false)
   }
 
-  // ── Keyboard shortcut: Cmd/Ctrl+Enter → submit ────────────────
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-        e.preventDefault()
-        if (canSubmit && !submitMutation.isPending && !submitMutation.isSuccess) {
-          submitMutation.mutate()
-        }
-      }
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSubmit, submitMutation.isPending, submitMutation.isSuccess])
-
   // ── Cleanup WebSocket and buffering on unmount ───────────────
   useEffect(() => {
     return () => {
@@ -379,6 +364,25 @@ function WorkspacePage() {
   useEffect(() => {
     if (!modelOverridden) setModelName(MODE_DEFAULTS[reviewMode])
   }, [reviewMode]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // canSubmit must be declared before the keyboard shortcut useEffect
+  // so the dep array can evaluate it without TDZ error
+  const canSubmit = answerCode.trim().length > 20 && checklistProgress > 0
+
+  // ── Keyboard shortcut: Cmd/Ctrl+Enter → submit ────────────────
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault()
+        if (canSubmit && !submitMutation.isPending && !submitMutation.isSuccess) {
+          submitMutation.mutate()
+        }
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSubmit, submitMutation.isPending, submitMutation.isSuccess])
 
   function handleSendAgentMessage(msg: string) {
     setAgentMessages((prev) => [
@@ -421,8 +425,6 @@ function WorkspacePage() {
       </div>
     )
   }
-
-  const canSubmit = answerCode.trim().length > 20 && checklistProgress > 0
 
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
