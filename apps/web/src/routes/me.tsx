@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, CheckCircle2, BarChart3, Layers } from "lucide-react"
+import { MetricsCard } from "@/components/MetricsCard"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -119,51 +120,34 @@ function MePage() {
       </div>
 
       {/* ── Stats strip ─────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-        <div
-          style={{ background: "#171f33", border: "1px solid #2d3449" }}
-          className="rounded-lg px-6 py-5 flex flex-col gap-1"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
-            Problems Solved
-          </p>
-          <p
-            className="text-3xl font-extrabold"
-            style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}
-          >
-            {submissions.filter((s) => s.status === "done").length}
-          </p>
-        </div>
-
-        <div
-          style={{ background: "#171f33", border: "1px solid #2d3449" }}
-          className="rounded-lg px-6 py-5 flex flex-col gap-1"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
-            Avg Score
-          </p>
-          <p
-            className="text-3xl font-extrabold"
-            style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}
-          >
-            {avgScore?.toFixed(1) ?? "—"}
-          </p>
-        </div>
-
-        <div
-          style={{ background: "#171f33", border: "1px solid #2d3449" }}
-          className="rounded-lg px-6 py-5 flex flex-col gap-1"
-        >
-          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
-            Total Attempted
-          </p>
-          <p
-            className="text-3xl font-extrabold"
-            style={{ color: "#c0c1ff", letterSpacing: "-0.02em" }}
-          >
-            {submissions.length}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+        <MetricsCard
+          label="Problems Solved"
+          value={String(submissions.filter((s) => s.status === "done").length)}
+          icon={<CheckCircle2 size={20} />}
+          iconColor="#4edea3"
+          accentColor="tertiary"
+          progress={Math.min(100, Math.round(submissions.filter((s) => s.status === "done").length / Math.max(submissions.length, 1) * 100))}
+          description={`${submissions.filter((s) => s.status === "done").length} of ${submissions.length} attempted`}
+        />
+        <MetricsCard
+          label="Avg Score"
+          value={avgScore != null ? avgScore.toFixed(1) : "—"}
+          unit={avgScore != null ? "/ 100" : ""}
+          icon={<BarChart3 size={20} />}
+          iconColor="#b9c8de"
+          accentColor="secondary"
+          progress={avgScore ?? 0}
+          description={avgScore != null ? (avgScore >= 75 ? "Excellent performance" : avgScore >= 50 ? "Good — keep improving" : "Needs more practice") : "Submit your first answer"}
+        />
+        <MetricsCard
+          label="Total Attempted"
+          value={String(submissions.length)}
+          icon={<Layers size={20} />}
+          iconColor="#c0c1ff"
+          accentColor="primary"
+          description={submissions.length === 0 ? "Start practicing today" : `Across ${Object.keys(masteryByCategory).length} categories`}
+        />
       </div>
 
       {/* ── Mastery by category ──────────────────────────────── */}

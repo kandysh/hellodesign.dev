@@ -53,7 +53,15 @@ function QuestionsPage() {
     return diffOk && catOk && searchOk
   })
 
-  const popular = [...questions].sort(() => Math.random() - 0.5).slice(0, 4)
+  // Stable daily popular: seed with today's date string so same order all day
+  const todaySeed = new Date().toISOString().slice(0, 10)
+  const popular = [...questions]
+    .sort((a, b) => {
+      const ha = Math.abs(Array.from(a.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997)
+      const hb = Math.abs(Array.from(b.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997)
+      return ha - hb
+    })
+    .slice(0, 4)
 
   function toggleDifficulty(d: string) {
     setSelectedDifficulties((prev) => {

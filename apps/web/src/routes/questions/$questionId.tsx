@@ -307,7 +307,62 @@ function WorkspacePage() {
     },
   })
 
-  // Cleanup WebSocket and buffering on unmount
+  // ── Draft auto-save ──────────────────────────────────────────
+  const draftKey = `workspace_draft_${questionId}`
+  const [draftRestored, setDraftRestored] = useState(false)
+
+  // Restore draft on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey)
+      if (!raw) return
+      const { code, checklist: savedChecklist, savedAt } = JSON.parse(raw)
+      if (code) setAnswerCode(code)
+      if (Array.isArray(savedChecklist)) setChecklist(new Set(savedChecklist))
+      const mins = Math.round((Date.now() - savedAt) / 60000)
+      if (code?.trim().length > 0) setDraftRestored(mins <= 10080) // show if < 1 week old
+    } catch { /* ignore corrupt data */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftKey])
+
+  // Auto-save every 30s when there's content
+  useEffect(() => {
+    if (!answerCode.trim()) return
+    const id = setInterval(() => {
+      try {
+        localStorage.setItem(draftKey, JSON.stringify({
+          code: answerCode,
+          checklist: [...checklist],
+          savedAt: Date.now(),
+        }))
+      } catch { /* ignore quota errors */ }
+    }, 30_000)
+    return () => clearInterval(id)
+  }, [answerCode, checklist, draftKey])
+
+  function clearDraft() {
+    localStorage.removeItem(draftKey)
+    setAnswerCode("")
+    setChecklist(new Set())
+    setDraftRestored(false)
+  }
+
+  // ── Keyboard shortcut: Cmd/Ctrl+Enter → submit ────────────────
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault()
+        if (canSubmit && !submitMutation.isPending && !submitMutation.isSuccess) {
+          submitMutation.mutate()
+        }
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSubmit, submitMutation.isPending, submitMutation.isSuccess])
+
+  // ── Cleanup WebSocket and buffering on unmount ───────────────
   useEffect(() => {
     return () => {
       wsRef.current?.close()
@@ -664,6 +719,26 @@ function WorkspacePage() {
           </div>
         </div>
 
+        {/* Draft restored banner */}
+        {draftRestored && (
+          <div
+            className="flex items-center justify-between gap-3 px-4 py-2.5 shrink-0"
+            style={{ background: "rgba(128,131,255,0.06)", borderBottom: "1px solid rgba(128,131,255,0.15)" }}
+          >
+            <span className="text-xs" style={{ color: "#8083ff" }}>
+              Draft restored — your previous work is loaded.
+            </span>
+            <button
+              type="button"
+              onClick={clearDraft}
+              className="text-xs underline underline-offset-2 transition-opacity hover:opacity-70 shrink-0"
+              style={{ color: "#8083ff" }}
+            >
+              Clear draft
+            </button>
+          </div>
+        )}
+
         {/* API Key Warning Banner */}
         {!apiKey && !apiBannerDismissed && (
           <div
@@ -781,11 +856,25 @@ function WorkspacePage() {
           className="flex items-center gap-3 px-4 py-2.5 shrink-0"
           style={{ borderTop: "1px solid #1e2a3d", background: "#0b1326" }}
         >
-          {/* Left: word count + diagram indicator */}
-          <div className="flex items-center gap-3 text-xs shrink-0" style={{ color: "#464554" }}>
-            <span style={{ color: wordCount > 0 ? "#908fa0" : "#464554" }}>{wordCount} words</span>
+          {/* Left: word count + progress + diagram indicator */}
+          <div className="flex items-center gap-3 text-xs shrink-0">
+            <div className="flex flex-col gap-1">
+              <span style={{ color: wordCount > 50 ? "#908fa0" : "#464554" }}>{wordCount} words</span>
+              <div
+                className="w-20 h-0.5 rounded-full overflow-hidden"
+                style={{ background: "#1e2a3d" }}
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.min(100, (wordCount / 300) * 100)}%`,
+                    background: wordCount >= 300 ? "#4edea3" : wordCount >= 150 ? "#8083ff" : wordCount >= 50 ? "#fbbf24" : "#2d3449",
+                  }}
+                />
+              </div>
+            </div>
             {hasExcalidrawElements && (
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1" style={{ color: "#464554" }}>
                 <Layers size={10} style={{ color: "rgba(128,131,255,0.6)" }} />
                 Diagram
               </span>
@@ -842,6 +931,14 @@ function WorkspacePage() {
                 : reviewMode === "deep"
                   ? "Submit for Deep Review"
                   : "Submit for Review"}
+              {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
+                <span
+                  className="text-[10px] opacity-50 font-mono ml-1"
+                  style={{ letterSpacing: "0" }}
+                >
+                  ⌘↵
+                </span>
+              )}
             </button>
 
             {/* Inline validation hint — shown when disabled and not yet submitted */}

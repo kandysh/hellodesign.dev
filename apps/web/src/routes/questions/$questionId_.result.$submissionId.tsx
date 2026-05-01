@@ -142,15 +142,32 @@ function ResultPage() {
       className="mx-auto max-w-5xl px-4 py-8 font-[Manrope,sans-serif]"
       style={{ color: DS.textPrimary }}
     >
-      {/* ── Back link ── */}
-      <Link
-        to="/questions/$questionId"
-        params={{ questionId }}
-        style={{ color: DS.textSecondary }}
-        className="flex items-center gap-1.5 text-xs mb-6 hover:text-slate-200 transition-colors"
-      >
-        ← Back to question
-      </Link>
+      {/* ── Back link + retry row ── */}
+      <div className="flex items-center justify-between mb-6">
+        <Link
+          to="/questions/$questionId"
+          params={{ questionId }}
+          style={{ color: DS.textSecondary }}
+          className="flex items-center gap-1.5 text-xs hover:text-slate-200 transition-colors"
+        >
+          ← Back to question
+        </Link>
+        <Link
+          to="/questions/$questionId"
+          params={{ questionId }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all active:scale-95"
+          style={{
+            background: "rgba(128,131,255,0.12)",
+            border: "1px solid rgba(128,131,255,0.25)",
+            color: "#c0c1ff",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(128,131,255,0.2)" }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(128,131,255,0.12)" }}
+        >
+          <RefreshCw size={13} />
+          Improve Your Design
+        </Link>
+      </div>
 
       {/* ── Scorecard header ── */}
       <header
