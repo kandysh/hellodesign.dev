@@ -5,7 +5,7 @@ import type { QuestionSummary } from "@sysdesign/types"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { MetricsCard } from "@/components/MetricsCard"
 import { useSession } from "@/lib/auth-client"
-import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal, Trophy, Flame, CheckCircle2, Search, Filter } from "lucide-react"
+import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal, Trophy, Flame, CheckCircle2, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { questionsQueryOptions } from "@/lib/queries/questions"
 
@@ -38,8 +38,9 @@ export const Route = createFileRoute("/questions/")({
 function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedTimeRange, setSelectedTimeRange] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [showDiffFilter, setShowDiffFilter] = useState(false)
+  const [showTopicFilter, setShowTopicFilter] = useState(false)
 
   const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
   const { data: session } = useSession()
@@ -48,16 +49,10 @@ function QuestionsPage() {
   const filtered = questions.filter((q) => {
     const diffOk = selectedDifficulties.size === 0 || selectedDifficulties.has(q.difficulty)
     const catOk = !selectedCategory || q.category === selectedCategory
-    const timeOk = !selectedTimeRange || (
-      (selectedTimeRange === "quick" && q.estimatedMins <= 15) ||
-      (selectedTimeRange === "medium" && q.estimatedMins > 15 && q.estimatedMins <= 30) ||
-      (selectedTimeRange === "long" && q.estimatedMins > 30)
-    )
     const searchOk = !searchQuery || q.title.toLowerCase().includes(searchQuery.toLowerCase()) || q.description?.toLowerCase().includes(searchQuery.toLowerCase())
-    return diffOk && catOk && timeOk && searchOk
+    return diffOk && catOk && searchOk
   })
 
-  // Popular (most popular sorted by random for now, ideally sorted by views)
   const popular = [...questions].sort(() => Math.random() - 0.5).slice(0, 4)
 
   function toggleDifficulty(d: string) {
@@ -68,9 +63,15 @@ function QuestionsPage() {
     })
   }
 
-  const totalEasy   = questions.filter((q) => q.difficulty === "easy").length
-  const totalMedium = questions.filter((q) => q.difficulty === "medium").length
-  const totalHard   = questions.filter((q) => q.difficulty === "hard").length
+  function clearAll() {
+    setSelectedDifficulties(new Set())
+    setSelectedCategory(null)
+    setSearchQuery("")
+    setShowDiffFilter(false)
+    setShowTopicFilter(false)
+  }
+
+  const hasFilters = selectedDifficulties.size > 0 || selectedCategory !== null || searchQuery !== ""
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8" style={{ color: "#dae2fd" }}>
@@ -87,7 +88,7 @@ function QuestionsPage() {
         </h1>
         <p className="text-sm" style={{ color: "#908fa0" }}>
           {filtered.length} challenge{filtered.length !== 1 ? "s" : ""}
-          {(selectedDifficulties.size > 0 || selectedCategory) ? " matching filters" : " in the library"}
+          {hasFilters ? " matching filters" : " in the library"}
         </p>
       </div>
 
@@ -132,52 +133,122 @@ function QuestionsPage() {
       )}
 
       {/* ── Search + Filter Bar ────────────────────────────────────── */}
-      <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between p-4 rounded-lg" style={{ background: "#131b2e", border: "1px solid #2d3449" }}>
-        <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:max-w-md" style={{ position: "relative" }}>
-          <Search size={16} style={{ color: "#908fa0", position: "absolute", left: "12px" }} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search challenges..."
-            className="w-full pl-10 pr-4 py-2 rounded text-sm"
-            style={{
-              background: "#0b1326",
-              border: "1px solid #2d3449",
-              color: "#dae2fd",
-            }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "#464554" }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
-          />
+      <div className="mb-6 rounded-lg" style={{ background: "#131b2e", border: "1px solid #2d3449" }}>
+        {/* Row 1: search + filter buttons */}
+        <div className="flex flex-col md:flex-row gap-3 items-center p-4">
+          <div className="relative flex-1 w-full md:max-w-md">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#908fa0" }} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search challenges by name or topic..."
+              className="w-full pl-9 pr-4 py-2 rounded text-sm"
+              style={{ background: "#0b1326", border: "1px solid #2d3449", color: "#dae2fd", outline: "none" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "#8083ff" }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "#2d3449" }}
+            />
+          </div>
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={() => { setShowDiffFilter(!showDiffFilter); setShowTopicFilter(false) }}
+              className="flex items-center gap-2 px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
+              style={{
+                background: showDiffFilter || selectedDifficulties.size > 0 ? "rgba(128,131,255,0.15)" : "#0b1326",
+                border: showDiffFilter || selectedDifficulties.size > 0 ? "1px solid #8083ff" : "1px solid #2d3449",
+                color: showDiffFilter || selectedDifficulties.size > 0 ? "#dae2fd" : "#908fa0",
+              }}
+            >
+              <SlidersHorizontal size={13} />
+              Difficulty
+              {selectedDifficulties.size > 0 && (
+                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "#8083ff", color: "#0b1326" }}>
+                  {selectedDifficulties.size}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowTopicFilter(!showTopicFilter); setShowDiffFilter(false) }}
+              className="flex items-center gap-2 px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
+              style={{
+                background: showTopicFilter || selectedCategory ? "rgba(128,131,255,0.15)" : "#0b1326",
+                border: showTopicFilter || selectedCategory ? "1px solid #8083ff" : "1px solid #2d3449",
+                color: showTopicFilter || selectedCategory ? "#dae2fd" : "#908fa0",
+              }}
+            >
+              <LayoutGrid size={13} />
+              Topics
+              {selectedCategory && (
+                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "#8083ff", color: "#0b1326" }}>1</span>
+              )}
+            </button>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearAll}
+                className="px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
+                style={{ background: "transparent", border: "1px solid transparent", color: "#908fa0" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#ffb4ab" }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#908fa0" }}
+              >
+                Clear all
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-          <button
-            type="button"
-            className="flex items-center gap-2 px-4 py-2 rounded text-sm whitespace-nowrap transition-colors"
-            style={{
-              background: selectedDifficulties.size > 0 ? "rgba(99,102,241,0.1)" : "#0b1326",
-              border: selectedDifficulties.size > 0 ? "1px solid #464554" : "1px solid #2d3449",
-              color: selectedDifficulties.size > 0 ? "#dae2fd" : "#908fa0",
-            }}
-            title="Filter by difficulty"
-          >
-            <Filter size={14} />
-            Difficulty
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-2 px-4 py-2 rounded text-sm whitespace-nowrap transition-colors"
-            style={{
-              background: selectedCategory ? "rgba(99,102,241,0.1)" : "#0b1326",
-              border: selectedCategory ? "1px solid #464554" : "1px solid #2d3449",
-              color: selectedCategory ? "#dae2fd" : "#908fa0",
-            }}
-            title="Filter by topic"
-          >
-            <Filter size={14} />
-            Topics
-          </button>
-        </div>
+
+        {/* Row 2: Difficulty chips (expand) */}
+        {showDiffFilter && (
+          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid #2d3449" }}>
+            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "#464554" }}>Difficulty:</span>
+            {DIFFICULTIES.map((d) => {
+              const active = selectedDifficulties.has(d)
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => toggleDifficulty(d)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize mt-4 transition-all"
+                  style={{
+                    background: active ? `${difficultyColors[d]}22` : "#0b1326",
+                    border: `1px solid ${active ? difficultyColors[d] : "#2d3449"}`,
+                    color: active ? difficultyColors[d] : "#908fa0",
+                  }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: difficultyColors[d] }} />
+                  {d}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Row 3: Topic chips (expand) */}
+        {showTopicFilter && (
+          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid #2d3449" }}>
+            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "#464554" }}>Topics:</span>
+            {categories.map((cat) => {
+              const active = selectedCategory === cat
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(active ? null : cat)}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold mt-4 transition-all"
+                  style={{
+                    background: active ? "rgba(128,131,255,0.15)" : "#0b1326",
+                    border: `1px solid ${active ? "#8083ff" : "#2d3449"}`,
+                    color: active ? "#dae2fd" : "#908fa0",
+                  }}
+                >
+                  {categoryLabels[cat] ?? cat}
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       {/* ── Popular This Week ──────────────────────────────────────── */}
@@ -222,169 +293,59 @@ function QuestionsPage() {
         </div>
       )}
 
-      <div className="flex gap-5">
-        {/* ── Sidebar ──────────────────────────────────────────── */}
-        <aside className="w-48 shrink-0 space-y-5">
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest flex items-center gap-1.5" style={{ color: "#464554" }}>
-              <SlidersHorizontal size={11} /> Difficulty
-            </p>
-            <div className="flex flex-col gap-1">
-              {DIFFICULTIES.map((d) => {
-                const active = selectedDifficulties.has(d)
-                return (
-                  <button
-                    key={d}
-                    type="button"
-                    onClick={() => toggleDifficulty(d)}
-                    className="flex items-center gap-2 rounded px-3 py-1.5 text-sm text-left transition-colors duration-150"
-                    style={{
-                      background: active ? "rgba(99,102,241,0.1)" : "transparent",
-                      border: active ? "1px solid rgba(192,193,255,0.2)" : "1px solid transparent",
-                      color: active ? "#dae2fd" : "#908fa0",
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: difficultyColors[d] }} />
-                    <span className="capitalize">{d}</span>
-                  </button>
-                )
-              })}
-            </div>
+      {/* ── Questions ────────────────────────────────────────── */}
+      <div className="space-y-2">
+        {isLoading ? (
+          <div className="space-y-2">
+            {[...Array(6)].map((_, i) => {
+              // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
+              return (
+                <div
+                  key={i}
+                  className="h-[72px] w-full rounded-lg animate-pulse"
+                  style={{ background: "#131b2e" }}
+                />
+              )
+            })}
           </div>
-
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
-              Category
+        ) : isError ? (
+          <div
+            className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
+            style={{ border: "1px dashed rgba(255,180,171,0.3)" }}
+          >
+            <p className="mb-3 text-sm" style={{ color: "#ffb4ab" }}>
+              Could not load questions — is the API running?
             </p>
-            <div className="flex flex-col gap-0.5">
-              <button
-                type="button"
-                onClick={() => setSelectedCategory(null)}
-                className="rounded px-3 py-1.5 text-left text-sm transition-colors duration-150"
-                style={{
-                  background: !selectedCategory ? "rgba(99,102,241,0.1)" : "transparent",
-                  border: !selectedCategory ? "1px solid rgba(192,193,255,0.2)" : "1px solid transparent",
-                  color: !selectedCategory ? "#dae2fd" : "#908fa0",
-                }}
-              >
-                All
-              </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
-                  className="rounded px-3 py-1.5 text-left text-sm transition-colors duration-150"
-                  style={{
-                    background: selectedCategory === cat ? "rgba(99,102,241,0.1)" : "transparent",
-                    border: selectedCategory === cat ? "1px solid rgba(192,193,255,0.2)" : "1px solid transparent",
-                    color: selectedCategory === cat ? "#dae2fd" : "#908fa0",
-                  }}
-                >
-                  {categoryLabels[cat] ?? cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: "#464554" }}>
-              Time to Complete
-            </p>
-            <div className="flex flex-col gap-1">
-              {[
-                { id: "quick", label: "Quick (≤15 min)" },
-                { id: "medium", label: "Medium (15-30 min)" },
-                { id: "long", label: "Long (30+ min)" },
-              ].map((opt) => {
-                const active = selectedTimeRange === opt.id
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setSelectedTimeRange(active ? null : opt.id)}
-                    className="rounded px-3 py-1.5 text-left text-sm transition-colors duration-150"
-                    style={{
-                      background: active ? "rgba(99,102,241,0.1)" : "transparent",
-                      border: active ? "1px solid rgba(192,193,255,0.2)" : "1px solid transparent",
-                      color: active ? "#dae2fd" : "#908fa0",
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {(selectedDifficulties.size > 0 || selectedCategory || selectedTimeRange) && (
             <button
               type="button"
-              onClick={() => { setSelectedDifficulties(new Set()); setSelectedCategory(null); setSelectedTimeRange(null) }}
-              className="text-xs transition-colors hover:underline underline-offset-2"
-              style={{ color: "#464554" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "#908fa0" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "#464554" }}
+              onClick={() => refetch()}
+              className="px-4 py-2 rounded text-xs font-semibold transition-all"
+              style={{ background: "rgba(255,180,171,0.1)", border: "1px solid rgba(255,180,171,0.3)", color: "#ffb4ab" }}
+            >
+              Retry
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div
+            className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
+            style={{ border: "1px dashed #2d3449" }}
+          >
+            <p className="text-sm mb-2" style={{ color: "#464554" }}>No questions match your filters</p>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
             >
               Clear filters
             </button>
-          )}
-        </aside>
-
-        {/* ── Questions ────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
-          {isLoading ? (
-            <div className="space-y-2">
-              {[...Array(6)].map((_, i) => {
-                // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
-                return (
-                  <div
-                    key={i}
-                    className="h-[72px] w-full rounded-lg animate-pulse"
-                    style={{ background: "#131b2e" }}
-                  />
-                )
-              })}
-            </div>
-          ) : isError ? (
-            <div
-              className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
-              style={{ border: "1px dashed rgba(255,180,171,0.3)" }}
-            >
-              <p className="mb-3 text-sm" style={{ color: "#ffb4ab" }}>
-                Could not load questions — is the API running?
-              </p>
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="px-4 py-2 rounded text-xs font-semibold transition-all"
-                style={{ background: "rgba(255,180,171,0.1)", border: "1px solid rgba(255,180,171,0.3)", color: "#ffb4ab" }}
-              >
-                Retry
-              </button>
-            </div>
-          ) : filtered.length === 0 ? (
-            <div
-              className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
-              style={{ border: "1px dashed #2d3449" }}
-            >
-              <p className="text-sm mb-2" style={{ color: "#464554" }}>No questions match your filters</p>
-              <button
-                type="button"
-                onClick={() => { setSelectedDifficulties(new Set()); setSelectedCategory(null) }}
-                className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-              >
-                Clear filters
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filtered.map((q) => (
-                <QuestionCard key={q.id} question={q} />
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {filtered.map((q) => (
+              <QuestionCard key={q.id} question={q} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
