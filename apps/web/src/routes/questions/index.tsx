@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import type { QuestionSummary } from "@sysdesign/types"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
-import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal } from "lucide-react"
+import { MetricsCard } from "@/components/MetricsCard"
+import { useSession } from "@/lib/auth-client"
+import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal, Trophy, Flame, CheckCircle2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { questionsQueryOptions } from "@/lib/queries/questions"
 
@@ -36,9 +38,10 @@ export const Route = createFileRoute("/questions/")({
 function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [selectedTimeRange, setSelectedTimeRange] = useState<string | null>(null) // new
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string | null>(null)
 
   const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
+  const { data: session } = useSession()
 
   const categories = [...new Set(questions.map((q) => q.category))]
   const filtered = questions.filter((q) => {
@@ -110,6 +113,46 @@ function QuestionsPage() {
         ))}
       </div>
 
+      {/* ── Dashboard Metrics (if logged in) ───────────────────── */}
+      {session?.user && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#8083ff" }}>
+              📊 Your Progress
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <MetricsCard
+              label="Problems Solved"
+              value="15"
+              unit="/ 50"
+              icon={<CheckCircle2 size={20} />}
+              iconColor="#4edea3"
+              accentColor="tertiary"
+              progress={30}
+              description="28% of the library"
+            />
+            <MetricsCard
+              label="Current Streak"
+              value="12"
+              unit="days"
+              icon={<Flame size={20} />}
+              iconColor="#b9c8de"
+              accentColor="secondary"
+              description="Keep it up! 3 days to next milestone"
+            />
+            <MetricsCard
+              label="Global Rank"
+              value="45,892"
+              icon={<Trophy size={20} />}
+              iconColor="#c0c1ff"
+              accentColor="primary"
+              description="Top 3% of all users"
+            />
+          </div>
+        </div>
+      )}
+
       {/* ── Popular This Week ──────────────────────────────────────── */}
       {popular.length > 0 && (
         <div className="mb-8">
@@ -124,19 +167,27 @@ function QuestionsPage() {
                 key={q.id}
                 to="/questions/$questionId"
                 params={{ questionId: q.id }}
-                className="rounded-lg p-4 group transition-all duration-200 hover:shadow-lg hover:shadow-indigo-950/40"
+                className="rounded-lg p-4 group transition-all duration-200 hover:shadow-lg hover:shadow-indigo-950/40 relative overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg, rgba(23, 31, 51, 0.8), rgba(34, 42, 61, 0.6))",
+                  background: "linear-gradient(135deg, rgba(128,131,255,0.1) 0%, rgba(78,222,163,0.05) 100%), rgba(23, 31, 51, 0.6)",
                   border: "1px solid #2d3449",
                 }}
               >
-                <DifficultyBadge difficulty={q.difficulty} />
-                <p className="text-sm font-semibold mt-2 line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ color: "#dae2fd" }}>
-                  {q.title}
-                </p>
-                <div className="flex items-center gap-1 text-xs mt-3" style={{ color: "#908fa0" }}>
-                  <Clock size={12} />
-                  {q.estimatedMins}m
+                <div
+                  className="absolute -right-8 -top-8 w-24 h-24 rounded-full blur-2xl group-hover:opacity-100 opacity-50 transition-all duration-500 pointer-events-none"
+                  style={{
+                    background: "rgba(128,131,255,0.15)",
+                  }}
+                />
+                <div className="relative z-10">
+                  <DifficultyBadge difficulty={q.difficulty} />
+                  <p className="text-sm font-semibold mt-2 line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ color: "#dae2fd" }}>
+                    {q.title}
+                  </p>
+                  <div className="flex items-center gap-1 text-xs mt-3" style={{ color: "#908fa0" }}>
+                    <Clock size={12} />
+                    {q.estimatedMins}m
+                  </div>
                 </div>
               </Link>
             ))}
@@ -318,16 +369,27 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
       to="/questions/$questionId"
       params={{ questionId: q.id }}
       className={cn(
-        "group flex items-stretch rounded-lg overflow-hidden transition-all duration-150",
+        "group flex items-stretch rounded-lg overflow-hidden transition-all duration-150 relative",
         "hover:shadow-lg hover:shadow-indigo-950/50",
       )}
-      style={{ border: "1px solid #2d3449", background: "#131b2e" }}
+      style={{ 
+        border: "1px solid #2d3449", 
+        background: "linear-gradient(135deg, rgba(128,131,255,0.1) 0%, rgba(78,222,163,0.05) 100%), rgba(23, 31, 51, 0.4)"
+      }}
       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#464554" }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "#2d3449" }}
     >
+      {/* Gradient blur circle */}
+      <div
+        className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-all duration-500 pointer-events-none"
+        style={{
+          background: "rgba(128,131,255,0.1)",
+        }}
+      />
+
       {/* Left accent bar */}
       <div
-        className="w-0.5 shrink-0 transition-colors duration-150"
+        className="w-0.5 shrink-0 transition-colors duration-150 relative z-10"
         style={{ background: "#2d3449" }}
         ref={(el) => {
           if (!el) return
@@ -338,7 +400,7 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
         }}
       />
 
-      <div className="flex flex-1 items-center justify-between gap-4 px-5 py-4">
+      <div className="flex flex-1 items-center justify-between gap-4 px-5 py-4 relative z-10">
         <div className="flex-1 min-w-0">
           <p
             className="font-semibold truncate transition-colors duration-150 group-hover:text-indigo-300"
