@@ -1,18 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link, useRouterState } from "@tanstack/react-router"
 import {
   Activity,
   BookOpen,
   ChevronDown,
   LogOut,
-  Search,
+  Menu,
+  Moon,
   Settings,
+  Sun,
   User,
   Users,
+  X,
   Zap,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { cn } from "@/lib/utils"
+import { useTheme } from "../hooks/useTheme"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -23,8 +26,13 @@ interface SessionUser {
   image?: string
 }
 
+const NAV_LINKS = [
+  { to: "/questions", label: "Explore", icon: BookOpen },
+  { to: "/community", label: "Community", icon: Users },
+  { to: "/pricing", label: "Pricing", icon: Zap },
+]
+
 export default function Header() {
-  const navigate = useNavigate()
   const { data: session } = useQuery<{ user: SessionUser } | null>({
     queryKey: ["session"],
     queryFn: () =>
@@ -35,180 +43,413 @@ export default function Header() {
   })
 
   const user = session?.user ?? null
-  const [menuOpen, setMenuOpen] = useState(false)
-  const [search, setSearch] = useState("")
-  const menuRef = useRef<HTMLDivElement>(null)
+  const { theme, toggle } = useTheme()
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
+  const routerState = useRouterState()
+  const currentPath = routerState.location.pathname
 
+  // Close menus on route change
   useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false)
+    setMobileOpen(false)
+    setUserMenuOpen(false)
+  }, [currentPath])
+
+  // Close user menu on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
       }
     }
-    document.addEventListener("mousedown", onClickOutside)
-    return () => document.removeEventListener("mousedown", onClickOutside)
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
   }, [])
+
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [mobileOpen])
 
   async function handleSignOut() {
     await fetch(`${API}/api/auth/sign-out`, { method: "POST", credentials: "include" })
     window.location.href = "/"
   }
 
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const q = search.trim()
-    if (q) {
-      navigate({ to: "/questions", search: { q } as never })
-      setSearch("")
-    }
-  }
-
   const initials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
+    ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : "?"
 
+  const isActive = (to: string) =>
+    to === "/" ? currentPath === "/" : currentPath.startsWith(to)
+
   return (
-    <header
-      className="fixed top-0 w-full z-50 border-b"
-      style={{
-        background: "rgba(6, 8, 20, 0.9)",
-        backdropFilter: "blur(12px)",
-        borderColor: "#1e293b",
-      }}
-    >
-      <nav className="flex items-center justify-between h-16 px-6 max-w-[1440px] mx-auto">
-        {/* Brand + search */}
-        <div className="flex items-center gap-6">
+    <>
+      <header
+        className="fixed top-0 w-full z-50 border-b"
+        style={{
+          background: "var(--app-header-bg)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderColor: "var(--app-header-border)",
+          transition: "background 0.2s ease, border-color 0.2s ease",
+        }}
+      >
+        <nav className="flex items-center justify-between h-14 px-4 sm:px-6 max-w-[1440px] mx-auto">
+          {/* Brand */}
           <Link
             to="/"
-            className="flex items-center gap-2 text-xl font-black tracking-tighter text-slate-50 hover:text-white transition-colors duration-150 shrink-0"
+            className="flex items-center gap-2 shrink-0 group"
+            aria-label="Hello Design home"
           >
             <HdLogo />
-            Hello Design
+            <span
+              className="text-lg font-black tracking-tight transition-colors duration-150"
+              style={{ color: "var(--app-fg)" }}
+            >
+              Hello Design
+            </span>
           </Link>
 
-          {/* Search bar (hidden on small screens) */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex items-center gap-2 rounded border px-3 py-1.5 h-9 transition-all"
-            style={{
-              background: "#222a3d",
-              borderColor: "#2d3449",
-            }}
-            onFocusCapture={(e) => {
-              ;(e.currentTarget as HTMLElement).style.borderColor = "#c0c1ff"
-              ;(e.currentTarget as HTMLElement).style.boxShadow = "0 0 8px rgba(192,193,255,0.2)"
-            }}
-            onBlurCapture={(e) => {
-              ;(e.currentTarget as HTMLElement).style.borderColor = "#2d3449"
-              ;(e.currentTarget as HTMLElement).style.boxShadow = "none"
-            }}
-          >
-            <Search size={14} style={{ color: "#908fa0" }} />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search questions…"
-              className="bg-transparent border-none outline-none text-sm w-48 placeholder:text-slate-600"
-              style={{ color: "#dae2fd" }}
-            />
-          </form>
-
-          {/* Nav links */}
-          <div className="hidden md:flex items-center gap-6">
-            <NavLink to="/questions" label="Explore" icon={<BookOpen size={14} />} />
-            <NavLink to="/community" label="Community" icon={<Users size={14} />} />
-            <NavLink to="/pricing" label="Pricing" icon={<Zap size={14} />} />
-            <NavLink to="/settings" label="Settings" icon={<Settings size={14} />} />
+          {/* Desktop nav links — centered */}
+          <div className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            {NAV_LINKS.map(({ to, label }) => (
+              <NavLink key={to} to={to} label={label} active={isActive(to)} />
+            ))}
           </div>
-        </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          {user ? (
-            <div className="relative" ref={menuRef}>
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-2">
+            {/* Theme toggle */}
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className="w-8 h-8 rounded flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
+              style={{
+                color: "var(--app-subtle)",
+                background: "transparent",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--app-surface-3)"
+                e.currentTarget.style.color = "var(--app-indigo)"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent"
+                e.currentTarget.style.color = "var(--app-subtle)"
+              }}
+            >
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+
+            {/* Settings */}
+            <Link
+              to="/settings"
+              aria-label="Settings"
+              className="w-8 h-8 rounded flex items-center justify-center transition-all duration-150"
+              style={{ color: "var(--app-subtle)" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
+                ;(e.currentTarget as HTMLElement).style.color = "var(--app-indigo)"
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent"
+                ;(e.currentTarget as HTMLElement).style.color = "var(--app-subtle)"
+              }}
+            >
+              <Settings size={15} />
+            </Link>
+
+            <div className="w-px h-5 mx-1" style={{ background: "var(--app-border)" }} />
+
+            {/* User menu / sign in */}
+            {user ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserMenuOpen((o) => !o)}
+                  className="flex items-center gap-2 rounded px-2.5 py-1.5 text-sm font-medium transition-all duration-150 active:scale-95"
+                  style={{ color: "var(--app-body)" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "var(--app-surface-3)"
+                    e.currentTarget.style.color = "var(--app-fg)"
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent"
+                    e.currentTarget.style.color = "var(--app-body)"
+                  }}
+                >
+                  <UserAvatar user={user} initials={initials} size={26} />
+                  <span className="hidden sm:block max-w-[100px] truncate">{user.name.split(" ")[0]}</span>
+                  <ChevronDown size={11} style={{ color: "var(--app-muted)" }} />
+                </button>
+
+                {userMenuOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-52 rounded-lg border shadow-2xl py-1.5 text-sm z-50"
+                    style={{
+                      background: "var(--app-surface)",
+                      borderColor: "var(--app-border)",
+                      boxShadow: "0 16px 32px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.15)",
+                    }}
+                  >
+                    <div className="px-4 py-2.5 border-b" style={{ borderColor: "var(--app-border)" }}>
+                      <p className="font-semibold truncate" style={{ color: "var(--app-fg)" }}>
+                        {user.name}
+                      </p>
+                      <p className="text-xs truncate mt-0.5" style={{ color: "var(--app-subtle)" }}>
+                        {user.email}
+                      </p>
+                    </div>
+                    <DropdownItem to="/me" icon={<User size={13} />} label="Profile" onClick={() => setUserMenuOpen(false)} />
+                    <DropdownItem to="/settings" icon={<Settings size={13} />} label="Settings" onClick={() => setUserMenuOpen(false)} />
+                    <div className="my-1 border-t" style={{ borderColor: "var(--app-border)" }} />
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 transition-colors duration-150 text-left"
+                      style={{ color: "var(--app-red)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,100,100,0.08)" }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
+                    >
+                      <LogOut size={13} /> Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/auth/login"
+                className="text-sm font-medium px-3 py-1.5 rounded transition-all duration-150 active:scale-95"
+                style={{ color: "var(--app-subtle)" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--app-fg)"
+                  ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.color = "var(--app-subtle)"
+                  ;(e.currentTarget as HTMLElement).style.background = "transparent"
+                }}
+              >
+                Sign in
+              </Link>
+            )}
+
+            <Link
+              to="/questions"
+              className="inline-flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-1.5 rounded transition-all duration-150 active:scale-95"
+              style={{
+                background: "var(--app-indigo)",
+                boxShadow: "0 0 12px var(--app-indigo-glow)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.filter = "brightness(1.1)"
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.filter = "none"
+              }}
+            >
+              <Activity size={13} />
+              Practice
+            </Link>
+          </div>
+
+          {/* Mobile: theme toggle + hamburger */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              className="w-8 h-8 rounded flex items-center justify-center"
+              style={{ color: "var(--app-subtle)" }}
+            >
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open navigation menu"
+              className="w-8 h-8 rounded flex items-center justify-center"
+              style={{ color: "var(--app-body)" }}
+            >
+              <Menu size={18} />
+            </button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <>
+          {/* Overlay */}
+          <div
+            className="mobile-nav-overlay"
+            onClick={() => setMobileOpen(false)}
+            onKeyDown={(e) => e.key === "Escape" && setMobileOpen(false)}
+            role="button"
+            tabIndex={-1}
+            aria-label="Close navigation"
+          />
+
+          {/* Drawer */}
+          <div
+            className="mobile-nav-drawer open"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--app-border)" }}>
+              <span className="font-bold text-base" style={{ color: "var(--app-fg)" }}>Navigation</span>
               <button
                 type="button"
-                onClick={() => setMenuOpen((o) => !o)}
-                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all duration-150 active:scale-95"
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="w-8 h-8 rounded flex items-center justify-center"
+                style={{ color: "var(--app-subtle)" }}
               >
-                <Avatar user={user} initials={initials} />
-                <span className="hidden sm:block max-w-[120px] truncate font-medium">
-                  {user.name}
-                </span>
-                <ChevronDown size={12} className="text-slate-500" />
+                <X size={18} />
               </button>
+            </div>
 
-              {menuOpen && (
-                <div
-                  className="absolute right-0 mt-1.5 w-48 rounded-lg border text-sm shadow-2xl py-1 z-50"
-                  style={{ background: "#131b2e", borderColor: "#2d3449" }}
+            <nav className="px-3 py-4 flex flex-col gap-1">
+              {NAV_LINKS.map(({ to, label, icon: Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150"
+                  style={{
+                    color: isActive(to) ? "var(--app-indigo)" : "var(--app-body)",
+                    background: isActive(to) ? "var(--app-indigo-10)" : "transparent",
+                  }}
                 >
+                  <Icon size={16} />
+                  {label}
+                </Link>
+              ))}
+              <Link
+                to="/settings"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150"
+                style={{
+                  color: isActive("/settings") ? "var(--app-indigo)" : "var(--app-body)",
+                  background: isActive("/settings") ? "var(--app-indigo-10)" : "transparent",
+                }}
+              >
+                <Settings size={16} /> Settings
+              </Link>
+            </nav>
+
+            <div className="border-t px-3 py-4" style={{ borderColor: "var(--app-border)" }}>
+              {user ? (
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <UserAvatar user={user} initials={initials} size={32} />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate" style={{ color: "var(--app-fg)" }}>{user.name}</p>
+                      <p className="text-xs truncate" style={{ color: "var(--app-subtle)" }}>{user.email}</p>
+                    </div>
+                  </div>
                   <Link
                     to="/me"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors duration-150"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium"
+                    style={{ color: "var(--app-body)" }}
                   >
-                    <User size={13} /> Profile
+                    <User size={16} /> Profile
                   </Link>
-                  <Link
-                    to="/settings"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors duration-150"
-                  >
-                    <Settings size={13} /> Settings
-                  </Link>
-                  <div className="my-1 border-t" style={{ borderColor: "#2d3449" }} />
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors duration-150"
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-left"
+                    style={{ color: "var(--app-red)" }}
                   >
-                    <LogOut size={13} /> Sign out
+                    <LogOut size={16} /> Sign out
                   </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 px-1">
+                  <Link
+                    to="/auth/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center py-2.5 rounded text-sm font-medium border transition-all duration-150"
+                    style={{ color: "var(--app-body)", borderColor: "var(--app-border)" }}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/questions"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded text-sm font-semibold text-white transition-all duration-150"
+                    style={{ background: "var(--app-indigo)" }}
+                  >
+                    <Activity size={14} /> Practice
+                  </Link>
                 </div>
               )}
             </div>
-          ) : (
-            <Link
-              to="/auth/login"
-              className="text-sm text-slate-400 hover:text-slate-200 transition-colors duration-150 active:scale-95 px-3 py-1.5"
-            >
-              Sign in
-            </Link>
-          )}
-
-          <Link
-            to="/questions"
-            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded transition-all duration-150 active:scale-95 border border-indigo-400/50"
-            style={{ boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}
-          >
-            <Activity size={13} />
-            Practice
-          </Link>
-        </div>
-      </nav>
-    </header>
+          </div>
+        </>
+      )}
+    </>
   )
 }
 
-function NavLink({ to, label, icon }: { to: string; label: string; icon?: React.ReactNode }) {
+function NavLink({ to, label, active }: { to: string; label: string; active: boolean }) {
   return (
     <Link
       to={to}
-      activeProps={{
-        className: "!text-indigo-400 !border-b-2 !border-indigo-500 !pb-1",
+      className="relative px-3 py-1.5 text-sm font-medium rounded transition-all duration-150"
+      style={{ color: active ? "var(--app-indigo)" : "var(--app-subtle)" }}
+      onMouseEnter={(e) => {
+        if (!active) {
+          (e.currentTarget as HTMLElement).style.color = "var(--app-body)"
+          ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
+        }
       }}
-      className={cn(
-        "flex items-center gap-1.5 text-sm font-medium text-slate-400",
-        "hover:text-indigo-400 transition-colors duration-150 active:scale-95 transition-transform",
-        "pb-1 border-b-2 border-transparent",
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.color = active ? "var(--app-indigo)" : "var(--app-subtle)"
+        ;(e.currentTarget as HTMLElement).style.background = "transparent"
+      }}
+    >
+      {label}
+      {active && (
+        <span
+          className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
+          style={{ background: "var(--app-indigo)" }}
+        />
       )}
+    </Link>
+  )
+}
+
+function DropdownItem({
+  to,
+  icon,
+  label,
+  onClick,
+}: {
+  to: string
+  icon: React.ReactNode
+  label: string
+  onClick?: () => void
+}) {
+  return (
+    <Link
+      to={to}
+      onClick={onClick}
+      className="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors duration-150"
+      style={{ color: "var(--app-body)" }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
+        ;(e.currentTarget as HTMLElement).style.color = "var(--app-fg)"
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = "transparent"
+        ;(e.currentTarget as HTMLElement).style.color = "var(--app-body)"
+      }}
     >
       {icon}
       {label}
@@ -216,14 +457,16 @@ function NavLink({ to, label, icon }: { to: string; label: string; icon?: React.
   )
 }
 
-function Avatar({ user, initials }: { user: SessionUser; initials: string }) {
+function UserAvatar({ user, initials, size = 28 }: { user: SessionUser; initials: string; size?: number }) {
   return (
     <div
-      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
+      className="rounded-full flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
       style={{
-        background: "rgba(192,193,255,0.15)",
-        color: "#c0c1ff",
-        border: "1px solid rgba(192,193,255,0.25)",
+        width: size,
+        height: size,
+        background: "var(--app-indigo-15)",
+        color: "var(--app-indigo-pale)",
+        border: "1px solid var(--app-indigo-20)",
       }}
     >
       {user.image ? (
@@ -251,14 +494,14 @@ function HdLogo() {
       aria-hidden="true"
       className="shrink-0"
     >
-      <rect width="32" height="32" rx="7" fill="#0b1326" />
-      {/* Material Symbol: polyline (outlined, FILL=1), indigo */}
+      <rect width="32" height="32" rx="7" fill="var(--app-surface)" />
       <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
         <path
           d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
-          fill="#6366f1"
+          fill="var(--app-indigo)"
         />
       </svg>
     </svg>
   )
 }
+

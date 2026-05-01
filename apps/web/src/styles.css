@@ -3,6 +3,88 @@
 @import '@fontsource-variable/manrope';
 @import '@fontsource/space-grotesk/500.css';
 
+/* ── Semantic Design Tokens (theme-aware) ───────────────────── */
+:root {
+  /* Backgrounds */
+  --app-bg:           #0b1326;
+  --app-bg-deep:      #060e20;
+  --app-bg-elevated:  #0f1729;
+  --app-surface:      #131b2e;
+  --app-surface-2:    #171f33;
+  --app-surface-3:    #1e2a3d;
+  --app-surface-4:    #222a3d;
+
+  /* Borders */
+  --app-border:       #2d3449;
+  --app-border-2:     #1e2a3d;
+
+  /* Text */
+  --app-muted:        #464554;
+  --app-subtle:       #908fa0;
+  --app-body:         #c7c4d7;
+  --app-fg:           #dae2fd;
+
+  /* Brand */
+  --app-indigo:       #8083ff;
+  --app-indigo-pale:  #c0c1ff;
+  --app-green:        #4edea3;
+  --app-amber:        #fbbf24;
+  --app-red:          #ffb4ab;
+
+  /* UI chrome */
+  --app-header-bg:    rgba(6, 8, 20, 0.9);
+  --app-header-border: #1e293b;
+
+  /* Gradient card bg (indigo tint) */
+  --app-card-gradient: linear-gradient(135deg, rgba(128,131,255,0.08) 0%, rgba(78,222,163,0.04) 100%);
+  --app-card-bg:       rgba(23, 31, 51, 0.4);
+  --app-popular-bg:    rgba(23, 31, 51, 0.6);
+
+  /* Indigo glow for active accent */
+  --app-indigo-glow: rgba(99,102,241,0.3);
+  --app-indigo-10:   rgba(128,131,255,0.1);
+  --app-indigo-15:   rgba(128,131,255,0.15);
+  --app-indigo-20:   rgba(128,131,255,0.2);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --app-bg:           #f4f6ff;
+  --app-bg-deep:      #eaedfa;
+  --app-bg-elevated:  #edf0fc;
+  --app-surface:      #e4e9f8;
+  --app-surface-2:    #d8dff3;
+  --app-surface-3:    #cdd4ec;
+  --app-surface-4:    #c2cae6;
+
+  --app-border:       #b8c2de;
+  --app-border-2:     #cdd4ec;
+
+  --app-muted:        #8891b0;
+  --app-subtle:       #5c6480;
+  --app-body:         #2e3554;
+  --app-fg:           #131828;
+
+  --app-indigo:       #4b4fd6;
+  --app-indigo-pale:  #363abf;
+  --app-green:        #007850;
+  --app-amber:        #9a6b00;
+  --app-red:          #c4271e;
+
+  --app-header-bg:    rgba(244, 246, 255, 0.95);
+  --app-header-border: #c8d0e8;
+
+  --app-card-gradient: linear-gradient(135deg, rgba(75,79,214,0.06) 0%, rgba(0,120,80,0.04) 100%);
+  --app-card-bg:       rgba(228, 233, 248, 0.6);
+  --app-popular-bg:    rgba(220, 227, 248, 0.8);
+
+  --app-indigo-glow:  rgba(75,79,214,0.2);
+  --app-indigo-10:    rgba(75,79,214,0.08);
+  --app-indigo-15:    rgba(75,79,214,0.12);
+  --app-indigo-20:    rgba(75,79,214,0.18);
+}
+
 /* ── Technical Precision Design Token Colors ────────────────── */
 @theme {
   --color-background:               #0b1326;
@@ -93,14 +175,19 @@ html {
   color-scheme: dark;
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
 body {
   @apply m-0 antialiased;
-  background-color: #0b1326;
-  color: #b8c1e3;
+  background-color: var(--app-bg);
+  color: var(--app-body);
   font-family: 'Manrope Variable', 'Manrope', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ── Grain texture background ────────────────────────────────── */
@@ -114,13 +201,24 @@ body::before {
   background-image: 
     repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0.03),
-      rgba(255, 255, 255, 0.03) 1px,
+      rgba(255, 255, 255, 0.015),
+      rgba(255, 255, 255, 0.015) 1px,
       transparent 1px,
       transparent 2px
     );
   pointer-events: none;
   z-index: -1;
+}
+
+[data-theme="light"] body::before {
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.012),
+      rgba(0, 0, 0, 0.012) 1px,
+      transparent 1px,
+      transparent 2px
+    );
 }
 
 code, pre, .font-mono {
@@ -129,19 +227,19 @@ code, pre, .font-mono {
 
 /* ── Selection ─────────────────────────────────────────────── */
 ::selection {
-  background-color: #8083ff33;
-  color: #c0c1ff;
+  background-color: rgba(128,131,255,0.2);
+  color: var(--app-indigo-pale);
 }
 
 /* ── Scrollbar styling ─────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #131b2e; }
-::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #464554; }
+::-webkit-scrollbar-track { background: var(--app-surface); }
+::-webkit-scrollbar-thumb { background: var(--app-border); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--app-muted); }
 
 /* ── Focus rings ───────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid #c0c1ff;
+  outline: 2px solid var(--app-indigo-pale);
   outline-offset: 2px;
 }
 
@@ -153,34 +251,34 @@ code, pre, .font-mono {
 /* ── Glass panel ───────────────────────────────────────────── */
 .glass-panel {
   backdrop-filter: blur(12px);
-  background: linear-gradient(135deg, rgba(11, 19, 38, 0.95), rgba(19, 27, 46, 0.9));
-  border: 1px solid #464554;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  background: var(--app-card-gradient), var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
 /* ── Bento card ────────────────────────────────────────────── */
 .bento-card {
-  background: linear-gradient(135deg, rgba(23, 31, 51, 0.8), rgba(34, 42, 61, 0.6));
-  border: 1px solid #2d3449;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  background: var(--app-card-gradient), var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 
 .bento-card:hover {
-  box-shadow: 0 8px 20px rgba(128, 131, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 20px var(--app-indigo-15), inset 0 1px 1px rgba(255, 255, 255, 0.03);
   transform: translateY(-2px);
 }
 
 /* ── Indigo glow (active state) ────────────────────────────── */
 .glow-indigo {
-  box-shadow: 0 0 8px rgba(192, 193, 255, 0.35);
+  box-shadow: 0 0 8px var(--app-indigo-glow);
 }
 
 /* ── Reasoning trace terminal ──────────────────────────────── */
 .reasoning-trace {
   font-family: 'Space Grotesk', ui-monospace, monospace;
   font-size: 0.75rem;
-  color: rgba(78, 222, 163, 0.8);
+  color: var(--app-green);
   background-color: rgba(45, 52, 73, 0.3);
   border-radius: 0.5rem;
   padding: 0.75rem;
@@ -188,20 +286,24 @@ code, pre, .font-mono {
   line-height: 1.6;
 }
 
+[data-theme="light"] .reasoning-trace {
+  background-color: rgba(0, 120, 80, 0.06);
+}
+
 /* ── Lexical editor prose ──────────────────────────────────── */
 .lexical-prose {
   line-height: 1.8;
-  color: #dae2fd;
+  color: var(--app-fg);
 }
 .lexical-prose h1 { font-size: 1.5rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; }
 .lexical-prose h2 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.5rem; }
 .lexical-prose p  { margin-bottom: 0.5rem; }
 .lexical-prose ul { list-style-type: disc; padding-left: 1rem; margin-bottom: 0.5rem; }
 .lexical-prose ol { list-style-type: decimal; padding-left: 1rem; margin-bottom: 0.5rem; }
-.lexical-prose li { margin-left: 1rem; color: rgba(218, 226, 253, 0.9); }
-.lexical-prose blockquote { border-left: 4px solid rgba(192, 193, 255, 0.4); padding-left: 1rem; font-style: italic; color: rgba(218, 226, 253, 0.6); margin: 0.5rem 0; }
-.lexical-prose code { font-family: 'Space Grotesk', monospace; font-size: 0.875rem; background-color: rgba(45, 52, 73, 0.6); padding: 0.125rem 0.375rem; border-radius: 0.25rem; color: #4edea3; }
-.lexical-prose pre  { font-family: 'Space Grotesk', monospace; font-size: 0.875rem; background-color: rgba(45, 52, 73, 0.6); padding: 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; overflow-x: auto; }
+.lexical-prose li { margin-left: 1rem; color: var(--app-body); }
+.lexical-prose blockquote { border-left: 4px solid var(--app-indigo-15); padding-left: 1rem; font-style: italic; color: var(--app-subtle); margin: 0.5rem 0; }
+.lexical-prose code { font-family: 'Space Grotesk', monospace; font-size: 0.875rem; background-color: var(--app-surface); padding: 0.125rem 0.375rem; border-radius: 0.25rem; color: var(--app-green); }
+.lexical-prose pre  { font-family: 'Space Grotesk', monospace; font-size: 0.875rem; background-color: var(--app-surface); padding: 0.75rem; border-radius: 0.5rem; margin: 0.5rem 0; overflow-x: auto; }
 
 /* ── Auth input ────────────────────────────────────────────── */
 .auth-input {
@@ -209,33 +311,61 @@ code, pre, .font-mono {
   padding: 0.75rem 1rem 0.75rem 2.75rem;
   border-radius: 0.25rem;
   font-size: 0.875rem;
-  background: #060e20;
-  border: 1px solid #464554;
-  color: #dae2fd;
+  background: var(--app-bg-deep);
+  border: 1px solid var(--app-border);
+  color: var(--app-fg);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.auth-input::placeholder { color: #464554; }
+.auth-input::placeholder { color: var(--app-muted); }
 .auth-input:focus {
-  border-color: #c0c1ff;
-  box-shadow: 0 0 0 2px rgba(192,193,255,0.15);
+  border-color: var(--app-indigo-pale);
+  box-shadow: 0 0 0 2px var(--app-indigo-15);
 }
 
 /* ── Error, Warning, Success state utilities ────────────────── */
 .state-error {
-  color: #ff6b6b;
-  border-color: #ff6b6b;
+  color: var(--app-red);
+  border-color: var(--app-red);
   background: rgba(255, 107, 107, 0.1);
 }
 
 .state-warning {
-  color: #fbbf24;
-  border-color: #fbbf24;
+  color: var(--app-amber);
+  border-color: var(--app-amber);
   background: rgba(251, 191, 36, 0.1);
 }
 
 .state-success {
-  color: #4edea3;
-  border-color: #4edea3;
+  color: var(--app-green);
+  border-color: var(--app-green);
   background: rgba(78, 222, 163, 0.1);
 }
+
+/* ── Mobile nav drawer ─────────────────────────────────────── */
+.mobile-nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100dvh;
+  width: min(320px, 85vw);
+  z-index: 50;
+  background: var(--app-surface);
+  border-left: 1px solid var(--app-border);
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-nav-drawer.open {
+  transform: translateX(0);
+}
+
+
