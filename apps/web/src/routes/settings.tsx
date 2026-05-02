@@ -257,6 +257,15 @@ function SettingsPage() {
             </Link>
           </div>
 
+          {/* ── Guest Workspace Preferences ── */}
+          <SectionCard
+            icon={<Moon size={15} style={{ color: "var(--app-indigo)" }} />}
+            title="Workspace Preferences"
+            subtitle="Appearance and interface settings"
+          >
+            <ThemeSelector />
+          </SectionCard>
+
           {/* ── Guest API Keys ── */}
           <SectionCard
             icon={<Key size={15} style={{ color: "var(--app-indigo)" }} />}
