@@ -420,6 +420,9 @@ export function CodeEditor({
         >
           ⌃F search
         </span>
+        
+        {/* Right spacer - fills remaining area with theme background */}
+        <div className="flex-1" />
       </div>
 
       {/* ── Editor ─────────────────────────────────────────────────────── */}
