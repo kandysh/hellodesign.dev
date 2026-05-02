@@ -14,7 +14,10 @@ import keysRouter from "./routes/keys.js"
 import meRouter from "./routes/me.js"
 import modelsRouter from "./routes/models.js"
 
-const fastify = Fastify({ logger: { level: "info" } })
+const fastify = Fastify({ 
+  logger: { level: "info" },
+  trustProxy: true,
+})
 
 await fastify.register(cors, {
   origin: process.env.WEB_URL ?? "http://localhost:3000",

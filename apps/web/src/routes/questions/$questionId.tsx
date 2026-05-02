@@ -6,6 +6,7 @@ import {
   BookOpen,
   Check,
   CheckSquare,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
