@@ -4,8 +4,10 @@ import { useState, useEffect } from "react"
 import { useToast } from "@/components/Toast"
 import {
   Eye, EyeOff, Trash2, Plus, Shield, User as UserIcon,
-  Key, AlertTriangle, LogIn, Moon,
+  Key, AlertTriangle, LogIn, Monitor, Moon, Sun,
 } from "lucide-react"
+import { useTheme } from "@/hooks/useTheme"
+import { setTheme } from "@/lib/theme"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -152,30 +154,7 @@ function SettingsPage() {
             title="Workspace Preferences"
             subtitle="Appearance and interface settings"
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">
-                  Theme
-                </p>
-                <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-0.5">
-                  Interface appearance
-                </p>
-              </div>
-              <div
-                style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
-                className="flex items-center rounded-lg p-1 gap-1 text-xs"
-              >
-                <span
-                  style={{ background: "var(--app-surface-4)", color: "var(--app-fg)" }}
-                  className="px-3 py-1.5 rounded font-medium"
-                >
-                  Dark
-                </span>
-                <span style={{ color: "var(--app-muted)" }} className="px-3 py-1.5">
-                  Light
-                </span>
-              </div>
-            </div>
+            <ThemeSelector />
           </SectionCard>
 
           {/* ── Security notice ── */}
@@ -565,6 +544,76 @@ function ApiKeySection({
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+type ThemeOption = "dark" | "light" | "system"
+
+function ThemeSelector() {
+  const { theme } = useTheme()
+
+  // Determine effective value for "system" tracking
+  // If stored value matches system pref exactly AND no explicit choice override was made, show system
+  const [selected, setSelected] = useState<ThemeOption>(() => {
+    const stored = localStorage.getItem("app-theme") as "dark" | "light" | null
+    if (!stored) return "system"
+    return stored
+  })
+
+  function pick(opt: ThemeOption) {
+    setSelected(opt)
+    if (opt === "system") {
+      const osPref = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+      localStorage.removeItem("app-theme")
+      setTheme(osPref)
+    } else {
+      setTheme(opt)
+    }
+  }
+
+  const options: { value: ThemeOption; label: string; icon: React.ReactNode }[] = [
+    { value: "light", label: "Light", icon: <Sun size={13} /> },
+    { value: "dark",  label: "Dark",  icon: <Moon size={13} /> },
+    { value: "system", label: "System", icon: <Monitor size={13} /> },
+  ]
+
+  return (
+    <div className="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">Theme</p>
+        <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-0.5">
+          Interface appearance — changes apply immediately
+        </p>
+      </div>
+      <div
+        style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
+        className="flex items-center rounded-lg p-1 gap-1"
+        role="radiogroup"
+        aria-label="Theme"
+      >
+        {options.map(({ value, label, icon }) => {
+          const active = selected === value
+          return (
+            <button
+              key={value}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => pick(value)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all duration-150"
+              style={{
+                background: active ? "var(--app-indigo)" : "transparent",
+                color: active ? "#fff" : "var(--app-muted)",
+                boxShadow: active ? "0 0 8px var(--app-indigo-glow)" : "none",
+              }}
+            >
+              {icon}
+              {label}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
