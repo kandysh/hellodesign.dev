@@ -43,7 +43,6 @@ export default function Header() {
   })
 
   const user = session?.user ?? null
-  const { theme, toggle } = useTheme()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -122,28 +121,6 @@ export default function Header() {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2">
-            {/* Theme toggle */}
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              className="w-8 h-8 rounded flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95"
-              style={{
-                color: "var(--app-subtle)",
-                background: "transparent",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--app-surface-3)"
-                e.currentTarget.style.color = "var(--app-indigo)"
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "transparent"
-                e.currentTarget.style.color = "var(--app-subtle)"
-              }}
-            >
-              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-
             {/* Settings */}
             <Link
               to="/settings"
@@ -256,17 +233,8 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Mobile: theme toggle + hamburger */}
+          {/* Mobile: hamburger */}
           <div className="flex md:hidden items-center gap-2">
-            <button
-              type="button"
-              onClick={toggle}
-              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              className="w-8 h-8 rounded flex items-center justify-center"
-              style={{ color: "var(--app-subtle)" }}
-            >
-              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
             <button
               type="button"
               onClick={() => setMobileOpen(true)}

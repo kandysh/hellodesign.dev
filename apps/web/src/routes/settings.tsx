@@ -553,8 +553,6 @@ type ThemeOption = "dark" | "light" | "system"
 function ThemeSelector() {
   const { theme } = useTheme()
 
-  // Determine effective value for "system" tracking
-  // If stored value matches system pref exactly AND no explicit choice override was made, show system
   const [selected, setSelected] = useState<ThemeOption>(() => {
     const stored = localStorage.getItem("app-theme") as "dark" | "light" | null
     if (!stored) return "system"
@@ -572,27 +570,23 @@ function ThemeSelector() {
     }
   }
 
-  const options: { value: ThemeOption; label: string; icon: React.ReactNode }[] = [
-    { value: "light", label: "Light", icon: <Sun size={13} /> },
-    { value: "dark",  label: "Dark",  icon: <Moon size={13} /> },
-    { value: "system", label: "System", icon: <Monitor size={13} /> },
+  const options: { value: ThemeOption; label: string; description: string; icon: React.ReactNode }[] = [
+    { value: "light", label: "Light", description: "Bright interface for daytime", icon: <Sun size={16} /> },
+    { value: "dark",  label: "Dark",  description: "Dark interface for low light", icon: <Moon size={16} /> },
+    { value: "system", label: "System", description: "Follow device settings", icon: <Monitor size={16} /> },
   ]
 
   return (
-    <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="space-y-4">
       <div>
-        <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">Theme</p>
-        <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-0.5">
+        <p style={{ color: "var(--app-fg)" }} className="text-sm font-semibold">Theme</p>
+        <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-1">
           Interface appearance — changes apply immediately
         </p>
       </div>
-      <div
-        style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
-        className="flex items-center rounded-lg p-1 gap-1"
-        role="radiogroup"
-        aria-label="Theme"
-      >
-        {options.map(({ value, label, icon }) => {
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3" role="radiogroup" aria-label="Theme">
+        {options.map(({ value, label, description, icon }) => {
           const active = selected === value
           return (
             <button
@@ -601,18 +595,81 @@ function ThemeSelector() {
               role="radio"
               aria-checked={active}
               onClick={() => pick(value)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-medium transition-all duration-150"
-              style={{
-                background: active ? "var(--app-indigo)" : "transparent",
-                color: active ? "#fff" : "var(--app-muted)",
-                boxShadow: active ? "0 0 8px var(--app-indigo-glow)" : "none",
-              }}
+              className="relative group"
             >
-              {icon}
-              {label}
+              <div
+                className="p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer"
+                style={{
+                  background: active ? "var(--app-indigo-10)" : "var(--app-surface)",
+                  borderColor: active ? "var(--app-indigo)" : "var(--app-border)",
+                  boxShadow: active ? "0 0 12px rgba(99, 102, 241, 0.2)" : "none",
+                }}
+              >
+                {/* Icon */}
+                <div
+                  className="mb-3 flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-200"
+                  style={{
+                    background: active ? "var(--app-indigo-20)" : "var(--app-surface-2)",
+                    color: active ? "var(--app-indigo)" : "var(--app-muted)",
+                  }}
+                >
+                  {icon}
+                </div>
+
+                {/* Label */}
+                <h3 style={{ color: "var(--app-fg)" }} className="text-sm font-semibold text-left">
+                  {label}
+                </h3>
+
+                {/* Description */}
+                <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-1 text-left leading-relaxed">
+                  {description}
+                </p>
+
+                {/* Active indicator */}
+                {active && (
+                  <div className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: "var(--app-indigo)" }} />
+                )}
+              </div>
             </button>
           )
         })}
+      </div>
+
+      {/* Preview card */}
+      <div
+        className="rounded-lg border p-4 mt-5"
+        style={{
+          background: "var(--app-surface-2)",
+          border: "1px solid var(--app-border)",
+        }}
+      >
+        <p style={{ color: "var(--app-muted)" }} className="text-xs font-medium uppercase tracking-wide">
+          Preview
+        </p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <div
+            className="h-20 rounded"
+            style={{
+              background: "var(--app-fg)",
+              opacity: 0.15,
+            }}
+          />
+          <div
+            className="h-20 rounded"
+            style={{
+              background: "var(--app-indigo)",
+              opacity: 0.15,
+            }}
+          />
+          <div
+            className="h-20 rounded"
+            style={{
+              background: "var(--app-fg)",
+              opacity: 0.08,
+            }}
+          />
+        </div>
       </div>
     </div>
   )
