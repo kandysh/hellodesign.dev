@@ -353,10 +353,16 @@ export function CodeEditor({
   return (
     <div
       className={cn(
-        "flex flex-col h-full overflow-hidden rounded-lg border border-surface-container-high",
-        "bg-surface-container-lowest shadow-[0_0_0_1px_rgba(128,131,255,0.08),0_4px_24px_rgba(0,0,0,0.4)]",
+        "flex flex-col h-full overflow-hidden rounded-lg border",
         className,
       )}
+      style={{
+        borderColor: theme === "light" ? "#e5e5e5" : "var(--app-border)",
+        background: theme === "light" ? "#fafafa" : "#0a0e1a",
+        boxShadow: theme === "light" 
+          ? "0 0 0 1px rgba(0,0,0,0.05), 0 4px 24px rgba(0,0,0,0.08)"
+          : "0 0 0 1px rgba(128,131,255,0.08), 0 4px 24px rgba(0,0,0,0.4)",
+      }}
     >
       {/* ── Toolbar ────────────────────────────────────────────────────── */}
       <div 
