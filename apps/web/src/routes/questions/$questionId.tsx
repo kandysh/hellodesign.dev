@@ -856,196 +856,230 @@ function WorkspacePage() {
 
         {/* Bottom action bar */}
         <div
-          className="grid shrink-0 items-center px-4 py-3"
+          className="flex flex-col gap-4 shrink-0 px-6 py-4"
           style={{
-            gridTemplateColumns: "1fr auto 1fr",
             borderTop: "1px solid var(--app-border-2)",
             background: "var(--app-bg)",
           }}
         >
-          {/* Left cluster: word count + diagram indicator */}
-          <div className="flex items-center gap-4 text-xs">
-            <div className="flex flex-col gap-1 min-w-[64px]">
-              <span
-                style={{ color: wordCount > 50 ? "var(--app-subtle)" : "var(--app-muted)" }}
-                className="tabular-nums"
-              >
-                {wordCount} words
-              </span>
-              <div
-                className="w-20 h-0.5 rounded-full overflow-hidden"
-                style={{ background: "var(--app-surface-3)" }}
-              >
-                <div
-                  className="h-full rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.min(100, (wordCount / 300) * 100)}%`,
-                    background:
-                      wordCount >= 300
-                        ? "var(--app-green)"
-                        : wordCount >= 150
-                          ? "var(--app-indigo)"
-                          : wordCount >= 50
-                            ? "var(--app-amber)"
-                            : "var(--app-border)",
-                  }}
-                />
+          {/* Top row: Left metrics + Center submit button + Right controls */}
+          <div className="flex items-end justify-between gap-6">
+            {/* Left: Word count + diagram indicator */}
+            <div className="flex items-center gap-6 text-xs flex-1">
+              <div className="flex flex-col gap-2">
+                <span
+                  style={{ color: "var(--app-muted)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}
+                >
+                  Progress
+                </span>
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col gap-1">
+                    <span
+                      style={{ color: wordCount > 50 ? "var(--app-fg)" : "var(--app-muted)" }}
+                      className="tabular-nums font-semibold"
+                    >
+                      {wordCount} words
+                    </span>
+                    <div
+                      className="w-32 h-1 rounded-full overflow-hidden"
+                      style={{ background: "var(--app-surface-3)" }}
+                    >
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(100, (wordCount / 300) * 100)}%`,
+                          background:
+                            wordCount >= 300
+                              ? "var(--app-green)"
+                              : wordCount >= 150
+                                ? "var(--app-indigo)"
+                                : wordCount >= 50
+                                  ? "var(--app-amber)"
+                                  : "var(--app-border)",
+                        }}
+                      />
+                    </div>
+                  </div>
+                  {hasExcalidrawElements && (
+                    <div
+                      className="px-3 py-2 rounded-lg flex items-center gap-2"
+                      style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-indigo-15)" }}
+                    >
+                      <Layers size={12} style={{ color: "var(--app-indigo)" }} />
+                      <span style={{ color: "var(--app-indigo-pale)" }} className="text-xs font-medium">
+                        Diagram included
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            {hasExcalidrawElements && (
-              <span className="flex items-center gap-1" style={{ color: "var(--app-muted)" }}>
-                <Layers size={10} style={{ color: "rgba(128,131,255,0.6)" }} />
-                Diagram
-              </span>
-            )}
-          </div>
 
-          {/* Center cluster: submit button */}
-          <div className="flex flex-col items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                if (!submitMutation.isSuccess) {
-                  submitMutation.mutate()
+            {/* Center: Submit button */}
+            <div className="flex flex-col items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!submitMutation.isSuccess) {
+                    submitMutation.mutate()
+                  }
+                }}
+                disabled={
+                  !canSubmit ||
+                  submitMutation.isPending ||
+                  submitMutation.isSuccess
                 }
-              }}
-              disabled={
-                !canSubmit ||
-                submitMutation.isPending ||
-                submitMutation.isSuccess
-              }
-              className="inline-flex items-center justify-center gap-2 px-8 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
-              style={
-                submitMutation.isSuccess
-                  ? {
-                      background: "var(--app-green-10)",
-                      border: "1px solid var(--app-green-15)",
-                      color: "var(--app-green)",
-                    }
-                  : canSubmit
+                className="inline-flex items-center justify-center gap-2.5 px-10 py-3 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
+                style={
+                  submitMutation.isSuccess
                     ? {
-                        background: "var(--app-indigo)",
-                        border: "1px solid var(--app-indigo-20)",
-                        boxShadow: "0 0 16px var(--app-indigo-glow)",
-                        color: "#fff",
+                        background: "var(--app-green-10)",
+                        border: "1px solid var(--app-green-15)",
+                        color: "var(--app-green)",
                       }
-                    : {
-                        background: "var(--app-indigo-10)",
-                        border: "1px solid var(--app-indigo-15)",
-                        color: "rgba(128,131,255,0.4)",
+                    : canSubmit
+                      ? {
+                          background: "var(--app-indigo)",
+                          border: "1px solid var(--app-indigo-20)",
+                          boxShadow: "0 0 20px var(--app-indigo-glow)",
+                          color: "#fff",
                       }
-              }
-            >
-              {submitMutation.isPending ? (
-                <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              ) : submitMutation.isSuccess ? (
-                <Check size={14} />
-              ) : (
-                <Zap size={14} />
-              )}
-              {submitMutation.isSuccess
-                ? "Submitted"
-                : reviewMode === "deep"
-                  ? "Deep Review"
-                  : "Submit for Review"}
-              {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
+                      : {
+                          background: "var(--app-indigo-10)",
+                          border: "1px solid var(--app-indigo-15)",
+                          color: "rgba(128,131,255,0.4)",
+                        }
+                }
+              >
+                {submitMutation.isPending ? (
+                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                ) : submitMutation.isSuccess ? (
+                  <Check size={16} />
+                ) : (
+                  <Zap size={16} />
+                )}
+                <span>
+                  {submitMutation.isSuccess
+                    ? "Submitted"
+                    : reviewMode === "deep"
+                      ? "Deep Review"
+                      : "Submit for Review"}
+                </span>
+                {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
+                  <span
+                    className="text-xs opacity-60 font-mono"
+                    style={{ letterSpacing: "0" }}
+                  >
+                    ⌘↵
+                  </span>
+                )}
+              </button>
+              {/* Validation hint */}
+              {!canSubmit && !submitMutation.isSuccess && (
                 <span
-                  className="text-[10px] opacity-50 font-mono ml-1"
-                  style={{ letterSpacing: "0" }}
+                  className="flex items-center gap-1.5 text-xs"
+                  style={{ color: "var(--app-red)" }}
                 >
-                  ⌘↵
+                  <AlertTriangle size={12} />
+                  {answerCode.trim().length <= 20
+                    ? `Write at least 20 chars (${answerCode.trim().length}/20)`
+                    : `Check ${checklistTotal - checklistProgress} checklist item${checklistTotal - checklistProgress > 1 ? "s" : ""}`}
                 </span>
               )}
-            </button>
-            {/* Inline validation hint */}
-            {!canSubmit && !submitMutation.isSuccess && (
-              <span
-                className="flex items-center gap-1 text-[11px]"
-                style={{ color: "var(--app-red)" }}
-              >
-                <AlertTriangle size={10} />
-                {answerCode.trim().length <= 20
-                  ? `Write at least 20 chars (${answerCode.trim().length}/20)`
-                  : `Check ${checklistTotal - checklistProgress} checklist item${checklistTotal - checklistProgress > 1 ? "s" : ""}`}
-              </span>
-            )}
-          </div>
-
-          {/* Right cluster: mode toggle + mood + model + info */}
-          <div className="flex items-center justify-end gap-2 shrink-0">
-            {/* Agent type pill toggle */}
-            <div
-              className="flex items-center rounded-lg p-0.5 gap-0.5"
-              style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
-            >
-              <button
-                type="button"
-                onClick={() => setReviewMode("quick")}
-                className="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                style={
-                  reviewMode === "quick"
-                    ? { background: "var(--app-surface-3)", color: "var(--app-fg)" }
-                    : { background: "transparent", color: "var(--app-muted)" }
-                }
-              >
-                Quick
-              </button>
-              <button
-                type="button"
-                onClick={() => setReviewMode("deep")}
-                className="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                style={
-                  reviewMode === "deep"
-                    ? { background: "var(--app-surface-3)", color: "var(--app-indigo)" }
-                    : { background: "transparent", color: "var(--app-muted)" }
-                }
-              >
-                Deep
-              </button>
             </div>
 
-            {/* Mood / persona selector */}
-            <div
-              className="flex items-center rounded-lg p-0.5 gap-0.5"
-              style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
-            >
-              {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
-                const labels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
-                return (
+            {/* Right: Review & AI settings */}
+            <div className="flex flex-col gap-2 flex-1 items-end">
+              <div className="flex items-center gap-2">
+                {/* Review mode toggle */}
+                <div
+                  className="flex items-center rounded-lg p-1 gap-1"
+                  style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
+                >
                   <button
-                    key={m}
                     type="button"
-                    onClick={() => setMood(m)}
-                    className="px-2 py-1 rounded text-xs font-medium transition-all"
+                    onClick={() => setReviewMode("quick")}
+                    className="px-3 py-1.5 rounded text-xs font-medium transition-all"
                     style={
-                      mood === m
-                        ? { background: "var(--app-surface-3)", color: "var(--app-indigo)" }
+                      reviewMode === "quick"
+                        ? { background: "var(--app-indigo)", color: "white" }
                         : { background: "transparent", color: "var(--app-muted)" }
                     }
                   >
-                    {labels[m]}
+                    Quick
                   </button>
-                )
-              })}
+                  <button
+                    type="button"
+                    onClick={() => setReviewMode("deep")}
+                    className="px-3 py-1.5 rounded text-xs font-medium transition-all"
+                    style={
+                      reviewMode === "deep"
+                        ? { background: "var(--app-indigo)", color: "white" }
+                        : { background: "transparent", color: "var(--app-muted)" }
+                    }
+                  >
+                    Deep
+                  </button>
+                </div>
+
+                {/* Info tooltip */}
+                <span
+                  className="tooltip tooltip-left cursor-default"
+                  data-tip={
+                    reviewMode === "deep"
+                      ? "Deep: agent asks 2–3 follow-up questions then evaluates"
+                      : "Quick: instant structured feedback · ~5s"
+                  }
+                >
+                  <Info size={14} style={{ color: "var(--app-muted)" }} />
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom row: Mood selector + Model selector */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Mood / persona selector */}
+            <div className="flex items-center gap-3">
+              <span style={{ color: "var(--app-muted)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Interviewer
+              </span>
+              <div
+                className="flex items-center rounded-lg p-1 gap-1"
+                style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
+              >
+                {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
+                  const labels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setMood(m)}
+                      className="px-3 py-1.5 rounded text-xs font-medium transition-all"
+                      style={
+                        mood === m
+                          ? { background: "var(--app-indigo)", color: "white" }
+                          : { background: "transparent", color: "var(--app-muted)" }
+                      }
+                    >
+                      {labels[m]}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Model selector */}
-            <ModelCombobox
-              value={modelName}
-              onChange={(v) => { setModelName(v); setModelOverridden(true) }}
-              providers={["openai", "google", "anthropic", "deepseek"]}
-            />
-
-            <span
-              className="tooltip tooltip-left cursor-default"
-              data-tip={
-                reviewMode === "deep"
-                  ? "Deep: agent asks 2–3 follow-up questions then evaluates"
-                  : "Quick: instant structured feedback · ~5s"
-              }
-            >
-              <Info size={13} style={{ color: "var(--app-muted)" }} />
-            </span>
+            <div className="flex items-center gap-3">
+              <span style={{ color: "var(--app-muted)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                Model
+              </span>
+              <ModelCombobox
+                value={modelName}
+                onChange={(v) => { setModelName(v); setModelOverridden(true) }}
+                providers={["openai", "google", "anthropic", "deepseek"]}
+              />
+            </div>
           </div>
         </div>
       </div>
