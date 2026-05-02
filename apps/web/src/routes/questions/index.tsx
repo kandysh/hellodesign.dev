@@ -261,42 +261,54 @@ function QuestionsPage() {
 
       {/* ── Popular This Week ──────────────────────────────────────── */}
       {popular.length > 0 && (
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
               Popular This Week
             </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {popular.map((q) => (
-              <Link
-                key={q.id}
-                to="/questions/$questionId"
-                params={{ questionId: q.id }}
-                className="rounded-lg p-4 group transition-all duration-200 hover:shadow-lg hover:shadow-indigo-950/40 relative overflow-hidden"
-                style={{
-                  background: "var(--app-card-gradient), var(--app-popular-bg)",
-                  border: "1px solid var(--app-border)",
-                }}
-              >
-                <div
-                  className="absolute -right-8 -top-8 w-24 h-24 rounded-full blur-2xl group-hover:opacity-100 opacity-50 transition-all duration-500 pointer-events-none"
+          <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+            {popular.map((q) => {
+              const dot = difficultyColors[q.difficulty] ?? "var(--app-indigo)"
+              return (
+                <Link
+                  key={q.id}
+                  to="/questions/$questionId"
+                  params={{ questionId: q.id }}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 shrink-0 transition-all duration-150 group"
                   style={{
-                    background: "var(--app-indigo-15)",
+                    background: "var(--app-surface)",
+                    border: "1px solid var(--app-border)",
+                    maxWidth: 240,
                   }}
-                />
-                <div className="relative z-10">
-                  <DifficultyBadge difficulty={q.difficulty} />
-                  <p className="text-sm font-semibold mt-2 line-clamp-2 group-hover:text-indigo-300 transition-colors" style={{ color: "var(--app-fg)" }}>
-                    {q.title}
-                  </p>
-                  <div className="flex items-center gap-1 text-xs mt-3" style={{ color: "var(--app-subtle)" }}>
-                    <Clock size={12} />
-                    {q.estimatedMins}m
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = dot
+                    ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-2)"
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)"
+                    ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface)"
+                  }}
+                >
+                  {/* Difficulty dot */}
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: dot }}
+                  />
+                  <div className="min-w-0">
+                    <p
+                      className="text-xs font-semibold truncate"
+                      style={{ color: "var(--app-fg)", maxWidth: 180 }}
+                    >
+                      {q.title}
+                    </p>
+                    <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--app-muted)" }}>
+                      {categoryLabels[q.category] ?? q.category} · {q.estimatedMins}m
+                    </p>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}
@@ -360,43 +372,47 @@ function QuestionsPage() {
 }
 
 function QuestionCard({ question: q }: { question: QuestionSummary }) {
+  const [hovered, setHovered] = useState(false)
+  const accentColor = difficultyColors[q.difficulty] ?? "var(--app-muted)"
+
   return (
     <Link
       to="/questions/$questionId"
       params={{ questionId: q.id }}
       className={cn(
-        "group flex items-stretch rounded-lg overflow-hidden transition-all duration-150",
-        "hover:shadow-md",
+        "group flex items-stretch rounded-lg overflow-hidden transition-all duration-200",
+        "hover:shadow-lg",
       )}
-      style={{ 
-        border: "1px solid var(--app-border)", 
-        background: "var(--app-card-gradient), var(--app-card-bg)"
+      style={{
+        border: `1px solid ${hovered ? accentColor : "var(--app-border)"}`,
+        background: "var(--app-card-gradient), var(--app-card-bg)",
+        opacity: hovered ? 1 : 0.95,
+        transition: "border-color 0.15s, box-shadow 0.2s, opacity 0.15s",
       }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--app-muted)" }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)" }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {/* Left accent bar */}
+      {/* Left accent bar — difficulty colour on hover */}
       <div
-        className="w-0.5 shrink-0 transition-colors duration-150 relative z-10"
-        style={{ background: "var(--app-border)" }}
-        ref={(el) => {
-          if (!el) return
-          const parent = el.closest("a")
-          if (!parent) return
-          parent.addEventListener("mouseenter", () => { el.style.background = "#6366f1" })
-          parent.addEventListener("mouseleave", () => { el.style.background = "var(--app-border)" })
+        className="w-1 shrink-0 relative z-10"
+        style={{
+          background: hovered ? accentColor : "var(--app-border)",
+          transition: "background 0.2s",
         }}
       />
 
       <div className="flex flex-1 items-center justify-between gap-4 px-5 py-4 relative z-10">
         <div className="flex-1 min-w-0">
           <p
-            className="font-semibold truncate transition-colors duration-150 group-hover:text-indigo-300"
-            style={{ color: "var(--app-fg)" }}
+            className="font-semibold truncate text-sm"
+            style={{
+              color: hovered ? "var(--app-fg)" : "var(--app-body)",
+              transition: "color 0.15s",
+            }}
           >
             {q.title}
           </p>
-          <p className="mt-0.5 text-sm line-clamp-1" style={{ color: "var(--app-subtle)" }}>
+          <p className="mt-0.5 text-xs line-clamp-1" style={{ color: "var(--app-subtle)" }}>
             {q.description}
           </p>
         </div>
@@ -406,14 +422,26 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
             <Clock size={11} />
             {estimatedTime[q.difficulty] ?? "~25 min"}
           </div>
-          <span className="hidden sm:inline text-xs" style={{ color: "var(--app-muted)", fontFamily: "'Space Grotesk', monospace" }}>
+          <span
+            className="hidden sm:inline text-xs px-2 py-0.5 rounded-full"
+            style={{
+              color: "var(--app-muted)",
+              fontFamily: "'Space Grotesk', monospace",
+              background: "var(--app-surface)",
+              border: "1px solid var(--app-border)",
+            }}
+          >
             {categoryLabels[q.category] ?? q.category}
           </span>
           <DifficultyBadge difficulty={q.difficulty as "easy" | "medium" | "hard"} />
           <ArrowRight
             size={15}
-            className="transition-transform duration-150 group-hover:translate-x-0.5"
-            style={{ color: "var(--app-muted)" }}
+            className="transition-transform duration-200"
+            style={{
+              color: hovered ? accentColor : "var(--app-muted)",
+              transform: hovered ? "translateX(2px)" : "translateX(0)",
+              transition: "color 0.15s, transform 0.2s",
+            }}
           />
         </div>
       </div>

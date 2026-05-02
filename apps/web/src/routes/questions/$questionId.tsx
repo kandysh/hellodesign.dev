@@ -404,15 +404,15 @@ function WorkspacePage() {
       <div className="mx-auto max-w-7xl px-4 py-8 space-y-4">
         <div
           className="animate-pulse rounded-lg"
-          style={{ background: "#1e2a3d", height: 32, width: 256 }}
+          style={{ background: "var(--app-surface)", height: 32, width: 256 }}
         />
         <div
           className="animate-pulse rounded"
-          style={{ background: "#1e2a3d", height: 16, width: 384, marginTop: 8 }}
+          style={{ background: "var(--app-surface)", height: 16, width: 384, marginTop: 8 }}
         />
         <div
           className="animate-pulse rounded-xl"
-          style={{ background: "#1e2a3d", height: 500, width: "100%", marginTop: 16 }}
+          style={{ background: "var(--app-surface)", height: 500, width: "100%", marginTop: 16 }}
         />
       </div>
     )
@@ -420,7 +420,7 @@ function WorkspacePage() {
 
   if (!question) {
     return (
-      <div className="flex h-64 items-center justify-center" style={{ color: "#464554" }}>
+      <div className="flex h-64 items-center justify-center" style={{ color: "var(--app-muted)" }}>
         Question not found.
       </div>
     )
@@ -434,18 +434,18 @@ function WorkspacePage() {
           "flex flex-col transition-all duration-200 ease-in-out overflow-hidden shrink-0",
           leftCollapsed ? "w-10" : "w-72",
         )}
-        style={{ background: "#0f1729", borderRight: "1px solid #1e2a3d" }}
+        style={{ background: "var(--app-bg-elevated)", borderRight: "1px solid var(--app-border-2)" }}
       >
         {/* Sidebar header with collapse + tabs */}
-        <div className="shrink-0" style={{ borderBottom: "1px solid #1e2a3d" }}>
+        <div className="shrink-0" style={{ borderBottom: "1px solid var(--app-border-2)" }}>
           {leftCollapsed ? (
             <button
               type="button"
               onClick={() => setLeftCollapsed(false)}
               className="flex w-full items-center justify-center py-3 transition-colors"
-              style={{ color: "#464554" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#908fa0")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#464554")}
+              style={{ color: "var(--app-muted)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-subtle)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--app-muted)")}
               aria-label="Expand sidebar"
             >
               <ChevronRight size={14} />
@@ -474,13 +474,13 @@ function WorkspacePage() {
                   type="button"
                   onClick={() => setLeftCollapsed(true)}
                   className="ml-auto p-1.5 rounded-lg transition-colors"
-                  style={{ color: "#464554" }}
+                  style={{ color: "var(--app-muted)" }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "#908fa0"
+                    e.currentTarget.style.color = "var(--app-subtle)"
                     e.currentTarget.style.background = "rgba(255,255,255,0.05)"
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "#464554"
+                    e.currentTarget.style.color = "var(--app-muted)"
                     e.currentTarget.style.background = "transparent"
                   }}
                   aria-label="Collapse sidebar"
@@ -494,13 +494,13 @@ function WorkspacePage() {
                 <div className="px-3 pb-2 pt-1.5">
                   <div
                     className="h-0.5 w-full rounded-full overflow-hidden"
-                    style={{ background: "#2d3449" }}
+                    style={{ background: "var(--app-border)" }}
                   >
                     <div
                       className="h-full rounded-full transition-all duration-300"
                       style={{
                         width: `${(checklistProgress / checklistTotal) * 100}%`,
-                        background: "#8083ff",
+                        background: "var(--app-indigo)",
                       }}
                     />
                   </div>
@@ -519,11 +519,11 @@ function WorkspacePage() {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <DifficultyBadge difficulty={question.difficulty} solid />
-                    <span className="text-xs capitalize" style={{ color: "#464554" }}>
+                    <span className="text-xs capitalize" style={{ color: "var(--app-muted)" }}>
                       {question.category.replace(/-/g, " ")}
                     </span>
                   </div>
-                  <h2 className="text-sm font-semibold leading-snug" style={{ color: "#dae2fd" }}>
+                  <h2 className="text-sm font-semibold leading-snug" style={{ color: "var(--app-fg)" }}>
                     {question.title}
                   </h2>
                 </div>
@@ -532,13 +532,13 @@ function WorkspacePage() {
                 <div>
                   <p
                     className="mb-2 text-[10px] font-semibold uppercase tracking-widest"
-                    style={{ color: "#464554" }}
+                    style={{ color: "var(--app-muted)" }}
                   >
                     Description
                   </p>
                   <div
                     className="max-w-none text-xs leading-relaxed [&_p]:mb-1.5"
-                    style={{ color: "#908fa0" }}
+                    style={{ color: "var(--app-subtle)" }}
                   >
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{question.prompt}</ReactMarkdown>
                   </div>
@@ -547,7 +547,7 @@ function WorkspacePage() {
                 {/* Hints */}
                 <div
                   className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}
+                  style={{ border: "1px solid var(--app-border)", background: "rgba(255,255,255,0.02)" }}
                 >
                   <button
                     type="button"
@@ -556,27 +556,27 @@ function WorkspacePage() {
                   >
                     <span className="flex items-center gap-2">
                       {hintsOpen ? (
-                        <Unlock size={12} style={{ color: "#8083ff" }} />
+                        <Unlock size={12} style={{ color: "var(--app-indigo)" }} />
                       ) : (
-                        <Lock size={12} style={{ color: "#464554" }} />
+                        <Lock size={12} style={{ color: "var(--app-muted)" }} />
                       )}
-                      <span style={{ color: hintsOpen ? "#c7c4d7" : "#908fa0" }}>
+                      <span style={{ color: hintsOpen ? "var(--app-body)" : "var(--app-subtle)" }}>
                         {hintsOpen ? "Hide hints" : "Reveal hints"}
                       </span>
                     </span>
                     <ChevronRight
                       size={12}
                       className={cn("transition-transform duration-150", hintsOpen && "rotate-90")}
-                      style={{ color: "#464554" }}
+                      style={{ color: "var(--app-muted)" }}
                     />
                   </button>
                   {hintsOpen && (question.hints?.length ?? 0) > 0 && (
                     <div
                       className="px-3 py-2.5 space-y-2"
-                      style={{ borderTop: "1px solid #2d3449" }}
+                      style={{ borderTop: "1px solid var(--app-border)" }}
                     >
                       {question.hints?.map((hint, i) => (
-                        <p key={i} className="text-xs flex gap-1.5" style={{ color: "#908fa0" }}>
+                        <p key={i} className="text-xs flex gap-1.5" style={{ color: "var(--app-subtle)" }}>
                           <span className="shrink-0" style={{ color: "rgba(128,131,255,0.5)" }}>
                             ›
                           </span>
@@ -596,11 +596,11 @@ function WorkspacePage() {
                 <div>
                   <p
                     className="mb-1 text-[10px] font-semibold uppercase tracking-widest"
-                    style={{ color: "#464554" }}
+                    style={{ color: "var(--app-muted)" }}
                   >
                     What to cover
                   </p>
-                  <p className="text-xs mb-3" style={{ color: "#464554" }}>
+                  <p className="text-xs mb-3" style={{ color: "var(--app-muted)" }}>
                     Mark each section as you complete it.
                   </p>
                   <div className="space-y-1">
@@ -613,8 +613,8 @@ function WorkspacePage() {
                           onClick={() => toggleChecklist(item)}
                           className="flex items-center gap-2.5 w-full text-left rounded-lg px-2.5 py-2 transition-all"
                           style={{
-                            background: checked ? "rgba(99,102,241,0.08)" : "transparent",
-                            color: checked ? "#c7c4d7" : "#908fa0",
+                            background: checked ? "var(--app-indigo-10)" : "transparent",
+                            color: checked ? "var(--app-body)" : "var(--app-subtle)",
                           }}
                           onMouseEnter={(e) => {
                             if (!checked)
@@ -622,18 +622,18 @@ function WorkspacePage() {
                           }}
                           onMouseLeave={(e) => {
                             e.currentTarget.style.background = checked
-                              ? "rgba(99,102,241,0.08)"
+                              ? "var(--app-indigo-10)"
                               : "transparent"
                           }}
                         >
                           {checked ? (
                             <CheckSquare
                               size={13}
-                              style={{ color: "#8083ff" }}
+                              style={{ color: "var(--app-indigo)" }}
                               className="shrink-0"
                             />
                           ) : (
-                            <Square size={13} style={{ color: "#2d3449" }} className="shrink-0" />
+                            <Square size={13} style={{ color: "var(--app-border)" }} className="shrink-0" />
                           )}
                           <span className="text-xs">{item}</span>
                         </button>
@@ -645,19 +645,19 @@ function WorkspacePage() {
                 {/* Progress summary */}
                 <div
                   className="rounded-xl p-3"
-                  style={{ border: "1px solid #2d3449", background: "rgba(255,255,255,0.02)" }}
+                  style={{ border: "1px solid var(--app-border)", background: "rgba(255,255,255,0.02)" }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span
                       className="text-[10px] font-semibold uppercase tracking-widest"
-                      style={{ color: "#464554" }}
+                      style={{ color: "var(--app-muted)" }}
                     >
                       Progress
                     </span>
                     <span
                       className="text-xs font-semibold"
                       style={{
-                        color: checklistProgress === checklistTotal ? "#4edea3" : "#908fa0",
+                        color: checklistProgress === checklistTotal ? "var(--app-green)" : "var(--app-subtle)",
                       }}
                     >
                       {checklistProgress}/{checklistTotal}
@@ -665,18 +665,18 @@ function WorkspacePage() {
                   </div>
                   <div
                     className="h-1.5 w-full rounded-full overflow-hidden"
-                    style={{ background: "#2d3449" }}
+                    style={{ background: "var(--app-border)" }}
                   >
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${(checklistProgress / checklistTotal) * 100}%`,
-                        background: checklistProgress === checklistTotal ? "#4edea3" : "#8083ff",
+                        background: checklistProgress === checklistTotal ? "var(--app-green)" : "var(--app-indigo)",
                       }}
                     />
                   </div>
                   {checklistProgress === checklistTotal && (
-                    <p className="mt-2 text-xs" style={{ color: "#4edea3" }}>
+                    <p className="mt-2 text-xs" style={{ color: "var(--app-green)" }}>
                       ✓ All sections covered — great work!
                     </p>
                   )}
@@ -693,27 +693,27 @@ function WorkspacePage() {
         {/* Question context bar */}
         <div
           className="flex items-center gap-3 px-4 py-2 shrink-0"
-          style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}
+          style={{ borderBottom: "1px solid var(--app-border-2)", background: "var(--app-bg)" }}
         >
           <Link
             to="/questions"
             className="flex items-center gap-1 text-xs transition-colors shrink-0"
-            style={{ color: "#464554" }}
+            style={{ color: "var(--app-muted)" }}
           >
             <ArrowLeft size={11} />
             Questions
           </Link>
-          <span className="text-xs" style={{ color: "#2d3449" }}>
+          <span className="text-xs" style={{ color: "var(--app-border)" }}>
             /
           </span>
-          <span className="truncate text-xs font-medium min-w-0" style={{ color: "#908fa0" }}>
+          <span className="truncate text-xs font-medium min-w-0" style={{ color: "var(--app-subtle)" }}>
             {question.title}
           </span>
           <div className="ml-auto flex items-center gap-3 shrink-0">
             <DifficultyBadge difficulty={question.difficulty} />
             <span
               className="flex items-center gap-1 text-xs font-mono tabular-nums"
-              style={{ color: "#464554" }}
+              style={{ color: "var(--app-muted)" }}
             >
               <Clock size={11} />
               {elapsed}
@@ -725,16 +725,16 @@ function WorkspacePage() {
         {draftRestored && (
           <div
             className="flex items-center justify-between gap-3 px-4 py-2.5 shrink-0"
-            style={{ background: "rgba(128,131,255,0.06)", borderBottom: "1px solid rgba(128,131,255,0.15)" }}
+            style={{ background: "var(--app-indigo-10)", borderBottom: "1px solid var(--app-indigo-15)" }}
           >
-            <span className="text-xs" style={{ color: "#8083ff" }}>
+            <span className="text-xs" style={{ color: "var(--app-indigo)" }}>
               Draft restored — your previous work is loaded.
             </span>
             <button
               type="button"
               onClick={clearDraft}
               className="text-xs underline underline-offset-2 transition-opacity hover:opacity-70 shrink-0"
-              style={{ color: "#8083ff" }}
+              style={{ color: "var(--app-indigo)" }}
             >
               Clear draft
             </button>
@@ -745,15 +745,15 @@ function WorkspacePage() {
         {!apiKey && !apiBannerDismissed && (
           <div
             className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
-            style={{ background: "rgba(255,180,171,0.08)", borderBottom: "1px solid rgba(255,180,171,0.15)" }}
+            style={{ background: "var(--app-red-10)", borderBottom: "1px solid var(--app-red-15)" }}
           >
             <div className="flex items-center gap-2">
-              <AlertTriangle size={14} style={{ color: "#ffb4ab" }} className="shrink-0" />
-              <span style={{ color: "#ffb4ab" }} className="text-xs font-medium">
+              <AlertTriangle size={14} style={{ color: "var(--app-red)" }} className="shrink-0" />
+              <span style={{ color: "var(--app-red)" }} className="text-xs font-medium">
                 No OpenAI API key set.{" "}
                 <Link
                   to="/settings"
-                  style={{ color: "#ffb4ab", textDecoration: "underline" }}
+                  style={{ color: "var(--app-red)", textDecoration: "underline" }}
                   className="hover:opacity-80 transition-opacity"
                 >
                   Add one in Settings
@@ -764,7 +764,7 @@ function WorkspacePage() {
               type="button"
               onClick={() => setApiBannerDismissed(true)}
               className="shrink-0 p-0.5 hover:opacity-80 transition-opacity"
-              style={{ color: "#ffb4ab" }}
+              style={{ color: "var(--app-red)" }}
               aria-label="Dismiss"
             >
               <X size={14} />
@@ -775,7 +775,7 @@ function WorkspacePage() {
         {/* Tab bar */}
         <div
           className="flex items-center px-4 gap-0"
-          style={{ borderBottom: "1px solid #1e2a3d", background: "#0b1326" }}
+          style={{ borderBottom: "1px solid var(--app-border-2)", background: "var(--app-bg)" }}
         >
           <TabButton
             active={activeTab === "diagram"}
@@ -793,7 +793,7 @@ function WorkspacePage() {
             label="Code"
           />
           {hasExcalidrawElements && activeTab !== "diagram" && (
-            <span className="ml-auto text-xs flex items-center gap-1" style={{ color: "#464554" }}>
+            <span className="ml-auto text-xs flex items-center gap-1" style={{ color: "var(--app-muted)" }}>
               <Layers size={11} style={{ color: "rgba(128,131,255,0.6)" }} />
               Diagram will be included
             </span>
@@ -833,11 +833,11 @@ function WorkspacePage() {
                 fallback={
                   <div
                     className="flex h-full items-center justify-center text-sm gap-2"
-                    style={{ color: "#464554" }}
+                    style={{ color: "var(--app-muted)" }}
                   >
                     <span
                       className="w-4 h-4 rounded-full border-2 animate-spin"
-                      style={{ borderColor: "#2d3449", borderTopColor: "#6366f1" }}
+                      style={{ borderColor: "var(--app-border)", borderTopColor: "var(--app-indigo)" }}
                     />
                     Loading canvas…
                   </div>
@@ -855,38 +855,52 @@ function WorkspacePage() {
 
         {/* Bottom action bar */}
         <div
-          className="flex items-center gap-3 px-4 py-2.5 shrink-0"
-          style={{ borderTop: "1px solid #1e2a3d", background: "#0b1326" }}
+          className="grid shrink-0 items-center px-4 py-3"
+          style={{
+            gridTemplateColumns: "1fr auto 1fr",
+            borderTop: "1px solid var(--app-border-2)",
+            background: "var(--app-bg)",
+          }}
         >
-          {/* Left: word count + progress + diagram indicator */}
-          <div className="flex items-center gap-3 text-xs shrink-0">
-            <div className="flex flex-col gap-1">
-              <span style={{ color: wordCount > 50 ? "#908fa0" : "#464554" }}>{wordCount} words</span>
+          {/* Left cluster: word count + diagram indicator */}
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex flex-col gap-1 min-w-[64px]">
+              <span
+                style={{ color: wordCount > 50 ? "var(--app-subtle)" : "var(--app-muted)" }}
+                className="tabular-nums"
+              >
+                {wordCount} words
+              </span>
               <div
                 className="w-20 h-0.5 rounded-full overflow-hidden"
-                style={{ background: "#1e2a3d" }}
+                style={{ background: "var(--app-surface-3)" }}
               >
                 <div
                   className="h-full rounded-full transition-all duration-300"
                   style={{
                     width: `${Math.min(100, (wordCount / 300) * 100)}%`,
-                    background: wordCount >= 300 ? "#4edea3" : wordCount >= 150 ? "#8083ff" : wordCount >= 50 ? "#fbbf24" : "#2d3449",
+                    background:
+                      wordCount >= 300
+                        ? "var(--app-green)"
+                        : wordCount >= 150
+                          ? "var(--app-indigo)"
+                          : wordCount >= 50
+                            ? "var(--app-amber)"
+                            : "var(--app-border)",
                   }}
                 />
               </div>
             </div>
             {hasExcalidrawElements && (
-              <span className="flex items-center gap-1" style={{ color: "#464554" }}>
+              <span className="flex items-center gap-1" style={{ color: "var(--app-muted)" }}>
                 <Layers size={10} style={{ color: "rgba(128,131,255,0.6)" }} />
                 Diagram
               </span>
             )}
           </div>
 
-          <div className="flex-1" />
-
-          {/* Submit button + inline validation hint */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          {/* Center cluster: submit button */}
+          <div className="flex flex-col items-center gap-1.5">
             <button
               type="button"
               onClick={() => {
@@ -899,25 +913,25 @@ function WorkspacePage() {
                 submitMutation.isPending ||
                 submitMutation.isSuccess
               }
-              className="inline-flex items-center justify-center gap-2 px-6 py-2 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-8 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
               style={
                 submitMutation.isSuccess
                   ? {
-                      background: "rgba(78,222,163,0.12)",
-                      border: "1px solid rgba(78,222,163,0.3)",
-                      color: "#4edea3",
+                      background: "var(--app-green-10)",
+                      border: "1px solid var(--app-green-15)",
+                      color: "var(--app-green)",
                     }
                   : canSubmit
                     ? {
-                        background: "#6366f1",
-                        border: "1px solid rgba(99,102,241,0.5)",
-                        boxShadow: "0 0 12px rgba(99,102,241,0.25)",
+                        background: "var(--app-indigo)",
+                        border: "1px solid var(--app-indigo-20)",
+                        boxShadow: "0 0 16px var(--app-indigo-glow)",
                         color: "#fff",
                       }
                     : {
-                        background: "rgba(99,102,241,0.15)",
-                        border: "1px solid rgba(99,102,241,0.2)",
-                        color: "rgba(99,102,241,0.5)",
+                        background: "var(--app-indigo-10)",
+                        border: "1px solid var(--app-indigo-15)",
+                        color: "rgba(128,131,255,0.4)",
                       }
               }
             >
@@ -931,7 +945,7 @@ function WorkspacePage() {
               {submitMutation.isSuccess
                 ? "Submitted"
                 : reviewMode === "deep"
-                  ? "Submit for Deep Review"
+                  ? "Deep Review"
                   : "Submit for Review"}
               {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
                 <span
@@ -942,29 +956,26 @@ function WorkspacePage() {
                 </span>
               )}
             </button>
-
-            {/* Inline validation hint — shown when disabled and not yet submitted */}
+            {/* Inline validation hint */}
             {!canSubmit && !submitMutation.isSuccess && (
               <span
-                className="flex items-center gap-1 text-xs"
-                style={{ color: "rgba(255,180,171,0.7)" }}
+                className="flex items-center gap-1 text-[11px]"
+                style={{ color: "var(--app-red)" }}
               >
-                <AlertTriangle size={11} />
+                <AlertTriangle size={10} />
                 {answerCode.trim().length <= 20
-                  ? "Write more first"
-                  : "Check one item"}
+                  ? `Write at least 20 chars (${answerCode.trim().length}/20)`
+                  : `Check ${checklistTotal - checklistProgress} checklist item${checklistTotal - checklistProgress > 1 ? "s" : ""}`}
               </span>
             )}
           </div>
 
-          <div className="flex-1" />
-
-          {/* Right: mode toggle + interview link + info */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right cluster: mode toggle + mood + model + info */}
+          <div className="flex items-center justify-end gap-2 shrink-0">
             {/* Agent type pill toggle */}
             <div
               className="flex items-center rounded-lg p-0.5 gap-0.5"
-              style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+              style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
             >
               <button
                 type="button"
@@ -972,8 +983,8 @@ function WorkspacePage() {
                 className="px-2.5 py-1 rounded text-xs font-medium transition-all"
                 style={
                   reviewMode === "quick"
-                    ? { background: "#1e2a3d", color: "#dae2fd" }
-                    : { background: "transparent", color: "#464554" }
+                    ? { background: "var(--app-surface-3)", color: "var(--app-fg)" }
+                    : { background: "transparent", color: "var(--app-muted)" }
                 }
               >
                 Quick
@@ -984,8 +995,8 @@ function WorkspacePage() {
                 className="px-2.5 py-1 rounded text-xs font-medium transition-all"
                 style={
                   reviewMode === "deep"
-                    ? { background: "#1e2a3d", color: "#8083ff" }
-                    : { background: "transparent", color: "#464554" }
+                    ? { background: "var(--app-surface-3)", color: "var(--app-indigo)" }
+                    : { background: "transparent", color: "var(--app-muted)" }
                 }
               >
                 Deep
@@ -995,7 +1006,7 @@ function WorkspacePage() {
             {/* Mood / persona selector */}
             <div
               className="flex items-center rounded-lg p-0.5 gap-0.5"
-              style={{ background: "#131b2e", border: "1px solid #2d3449" }}
+              style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
             >
               {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
                 const labels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
@@ -1007,8 +1018,8 @@ function WorkspacePage() {
                     className="px-2 py-1 rounded text-xs font-medium transition-all"
                     style={
                       mood === m
-                        ? { background: "#1e2a3d", color: "#8083ff" }
-                        : { background: "transparent", color: "#464554" }
+                        ? { background: "var(--app-surface-3)", color: "var(--app-indigo)" }
+                        : { background: "transparent", color: "var(--app-muted)" }
                     }
                   >
                     {labels[m]}
@@ -1024,7 +1035,6 @@ function WorkspacePage() {
               providers={["openai", "google", "anthropic", "deepseek"]}
             />
 
-
             <span
               className="tooltip tooltip-left cursor-default"
               data-tip={
@@ -1033,7 +1043,7 @@ function WorkspacePage() {
                   : "Quick: instant structured feedback · ~5s"
               }
             >
-              <Info size={13} style={{ color: "#464554" }} />
+              <Info size={13} style={{ color: "var(--app-muted)" }} />
             </span>
           </div>
         </div>
@@ -1078,8 +1088,9 @@ function TabButton({
       onClick={onClick}
       className="flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-xs font-medium transition-all focus-visible:ring-2 focus-visible:ring-inset"
       style={{
-        borderBottomColor: active ? "#8083ff" : "transparent",
-        color: active ? "#dae2fd" : "#908fa0",
+        borderBottomColor: active ? "var(--app-indigo)" : "transparent",
+        color: active ? "var(--app-fg)" : "var(--app-subtle)",
+        background: active ? "var(--app-indigo-10)" : "transparent",
       }}
     >
       {icon}
@@ -1105,10 +1116,10 @@ function SidebarTabBtn({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-all"
+      className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11px] font-semibold transition-all"
       style={{
-        borderBottom: active ? "2px solid #8083ff" : "2px solid transparent",
-        color: active ? "#dae2fd" : "#464554",
+        background: active ? "var(--app-surface-3)" : "transparent",
+        color: active ? "var(--app-fg)" : "var(--app-muted)",
       }}
     >
       {icon}

@@ -45,6 +45,14 @@
   --app-indigo-10:   rgba(128,131,255,0.1);
   --app-indigo-15:   rgba(128,131,255,0.15);
   --app-indigo-20:   rgba(128,131,255,0.2);
+
+  /* State tint surfaces */
+  --app-green-10:    rgba(78,222,163,0.1);
+  --app-green-15:    rgba(78,222,163,0.15);
+  --app-red-10:      rgba(255,180,171,0.1);
+  --app-red-15:      rgba(255,180,171,0.15);
+  --app-amber-10:    rgba(251,191,36,0.1);
+  --app-amber-15:    rgba(251,191,36,0.15);
 }
 
 [data-theme="light"] {
@@ -83,6 +91,14 @@
   --app-indigo-10:    rgba(75,79,214,0.08);
   --app-indigo-15:    rgba(75,79,214,0.12);
   --app-indigo-20:    rgba(75,79,214,0.18);
+
+  /* State tint surfaces */
+  --app-green-10:    rgba(0,120,80,0.1);
+  --app-green-15:    rgba(0,120,80,0.15);
+  --app-red-10:      rgba(196,39,30,0.1);
+  --app-red-15:      rgba(196,39,30,0.15);
+  --app-amber-10:    rgba(154,107,0,0.1);
+  --app-amber-15:    rgba(154,107,0,0.15);
 }
 
 /* ── Technical Precision Design Token Colors ────────────────── */

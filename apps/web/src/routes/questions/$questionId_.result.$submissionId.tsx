@@ -442,8 +442,8 @@ function ResultPage() {
                 key={area.dimensionId}
                 className="flex items-center justify-between p-3 rounded-lg"
                 style={{
-                  background: `rgba(251, 191, 36, 0.08)`,
-                  border: `1px solid rgba(251, 191, 36, 0.2)`,
+                  background: "var(--app-amber-10)",
+                  border: "1px solid var(--app-amber-15)",
                 }}
               >
                 <div className="flex-1">
