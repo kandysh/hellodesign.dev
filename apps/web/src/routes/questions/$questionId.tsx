@@ -854,226 +854,172 @@ function WorkspacePage() {
           )}
         </div>
 
-        {/* Bottom action bar */}
+        {/* Bottom action bar — clean, compact, modern */}
         <div
-          className="flex flex-col gap-4 shrink-0 px-6 py-4"
+          className="flex items-center justify-between gap-6 shrink-0 px-6 py-3"
           style={{
             borderTop: "1px solid var(--app-border-2)",
             background: "var(--app-bg)",
           }}
         >
-          {/* Top row: Left metrics + Center submit button + Right controls */}
-          <div className="flex items-end justify-between gap-6">
-            {/* Left: Word count + diagram indicator */}
-            <div className="flex items-center gap-6 text-xs flex-1">
-              <div className="flex flex-col gap-2">
-                <span
-                  style={{ color: "var(--app-muted)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}
-                >
-                  Progress
-                </span>
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-col gap-1">
-                    <span
-                      style={{ color: wordCount > 50 ? "var(--app-fg)" : "var(--app-muted)" }}
-                      className="tabular-nums font-semibold"
-                    >
-                      {wordCount} words
-                    </span>
-                    <div
-                      className="w-32 h-1 rounded-full overflow-hidden"
-                      style={{ background: "var(--app-surface-3)" }}
-                    >
-                      <div
-                        className="h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${Math.min(100, (wordCount / 300) * 100)}%`,
-                          background:
-                            wordCount >= 300
-                              ? "var(--app-green)"
-                              : wordCount >= 150
-                                ? "var(--app-indigo)"
-                                : wordCount >= 50
-                                  ? "var(--app-amber)"
-                                  : "var(--app-border)",
-                        }}
-                      />
-                    </div>
-                  </div>
-                  {hasExcalidrawElements && (
-                    <div
-                      className="px-3 py-2 rounded-lg flex items-center gap-2"
-                      style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-indigo-15)" }}
-                    >
-                      <Layers size={12} style={{ color: "var(--app-indigo)" }} />
-                      <span style={{ color: "var(--app-indigo-pale)" }} className="text-xs font-medium">
-                        Diagram included
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Center: Submit button */}
-            <div className="flex flex-col items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!submitMutation.isSuccess) {
-                    submitMutation.mutate()
-                  }
+          {/* Left: Minimal status indicators */}
+          <div className="flex items-center gap-4 text-xs min-w-fit">
+            {/* Word count badge */}
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-full"
+              style={{
+                background: "var(--app-surface-2)",
+                border: "1px solid var(--app-border)",
+              }}
+            >
+              <span
+                style={{
+                  color: wordCount >= 300 ? "var(--app-green)" : wordCount >= 150 ? "var(--app-indigo)" : "var(--app-muted)",
+                  fontWeight: 600,
                 }}
-                disabled={
-                  !canSubmit ||
-                  submitMutation.isPending ||
-                  submitMutation.isSuccess
-                }
-                className="inline-flex items-center justify-center gap-2.5 px-10 py-3 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed"
-                style={
-                  submitMutation.isSuccess
-                    ? {
-                        background: "var(--app-green-10)",
-                        border: "1px solid var(--app-green-15)",
-                        color: "var(--app-green)",
-                      }
-                    : canSubmit
-                      ? {
-                          background: "var(--app-indigo)",
-                          border: "1px solid var(--app-indigo-20)",
-                          boxShadow: "0 0 20px var(--app-indigo-glow)",
-                          color: "#fff",
-                      }
-                      : {
-                          background: "var(--app-indigo-10)",
-                          border: "1px solid var(--app-indigo-15)",
-                          color: "rgba(128,131,255,0.4)",
-                        }
-                }
               >
-                {submitMutation.isPending ? (
-                  <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                ) : submitMutation.isSuccess ? (
-                  <Check size={16} />
-                ) : (
-                  <Zap size={16} />
-                )}
-                <span>
-                  {submitMutation.isSuccess
-                    ? "Submitted"
-                    : reviewMode === "deep"
-                      ? "Deep Review"
-                      : "Submit for Review"}
-                </span>
-                {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
-                  <span
-                    className="text-xs opacity-60 font-mono"
-                    style={{ letterSpacing: "0" }}
-                  >
-                    ⌘↵
-                  </span>
-                )}
-              </button>
-              {/* Validation hint */}
-              {!canSubmit && !submitMutation.isSuccess && (
-                <span
-                  className="flex items-center gap-1.5 text-xs"
-                  style={{ color: "var(--app-red)" }}
-                >
-                  <AlertTriangle size={12} />
-                  {answerCode.trim().length <= 20
-                    ? `Write at least 20 chars (${answerCode.trim().length}/20)`
-                    : `Check ${checklistTotal - checklistProgress} checklist item${checklistTotal - checklistProgress > 1 ? "s" : ""}`}
-                </span>
-              )}
+                {wordCount}
+              </span>
+              <span style={{ color: "var(--app-muted)" }}>words</span>
             </div>
 
-            {/* Right: Review & AI settings */}
-            <div className="flex flex-col gap-2 flex-1 items-end">
-              <div className="flex items-center gap-2">
-                {/* Review mode toggle */}
-                <div
-                  className="flex items-center rounded-lg p-1 gap-1"
-                  style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setReviewMode("quick")}
-                    className="px-3 py-1.5 rounded text-xs font-medium transition-all"
-                    style={
-                      reviewMode === "quick"
-                        ? { background: "var(--app-indigo)", color: "white" }
-                        : { background: "transparent", color: "var(--app-muted)" }
-                    }
-                  >
-                    Quick
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setReviewMode("deep")}
-                    className="px-3 py-1.5 rounded text-xs font-medium transition-all"
-                    style={
-                      reviewMode === "deep"
-                        ? { background: "var(--app-indigo)", color: "white" }
-                        : { background: "transparent", color: "var(--app-muted)" }
-                    }
-                  >
-                    Deep
-                  </button>
-                </div>
+            {/* Diagram indicator badge */}
+            {hasExcalidrawElements && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full"
+                style={{
+                  background: "rgba(99, 102, 241, 0.1)",
+                  border: "1px solid var(--app-indigo-15)",
+                }}
+              >
+                <Layers size={11} style={{ color: "var(--app-indigo)" }} />
+                <span style={{ color: "var(--app-indigo-pale)", fontWeight: 500 }}>Diagram</span>
+              </div>
+            )}
+          </div>
 
-                {/* Info tooltip */}
-                <span
-                  className="tooltip tooltip-left cursor-default"
-                  data-tip={
-                    reviewMode === "deep"
+          {/* Center: Primary submit button */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!submitMutation.isSuccess) {
+                submitMutation.mutate()
+              }
+            }}
+            disabled={
+              !canSubmit ||
+              submitMutation.isPending ||
+              submitMutation.isSuccess
+            }
+            className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed whitespace-nowrap"
+            style={
+              submitMutation.isSuccess
+                ? {
+                    background: "var(--app-green-10)",
+                    border: "1px solid var(--app-green-15)",
+                    color: "var(--app-green)",
+                  }
+                : canSubmit
+                  ? {
+                      background: "var(--app-indigo)",
+                      border: "1px solid var(--app-indigo-20)",
+                      boxShadow: "0 0 16px var(--app-indigo-glow)",
+                      color: "#fff",
+                    }
+                  : {
+                      background: "var(--app-indigo-10)",
+                      border: "1px solid var(--app-indigo-15)",
+                      color: "rgba(128,131,255,0.4)",
+                    }
+            }
+            title={
+              !canSubmit && !submitMutation.isSuccess
+                ? answerCode.trim().length <= 20
+                  ? `Write at least 20 chars (${answerCode.trim().length}/20)`
+                  : `Check ${checklistTotal - checklistProgress} checklist item${checklistTotal - checklistProgress > 1 ? "s" : ""}`
+                : ""
+            }
+          >
+            {submitMutation.isPending ? (
+              <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+            ) : submitMutation.isSuccess ? (
+              <Check size={14} />
+            ) : (
+              <Zap size={14} />
+            )}
+            <span>
+              {submitMutation.isSuccess
+                ? "Submitted"
+                : reviewMode === "deep"
+                  ? "Deep Review"
+                  : "Submit"}
+            </span>
+            {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
+              <span className="text-[10px] opacity-50 font-mono">⌘↵</span>
+            )}
+          </button>
+
+          {/* Right: Controls (review + mood + model) */}
+          <div className="flex items-center gap-3 ml-auto">
+            {/* Review mode toggle */}
+            <div
+              className="flex items-center gap-1"
+              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)", borderRadius: "6px", padding: "2px" }}
+            >
+              {[
+                { val: "quick" as const, label: "Quick", icon: null },
+                { val: "deep" as const, label: "Deep", icon: null },
+              ].map(({ val, label }) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setReviewMode(val)}
+                  className="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                  style={{
+                    background: reviewMode === val ? "var(--app-indigo)" : "transparent",
+                    color: reviewMode === val ? "white" : "var(--app-muted)",
+                  }}
+                  title={
+                    val === "deep"
                       ? "Deep: agent asks 2–3 follow-up questions then evaluates"
                       : "Quick: instant structured feedback · ~5s"
                   }
                 >
-                  <Info size={14} style={{ color: "var(--app-muted)" }} />
-                </span>
-              </div>
+                  {label}
+                </button>
+              ))}
             </div>
-          </div>
 
-          {/* Bottom row: Mood selector + Model selector */}
-          <div className="flex items-center justify-between gap-4">
-            {/* Mood / persona selector */}
-            <div className="flex items-center gap-3">
-              <span style={{ color: "var(--app-muted)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Interviewer
-              </span>
-              <div
-                className="flex items-center rounded-lg p-1 gap-1"
-                style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
-              >
-                {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
-                  const labels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
-                  return (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setMood(m)}
-                      className="px-3 py-1.5 rounded text-xs font-medium transition-all"
-                      style={
-                        mood === m
-                          ? { background: "var(--app-indigo)", color: "white" }
-                          : { background: "transparent", color: "var(--app-muted)" }
-                      }
-                    >
-                      {labels[m]}
-                    </button>
-                  )
-                })}
-              </div>
+            {/* Mood selector */}
+            <div
+              className="flex items-center gap-1"
+              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)", borderRadius: "6px", padding: "2px" }}
+            >
+              {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
+                const labels: Record<string, string> = { pragmatist: "P", systems: "S", sre: "R", pm: "M" }
+                const fullLabels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMood(m)}
+                    className="px-2 py-1 rounded text-xs font-semibold transition-all"
+                    style={{
+                      background: mood === m ? "var(--app-indigo)" : "transparent",
+                      color: mood === m ? "white" : "var(--app-muted)",
+                      minWidth: "24px",
+                      textAlign: "center",
+                    }}
+                    title={fullLabels[m]}
+                  >
+                    {labels[m]}
+                  </button>
+                )
+              })}
             </div>
 
             {/* Model selector */}
-            <div className="flex items-center gap-3">
-              <span style={{ color: "var(--app-muted)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Model
-              </span>
+            <div className="flex items-center">
               <ModelCombobox
                 value={modelName}
                 onChange={(v) => { setModelName(v); setModelOverridden(true) }}
