@@ -5,7 +5,17 @@ import type { QuestionSummary } from "@sysdesign/types"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { MetricsCard } from "@/components/MetricsCard"
 import { useSession } from "@/lib/auth-client"
-import { ArrowRight, Clock, LayoutGrid, SlidersHorizontal, Trophy, Flame, CheckCircle2, Search } from "lucide-react"
+import {
+  ArrowRight,
+  Clock,
+  LayoutGrid,
+  Trophy,
+  Flame,
+  CheckCircle2,
+  Search,
+  X,
+  ChevronDown,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { questionsQueryOptions } from "@/lib/queries/questions"
 
@@ -21,12 +31,20 @@ const categoryLabels: Record<string, string> = {
 }
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const
-const estimatedTime: Record<string, string> = {
-  easy: "~15 min", medium: "~25 min", hard: "~40 min",
-}
+type SortOption = "default" | "az" | "za" | "diff-asc" | "diff-desc" | "time-asc" | "time-desc"
 
+const difficultyOrder: Record<string, number> = { easy: 1, medium: 2, hard: 3 }
 const difficultyColors: Record<string, string> = {
   easy: "var(--app-green)", medium: "var(--app-amber)", hard: "var(--app-red)",
+}
+
+function matchesSearch(q: QuestionSummary, query: string): boolean {
+  const lower = query.toLowerCase()
+  return (
+    q.title.toLowerCase().includes(lower) ||
+    (q.description?.toLowerCase().includes(lower) ?? false) ||
+    (categoryLabels[q.category] ?? q.category).toLowerCase().includes(lower)
+  )
 }
 
 export const Route = createFileRoute("/questions/")({
@@ -37,25 +55,61 @@ export const Route = createFileRoute("/questions/")({
 
 function QuestionsPage() {
   const [selectedDifficulties, setSelectedDifficulties] = useState<Set<string>>(new Set())
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set())
   const [searchQuery, setSearchQuery] = useState("")
-  const [showDiffFilter, setShowDiffFilter] = useState(false)
-  const [showTopicFilter, setShowTopicFilter] = useState(false)
+  const [sortBy, setSortBy] = useState<SortOption>("default")
 
   const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
   const { data: session } = useSession()
 
   const categories = [...new Set(questions.map((q) => q.category))]
+
+  // Contextual counts: each dimension excludes its own filter so pills reflect real availability
+  function diffCount(d: string): number {
+    return questions.filter((q) => {
+      const catOk = selectedCategories.size === 0 || selectedCategories.has(q.category)
+      const searchOk = !searchQuery || matchesSearch(q, searchQuery)
+      return catOk && searchOk && q.difficulty === d
+    }).length
+  }
+
+  function catCount(cat: string): number {
+    return questions.filter((q) => {
+      const diffOk = selectedDifficulties.size === 0 || selectedDifficulties.has(q.difficulty)
+      const searchOk = !searchQuery || matchesSearch(q, searchQuery)
+      return diffOk && searchOk && q.category === cat
+    }).length
+  }
+
   const filtered = questions.filter((q) => {
     const diffOk = selectedDifficulties.size === 0 || selectedDifficulties.has(q.difficulty)
-    const catOk = !selectedCategory || q.category === selectedCategory
-    const searchOk = !searchQuery || q.title.toLowerCase().includes(searchQuery.toLowerCase()) || q.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const catOk = selectedCategories.size === 0 || selectedCategories.has(q.category)
+    const searchOk = !searchQuery || matchesSearch(q, searchQuery)
     return diffOk && catOk && searchOk
   })
 
-  // Stable daily popular: seed with today's date string so same order all day
+  const sorted: QuestionSummary[] =
+    sortBy === "default"
+      ? filtered
+      : [...filtered].sort((a, b) => {
+          switch (sortBy) {
+            case "az":        return a.title.localeCompare(b.title)
+            case "za":        return b.title.localeCompare(a.title)
+            case "diff-asc":  return (difficultyOrder[a.difficulty] ?? 2) - (difficultyOrder[b.difficulty] ?? 2)
+            case "diff-desc": return (difficultyOrder[b.difficulty] ?? 2) - (difficultyOrder[a.difficulty] ?? 2)
+            case "time-asc":  return (a.estimatedMins ?? 25) - (b.estimatedMins ?? 25)
+            case "time-desc": return (b.estimatedMins ?? 25) - (a.estimatedMins ?? 25)
+            default:          return 0
+          }
+        })
+
+  const hasFilters = selectedDifficulties.size > 0 || selectedCategories.size > 0 || searchQuery !== ""
+  // Hide featured when user is filtering or sorting — avoid competing list logic on the page
+  const showFeatured = !hasFilters && sortBy === "default"
+
+  // Stable daily featured: seed with today's date
   const todaySeed = new Date().toISOString().slice(0, 10)
-  const popular = [...questions]
+  const featured = [...questions]
     .sort((a, b) => {
       const ha = Math.abs(Array.from(a.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997)
       const hb = Math.abs(Array.from(b.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997)
@@ -71,36 +125,49 @@ function QuestionsPage() {
     })
   }
 
-  function clearAll() {
-    setSelectedDifficulties(new Set())
-    setSelectedCategory(null)
-    setSearchQuery("")
-    setShowDiffFilter(false)
-    setShowTopicFilter(false)
+  function toggleCategory(cat: string) {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev)
+      if (next.has(cat)) next.delete(cat); else next.add(cat)
+      return next
+    })
   }
 
-  const hasFilters = selectedDifficulties.size > 0 || selectedCategory !== null || searchQuery !== ""
+  function clearAll() {
+    setSelectedDifficulties(new Set())
+    setSelectedCategories(new Set())
+    setSearchQuery("")
+    setSortBy("default")
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8" style={{ color: "var(--app-fg)" }}>
+
       {/* ── Page header ─────────────────────────────────────────── */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
           <LayoutGrid size={16} style={{ color: "var(--app-indigo)" }} />
-          <span className="text-xs uppercase tracking-widest font-bold" style={{ color: "var(--app-indigo)", fontFamily: "'Space Grotesk', monospace" }}>
+          <span
+            className="text-xs uppercase tracking-widest font-bold"
+            style={{ color: "var(--app-indigo)", fontFamily: "'Space Grotesk', monospace" }}
+          >
             Problem Library
           </span>
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight mb-1" style={{ letterSpacing: "-0.02em" }}>
           Architecture Challenges
         </h1>
-        <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
-          {filtered.length} challenge{filtered.length !== 1 ? "s" : ""}
-          {hasFilters ? " matching filters" : " in the library"}
-        </p>
+        {/* Library-wide stats — shown once data loads */}
+        {!isLoading && questions.length > 0 && (
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-xs" style={{ color: "var(--app-muted)" }}>{questions.length} problems</span>
+            <span style={{ color: "var(--app-border)" }}>·</span>
+            <span className="text-xs" style={{ color: "var(--app-muted)" }}>{categories.length} categories</span>
+          </div>
+        )}
       </div>
 
-      {/* ── Dashboard Metrics (if logged in) ───────────────────── */}
+      {/* ── Dashboard Metrics (logged in only) ─────────────────── */}
       {session?.user && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -140,85 +207,88 @@ function QuestionsPage() {
         </div>
       )}
 
-      {/* ── Search + Filter Bar ────────────────────────────────────── */}
-      <div className="mb-6 rounded-lg" style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}>
-        {/* Row 1: search + filter buttons */}
-        <div className="flex flex-col md:flex-row gap-3 items-center p-4">
-          <div className="relative flex-1 w-full md:max-w-md">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--app-subtle)" }} />
+      {/* ── Unified Filter Bar ─────────────────────────────────── */}
+      <div
+        className="mb-6 rounded-xl overflow-hidden"
+        style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
+      >
+        {/* Row 1: Search + Sort */}
+        <div className="flex gap-3 items-center p-4">
+          <div className="relative flex-1">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: "var(--app-subtle)" }}
+            />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search challenges by name or topic..."
-              className="w-full pl-9 pr-4 py-2 rounded text-sm"
-              style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-fg)", outline: "none" }}
+              placeholder="Search by name, topic, or category…"
+              className="w-full pl-9 pr-4 py-2 rounded-lg text-sm transition-colors"
+              style={{
+                background: "var(--app-bg)",
+                border: "1px solid var(--app-border)",
+                color: "var(--app-fg)",
+                outline: "none",
+              }}
               onFocus={(e) => { e.currentTarget.style.borderColor = "var(--app-indigo)" }}
               onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
             />
           </div>
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <button
-              type="button"
-              onClick={() => { setShowDiffFilter(!showDiffFilter); setShowTopicFilter(false) }}
-              className="flex items-center gap-2 px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
+
+          {/* Sort dropdown */}
+          <div className="relative shrink-0">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="appearance-none pl-3 pr-8 py-2 rounded-lg text-sm cursor-pointer transition-all"
               style={{
-                background: showDiffFilter || selectedDifficulties.size > 0 ? "var(--app-indigo-15)" : "var(--app-bg)",
-                border: showDiffFilter || selectedDifficulties.size > 0 ? "1px solid var(--app-indigo)" : "1px solid var(--app-border)",
-                color: showDiffFilter || selectedDifficulties.size > 0 ? "var(--app-fg)" : "var(--app-subtle)",
+                background: sortBy !== "default" ? "var(--app-indigo-15)" : "var(--app-bg)",
+                border: `1px solid ${sortBy !== "default" ? "var(--app-indigo)" : "var(--app-border)"}`,
+                color: sortBy !== "default" ? "var(--app-fg)" : "var(--app-subtle)",
+                outline: "none",
               }}
             >
-              <SlidersHorizontal size={13} />
-              Difficulty
-              {selectedDifficulties.size > 0 && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "var(--app-indigo)", color: "var(--app-bg)" }}>
-                  {selectedDifficulties.size}
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setShowTopicFilter(!showTopicFilter); setShowDiffFilter(false) }}
-              className="flex items-center gap-2 px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
-              style={{
-                background: showTopicFilter || selectedCategory ? "var(--app-indigo-15)" : "var(--app-bg)",
-                border: showTopicFilter || selectedCategory ? "1px solid var(--app-indigo)" : "1px solid var(--app-border)",
-                color: showTopicFilter || selectedCategory ? "var(--app-fg)" : "var(--app-subtle)",
-              }}
-            >
-              <LayoutGrid size={13} />
-              Topics
-              {selectedCategory && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full font-bold" style={{ background: "var(--app-indigo)", color: "var(--app-bg)" }}>1</span>
-              )}
-            </button>
-            {hasFilters && (
-              <button
-                type="button"
-                onClick={clearAll}
-                className="px-3 py-2 rounded text-sm whitespace-nowrap transition-all"
-                style={{ background: "transparent", border: "1px solid transparent", color: "var(--app-subtle)" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-red)" }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-subtle)" }}
-              >
-                Clear all
-              </button>
-            )}
+              <option value="default">Sort: Default</option>
+              <option value="az">A → Z</option>
+              <option value="za">Z → A</option>
+              <option value="diff-asc">Easiest first</option>
+              <option value="diff-desc">Hardest first</option>
+              <option value="time-asc">Shortest first</option>
+              <option value="time-desc">Longest first</option>
+            </select>
+            <ChevronDown
+              size={12}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              style={{ color: "var(--app-muted)" }}
+            />
           </div>
         </div>
 
-        {/* Row 2: Difficulty chips (expand) */}
-        {showDiffFilter && (
-          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid var(--app-border)" }}>
-            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "var(--app-muted)" }}>Difficulty:</span>
+        {/* Row 2: Difficulty + Category pills — always visible */}
+        <div
+          className="px-4 pb-4 flex items-start gap-2 flex-wrap"
+          style={{ borderTop: "1px solid var(--app-border)" }}
+        >
+          <span
+            className="text-xs font-bold uppercase tracking-widest mt-4 mr-1 shrink-0"
+            style={{ color: "var(--app-muted)" }}
+          >
+            Filter:
+          </span>
+
+          <div className="mt-3.5 flex items-center gap-1.5 flex-wrap">
+            {/* Difficulty pills */}
             {DIFFICULTIES.map((d) => {
               const active = selectedDifficulties.has(d)
+              const count = diffCount(d)
               return (
                 <button
                   key={d}
                   type="button"
                   onClick={() => toggleDifficulty(d)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize mt-4 transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold capitalize transition-all"
                   style={{
                     background: active ? `${difficultyColors[d]}22` : "var(--app-bg)",
                     border: `1px solid ${active ? difficultyColors[d] : "var(--app-border)"}`,
@@ -227,24 +297,24 @@ function QuestionsPage() {
                 >
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: difficultyColors[d] }} />
                   {d}
+                  {count > 0 && <span style={{ opacity: 0.65 }}>({count})</span>}
                 </button>
               )
             })}
-          </div>
-        )}
 
-        {/* Row 3: Topic chips (expand) */}
-        {showTopicFilter && (
-          <div className="px-4 pb-4 flex items-center gap-2 flex-wrap" style={{ borderTop: "1px solid var(--app-border)" }}>
-            <span className="text-xs uppercase tracking-widest font-bold pt-4 pr-1" style={{ color: "var(--app-muted)" }}>Topics:</span>
+            {/* Divider */}
+            <div className="h-4 w-px mx-1 self-center" style={{ background: "var(--app-border)" }} />
+
+            {/* Category pills */}
             {categories.map((cat) => {
-              const active = selectedCategory === cat
+              const active = selectedCategories.has(cat)
+              const count = catCount(cat)
               return (
                 <button
                   key={cat}
                   type="button"
-                  onClick={() => setSelectedCategory(active ? null : cat)}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold mt-4 transition-all"
+                  onClick={() => toggleCategory(cat)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                   style={{
                     background: active ? "var(--app-indigo-15)" : "var(--app-bg)",
                     border: `1px solid ${active ? "var(--app-indigo)" : "var(--app-border)"}`,
@@ -252,30 +322,74 @@ function QuestionsPage() {
                   }}
                 >
                   {categoryLabels[cat] ?? cat}
+                  {count > 0 && <span style={{ opacity: 0.65 }}>({count})</span>}
                 </button>
               )
             })}
           </div>
+        </div>
+
+        {/* Row 3: Active filter tags — shown only when filters applied */}
+        {hasFilters && (
+          <div
+            className="px-4 py-2.5 flex items-center gap-2 flex-wrap"
+            style={{ borderTop: "1px solid var(--app-border)" }}
+          >
+            <span className="text-xs shrink-0" style={{ color: "var(--app-muted)" }}>Active:</span>
+
+            {searchQuery && (
+              <FilterTag label={`"${searchQuery}"`} onRemove={() => setSearchQuery("")} />
+            )}
+            {[...selectedDifficulties].map((d) => (
+              <FilterTag
+                key={d}
+                label={d}
+                color={difficultyColors[d]}
+                onRemove={() => toggleDifficulty(d)}
+              />
+            ))}
+            {[...selectedCategories].map((cat) => (
+              <FilterTag
+                key={cat}
+                label={categoryLabels[cat] ?? cat}
+                onRemove={() => toggleCategory(cat)}
+              />
+            ))}
+
+            <span className="ml-auto text-xs shrink-0" style={{ color: "var(--app-subtle)" }}>
+              {sorted.length} result{sorted.length !== 1 ? "s" : ""}
+            </span>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="text-xs transition-colors shrink-0"
+              style={{ color: "var(--app-subtle)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-red)" }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-subtle)" }}
+            >
+              Clear all
+            </button>
+          </div>
         )}
       </div>
 
-      {/* ── Popular This Week ──────────────────────────────────────── */}
-      {popular.length > 0 && (
+      {/* ── Featured ────────────────────────────────────────────── */}
+      {showFeatured && featured.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
-              Popular This Week
+              Featured
             </span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-            {popular.map((q) => {
+            {featured.map((q) => {
               const dot = difficultyColors[q.difficulty] ?? "var(--app-indigo)"
               return (
                 <Link
                   key={q.id}
                   to="/questions/$questionId"
                   params={{ questionId: q.id }}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 shrink-0 transition-all duration-150 group"
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 shrink-0 transition-all duration-150"
                   style={{
                     background: "var(--app-surface)",
                     border: "1px solid var(--app-border)",
@@ -290,20 +404,13 @@ function QuestionsPage() {
                     ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface)"
                   }}
                 >
-                  {/* Difficulty dot */}
-                  <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ background: dot }}
-                  />
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
                   <div className="min-w-0">
-                    <p
-                      className="text-xs font-semibold truncate"
-                      style={{ color: "var(--app-fg)", maxWidth: 180 }}
-                    >
+                    <p className="text-xs font-semibold truncate" style={{ color: "var(--app-fg)", maxWidth: 180 }}>
                       {q.title}
                     </p>
                     <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--app-muted)" }}>
-                      {categoryLabels[q.category] ?? q.category} · {q.estimatedMins}m
+                      {categoryLabels[q.category] ?? q.category} · {q.estimatedMins ? `${q.estimatedMins}m` : "25m"}
                     </p>
                   </div>
                 </Link>
@@ -313,25 +420,23 @@ function QuestionsPage() {
         </div>
       )}
 
-      {/* ── Questions ────────────────────────────────────────── */}
+      {/* ── Question list ────────────────────────────────────────── */}
       <div className="flex flex-col gap-2">
         {isLoading ? (
           <>
-            {[...Array(6)].map((_, i) => {
+            {[...Array(6)].map((_, i) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
-              return (
-                <div
-                  key={i}
-                  className="h-[68px] w-full rounded-lg animate-pulse"
-                  style={{ background: "var(--app-surface)" }}
-                />
-              )
-            })}
+              <div
+                key={i}
+                className="h-[74px] w-full rounded-lg animate-pulse"
+                style={{ background: "var(--app-surface)" }}
+              />
+            ))}
           </>
         ) : isError ? (
           <div
-            className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
-            style={{ border: "1px dashed rgba(255,180,171,0.3)" }}
+            className="flex flex-col items-center justify-center rounded-xl py-16 text-center"
+            style={{ border: "1px dashed var(--app-red-15)" }}
           >
             <p className="mb-3 text-sm" style={{ color: "var(--app-red)" }}>
               Could not load questions — is the API running?
@@ -340,34 +445,69 @@ function QuestionsPage() {
               type="button"
               onClick={() => refetch()}
               className="px-4 py-2 rounded text-xs font-semibold transition-all"
-              style={{ background: "rgba(255,180,171,0.1)", border: "1px solid rgba(255,180,171,0.3)", color: "var(--app-red)" }}
+              style={{ background: "var(--app-red-10)", border: "1px solid var(--app-red-15)", color: "var(--app-red)" }}
             >
               Retry
             </button>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <div
-            className="flex flex-col items-center justify-center rounded-lg py-16 text-center"
+            className="flex flex-col items-center justify-center rounded-xl py-16 text-center gap-2"
             style={{ border: "1px dashed var(--app-border)" }}
           >
-            <p className="text-sm mb-2" style={{ color: "var(--app-muted)" }}>No questions match your filters</p>
+            <Search size={28} style={{ color: "var(--app-muted)" }} />
+            <p className="text-sm font-semibold mt-1" style={{ color: "var(--app-subtle)" }}>
+              No results match your filters
+            </p>
+            <p className="text-xs" style={{ color: "var(--app-muted)" }}>
+              Try adjusting difficulty, category, or search terms
+            </p>
             <button
               type="button"
               onClick={clearAll}
-              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="mt-2 text-sm transition-colors"
+              style={{ color: "var(--app-indigo)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.75" }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1" }}
             >
-              Clear filters
+              Clear all filters
             </button>
           </div>
         ) : (
           <>
-            {filtered.map((q) => (
+            {sorted.map((q) => (
               <QuestionCard key={q.id} question={q} />
             ))}
           </>
         )}
       </div>
     </div>
+  )
+}
+
+function FilterTag({
+  label,
+  color,
+  onRemove,
+}: {
+  label: string
+  color?: string
+  onRemove: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onRemove}
+      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-opacity hover:opacity-75"
+      style={{
+        background: color ? `${color}22` : "var(--app-surface-3)",
+        border: `1px solid ${color ?? "var(--app-border)"}`,
+        color: color ?? "var(--app-fg)",
+      }}
+    >
+      {label}
+      <X size={10} />
+    </button>
   )
 }
 
@@ -412,7 +552,7 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
           >
             {q.title}
           </p>
-          <p className="mt-0.5 text-xs line-clamp-1" style={{ color: "var(--app-subtle)" }}>
+          <p className="mt-0.5 text-xs line-clamp-2" style={{ color: "var(--app-subtle)" }}>
             {q.description}
           </p>
         </div>
@@ -420,7 +560,7 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
         <div className="flex items-center gap-3 shrink-0">
           <div className="hidden sm:flex items-center gap-1 text-xs" style={{ color: "var(--app-muted)" }}>
             <Clock size={11} />
-            {estimatedTime[q.difficulty] ?? "~25 min"}
+            {q.estimatedMins ? `${q.estimatedMins}m` : "25m"}
           </div>
           <span
             className="hidden sm:inline text-xs px-2 py-0.5 rounded-full"
@@ -448,4 +588,3 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
     </Link>
   )
 }
-
