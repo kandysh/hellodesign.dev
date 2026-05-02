@@ -302,7 +302,7 @@ function QuestionsPage() {
       )}
 
       {/* ── Questions ────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-2">
         {isLoading ? (
           <>
             {[...Array(6)].map((_, i) => {
@@ -310,7 +310,7 @@ function QuestionsPage() {
               return (
                 <div
                   key={i}
-                  className="h-[72px] w-full rounded-lg animate-pulse"
+                  className="h-[68px] w-full rounded-lg animate-pulse"
                   style={{ background: "var(--app-surface)" }}
                 />
               )
@@ -365,8 +365,8 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
       to="/questions/$questionId"
       params={{ questionId: q.id }}
       className={cn(
-        "group flex items-stretch rounded-lg overflow-hidden transition-all duration-150 relative",
-        "hover:shadow-lg hover:shadow-indigo-950/50",
+        "group flex items-stretch rounded-lg overflow-hidden transition-all duration-150",
+        "hover:shadow-md",
       )}
       style={{ 
         border: "1px solid var(--app-border)", 
@@ -375,14 +375,6 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
       onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--app-muted)" }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)" }}
     >
-      {/* Gradient blur circle */}
-      <div
-        className="absolute -right-12 -top-12 w-40 h-40 rounded-full blur-3xl opacity-40 group-hover:opacity-60 transition-all duration-500 pointer-events-none"
-        style={{
-          background: "var(--app-indigo-10)",
-        }}
-      />
-
       {/* Left accent bar */}
       <div
         className="w-0.5 shrink-0 transition-colors duration-150 relative z-10"
