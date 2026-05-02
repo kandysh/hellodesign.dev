@@ -50,7 +50,7 @@ const LANGS: Record<LangKey, LangDef> = {
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 
-const codeTheme = createTheme({
+const codeThemeDark = createTheme({
   theme: "dark",
   settings: {
     background: "#0b1326",
@@ -120,9 +120,110 @@ const codeTheme = createTheme({
   ],
 });
 
-// ── Scrollbar + search panel CSS overrides ─────────────────────────────────
+const codeThemeLight = createTheme({
+  theme: "light",
+  settings: {
+    background: "#f8f8f8",
+    foreground: "#333333",
+    caret: "#6366f1",
+    selection: "rgba(99,102,241,0.2)",
+    selectionMatch: "rgba(99,102,241,0.1)",
+    lineHighlight: "rgba(99,102,241,0.05)",
+    gutterBackground: "#f0f0f0",
+    gutterForeground: "#999999",
+    gutterBorder: "transparent",
+    gutterActiveForeground: "#6366f1",
+  },
+  styles: [
+    { tag: [t.keyword, t.modifier, t.operatorKeyword], color: "#6366f1", fontWeight: "600" },
+    { tag: t.controlKeyword, color: "#5a5aff", fontWeight: "600" },
+    { tag: [t.definitionKeyword, t.moduleKeyword], color: "#6366f1" },
+    { tag: [t.function(t.variableName), t.function(t.propertyName)], color: "#5a5aff" },
+    { tag: t.definition(t.function(t.variableName)), color: "#333333", fontWeight: "600" },
+    { tag: [t.typeName, t.className, t.namespace, t.self], color: "#6366f1" },
+    { tag: t.definition(t.typeName), color: "#5a5aff", fontWeight: "600" },
+    { tag: [t.variableName, t.propertyName], color: "#333333" },
+    { tag: t.definition(t.variableName), color: "#333333" },
+    { tag: [t.string, t.special(t.string)], color: "#179b6e" },
+    { tag: t.regexp, color: "#179b6e", fontStyle: "italic" },
+    { tag: [t.number, t.integer, t.float], color: "#d97706" },
+    { tag: [t.bool, t.null, t.atom], color: "#5a5aff" },
+    { tag: t.operator, color: "#6366f1" },
+    { tag: t.punctuation, color: "#666666" },
+    { tag: t.bracket, color: "#666666" },
+    { tag: [t.meta, t.derefOperator], color: "#666666" },
+    { tag: t.annotation, color: "#179b6e" },
+    { tag: [t.comment, t.lineComment, t.blockComment, t.docComment], color: "#999999", fontStyle: "italic" },
+    { tag: t.invalid, color: "#dc2626", textDecoration: "underline wavy" },
+    { tag: t.tagName, color: "#6366f1" },
+    { tag: t.attributeName, color: "#5a5aff" },
+    { tag: t.attributeValue, color: "#179b6e" },
+  ],
+});
 
-const editorBaseStyle = EditorView.baseTheme({
+function getEditorBaseStyle(theme: "dark" | "light") {
+  if (theme === "light") {
+    return EditorView.baseTheme({
+      "&": { fontSize: "13px" },
+      ".cm-scroller": {
+        fontFamily: "'Space Grotesk', ui-monospace, 'Cascadia Code', Menlo, monospace",
+        overflowX: "auto",
+      },
+      ".cm-content": { padding: "12px 0" },
+      ".cm-line": { paddingLeft: "8px", paddingRight: "8px" },
+      ".cm-gutters": { paddingRight: "8px" },
+      ".cm-search": {
+        background: "#f0f0f0",
+        borderTop: "1px solid #e5e5e5",
+        color: "#333333",
+        padding: "6px 10px",
+        gap: "6px",
+      },
+      ".cm-search input": {
+        background: "#ffffff",
+        border: "1px solid #d1d5db",
+        borderRadius: "4px",
+        color: "#333333",
+        padding: "2px 6px",
+        outline: "none",
+      },
+      ".cm-search input:focus": { borderColor: "#6366f1" },
+      ".cm-search button": {
+        background: "#f3f4f6",
+        border: "1px solid #d1d5db",
+        borderRadius: "4px",
+        color: "#333333",
+        padding: "2px 8px",
+        cursor: "pointer",
+        fontSize: "12px",
+      },
+      ".cm-search button:hover": { background: "#e5e7eb", borderColor: "#6366f1" },
+      ".cm-tooltip": {
+        background: "#ffffff",
+        border: "1px solid #e5e5e5",
+        borderRadius: "6px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+        color: "#333333",
+      },
+      ".cm-tooltip.cm-tooltip-autocomplete > ul": {
+        fontFamily: "'Space Grotesk', ui-monospace, monospace",
+        fontSize: "12.5px",
+        maxHeight: "200px",
+      },
+      ".cm-tooltip-autocomplete ul li[aria-selected]": {
+        background: "rgba(99, 102, 241, 0.1)",
+        color: "#6366f1",
+      },
+      ".cm-completionIcon": { opacity: "0.7" },
+      ".cm-activeLineGutter": {
+        background: "rgba(99, 102, 241, 0.08)",
+        color: "#6366f1",
+      },
+      ".cm-foldGutter span": { color: "#d1d5db" },
+      ".cm-foldGutter span:hover": { color: "#6366f1" },
+    });
+  }
+  return EditorView.baseTheme({
   "&": { fontSize: "13px" },
   ".cm-scroller": {
     fontFamily:
@@ -185,7 +286,8 @@ const editorBaseStyle = EditorView.baseTheme({
   // Folding
   ".cm-foldGutter span": { color: "#464554" },
   ".cm-foldGutter span:hover": { color: "#8083ff" },
-});
+  });
+}
 
 // ── Language badge colors ─────────────────────────────────────────────────
 
@@ -232,10 +334,10 @@ export function CodeEditor({
     () => [
       ...(LANGS[lang].extensions ?? []),
       search({ top: false }),
-      editorBaseStyle,
+      getEditorBaseStyle(theme),
       EditorView.lineWrapping,
     ],
-    [lang],
+    [lang, theme],
   );
 
   const displayFilename = filename ?? `snippet${LANGS[lang].ext}`;
@@ -249,7 +351,13 @@ export function CodeEditor({
       )}
     >
       {/* ── Toolbar ────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-surface-container-high bg-[#0b1326] shrink-0">
+      <div 
+        className="flex items-center gap-2 px-3 py-2 border-b shrink-0"
+        style={{
+          background: theme === "light" ? "#f8f8f8" : "#0b1326",
+          borderColor: theme === "light" ? "#e5e5e5" : "var(--app-border)",
+        }}
+      >
         {/* Dot decorations */}
         <span className="flex gap-1.5 mr-1">
           <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57] opacity-80" />
@@ -296,7 +404,7 @@ export function CodeEditor({
       <CodeMirror
         value={value}
         className="flex-1 overflow-auto"
-        theme={theme === "light" ? "light" : codeTheme}
+        theme={theme === "light" ? "light" : codeThemeDark}
         extensions={extensions}
         onChange={handleChange}
         readOnly={readOnly}
