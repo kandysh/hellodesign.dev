@@ -10,6 +10,7 @@
 #                  mixed-content blocking in the browser.
 #                  Internal Railway URL: https://sys-api.railway.internal
 #                  Must be set BEFORE the build — Vite bakes it in at build time.
+#   NODE_ENV       production
 
 [build]
 builder = "RAILPACK"

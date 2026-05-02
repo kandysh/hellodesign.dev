@@ -1,15 +1,20 @@
 # ── apps/api ─────────────────────────────────────────────────────────────────
-# Railway config-as-code for the Hono API service.
+# Railway config-as-code for the Fastify API service.
 #
 # In Railway dashboard, set the config file path to: /apps/api/railway.toml
 # Root directory must stay at / (repo root) so pnpm workspace packages resolve.
 #
 # Required environment variables (set in Railway service variables):
-#   DATABASE_URL        PostgreSQL connection string
-#   REDIS_URL           Redis connection string
+#   DATABASE_URL        PostgreSQL connection string (use PRIVATE_URL for internal)
+#   REDIS_URL           Redis connection string (use PRIVATE_URL for internal)
 #   BETTER_AUTH_SECRET  Random secret ≥ 32 chars
 #   WEB_URL             Public URL of the web service (for CORS)
 #   OPENAI_API_KEY      OpenAI API key
+#   NODE_ENV            production
+#
+# Note: Fastify server has trustProxy: true enabled to handle X-Forwarded-For
+# headers from Railway's reverse proxy. This ensures req.ip reflects actual
+# client IP, not the proxy's IP.
 
 [build]
 builder = "RAILPACK"

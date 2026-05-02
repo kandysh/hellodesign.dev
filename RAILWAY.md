@@ -91,7 +91,10 @@ The Worker has **no public domain** — it only talks to Redis (queue) and Postg
 
 ## Step 5 — Configure the Web service
 
-> `VITE_API_URL` is baked into the JS bundle at build time — set it as a **regular service variable** (Railpack makes all env vars available during build).
+> `VITE_API_URL` for Railway: use the **private `.railway.internal` domain** when both web and API are in the same Railway project.
+> This avoids mixed-content errors (HTTPS page → HTTP internal API).
+> The `.railway.internal` domain only works for **service-to-service** communication (not from browser).
+> For external users, they access the web via public HTTPS domain, which then proxies to the private API endpoint.
 
 1. Open the `web` service → **Settings**
 2. Set **Config file path**: `/apps/web/railway.toml`
@@ -101,11 +104,14 @@ The Worker has **no public domain** — it only talks to Redis (queue) and Postg
 
 | Variable | Value |
 |----------|-------|
-| `VITE_API_URL` | `https://<your-api-domain>.railway.app` |
+| `VITE_API_URL` | `http://api.railway.internal` |
 | `NODE_ENV` | `production` |
 
 6. Go back to the **api service** → set `WEB_URL` to the web domain → redeploy
 7. **Deploy**
+
+> **Note:** The `.railway.internal` domain is only resolvable within Railway's network. External browsers cannot reach it directly — they use the public web domain, which proxies requests through Railway's internal routing.
+
 
 ---
 
