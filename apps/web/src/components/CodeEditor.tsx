@@ -299,6 +299,14 @@ const LANG_BADGE: Record<LangKey, string> = {
   java: "text-orange-400",
 };
 
+const LANG_BADGE_COLORS: Record<LangKey, string> = {
+  javascript: "#fbbf24",
+  typescript: "#60a5fa",
+  python: "#4ade80",
+  go: "#22d3ee",
+  java: "#fb923c",
+};
+
 // ── Props ──────────────────────────────────────────────────────────────────
 
 interface CodeEditorProps {
@@ -352,7 +360,7 @@ export function CodeEditor({
     >
       {/* ── Toolbar ────────────────────────────────────────────────────── */}
       <div 
-        className="flex items-center gap-2 px-3 py-2 border-b shrink-0"
+        className="flex items-center gap-2 px-3 py-2 border-b shrink-0 w-full"
         style={{
           background: theme === "light" ? "#f8f8f8" : "#0b1326",
           borderColor: theme === "light" ? "#e5e5e5" : "var(--app-border)",
@@ -366,15 +374,22 @@ export function CodeEditor({
         </span>
 
         {/* Filename */}
-        <span className="font-mono text-xs text-outline mr-auto">
+        <span 
+          className="font-mono text-xs mr-auto"
+          style={{ color: theme === "light" ? "#666666" : "#c0c1ff" }}
+        >
           {displayFilename}
         </span>
 
         {/* Language tabs */}
         <div
-          className="flex items-center gap-0.5 rounded-md bg-surface-container-low p-0.5 border border-surface-container-high"
+          className="flex items-center gap-0.5 rounded-md p-0.5 border"
           role="tablist"
           aria-label="Select language"
+          style={{
+            background: theme === "light" ? "#f0f0f0" : "#131b2e",
+            borderColor: theme === "light" ? "#d1d5db" : "#222a3d",
+          }}
         >
           {(Object.entries(LANGS) as [LangKey, LangDef][]).map(([key, def]) => (
             <button
@@ -382,12 +397,16 @@ export function CodeEditor({
               role="tab"
               aria-selected={lang === key}
               onClick={() => setLang(key)}
-              className={cn(
-                "px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all",
-                lang === key
-                  ? cn("bg-surface-container-high shadow-sm", LANG_BADGE[key])
-                  : "text-outline-variant hover:text-outline",
-              )}
+              className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all"
+              style={{
+                background: lang === key 
+                  ? (theme === "light" ? "#ffffff" : "#222a3d")
+                  : "transparent",
+                color: lang === key 
+                  ? LANG_BADGE_COLORS[key]
+                  : (theme === "light" ? "#999999" : "#908fa0"),
+                boxShadow: lang === key ? "0 1px 2px rgba(0,0,0,0.1)" : "none",
+              }}
             >
               {def.label}
             </button>
@@ -395,7 +414,10 @@ export function CodeEditor({
         </div>
 
         {/* Hint */}
-        <span className="hidden sm:block text-[10px] text-outline-variant font-mono select-none">
+        <span 
+          className="hidden sm:block text-[10px] font-mono select-none"
+          style={{ color: theme === "light" ? "#999999" : "#908fa0" }}
+        >
           ⌃F search
         </span>
       </div>
