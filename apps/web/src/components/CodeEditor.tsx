@@ -208,6 +208,7 @@ interface CodeEditorProps {
   className?: string;
   height?: string;
   placeholder?: string;
+  theme?: "dark" | "light";
 }
 
 // ── Component ──────────────────────────────────────────────────────────────
@@ -221,6 +222,7 @@ export function CodeEditor({
   className,
   height = "100%",
   placeholder = "// Start coding…",
+  theme = "dark",
 }: CodeEditorProps) {
   const [lang, setLang] = useState<LangKey>(defaultLanguage);
 
@@ -294,7 +296,7 @@ export function CodeEditor({
       <CodeMirror
         value={value}
         className="flex-1 overflow-auto"
-        theme={codeTheme}
+        theme={theme === "light" ? "light" : codeTheme}
         extensions={extensions}
         onChange={handleChange}
         readOnly={readOnly}

@@ -30,6 +30,7 @@ import { CodeEditor } from "@/components/CodeEditor"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { ModelCombobox } from "@/components/ModelCombobox"
 import { useToast } from "@/components/Toast"
+import { useTheme } from "@/hooks/useTheme"
 import { questionQueryOptions } from "@/lib/queries/questions"
 import { cn } from "@/lib/utils"
 
@@ -84,6 +85,7 @@ function WorkspacePage() {
   const { questionId } = Route.useParams()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { theme } = useTheme()
   const apiKey = useApiKey()
   const elapsed = useElapsedTimer()
 
@@ -814,6 +816,7 @@ function WorkspacePage() {
               className="w-full"
               height="100%"
               placeholder={EDITOR_PLACEHOLDER}
+              theme={theme}
             />
           </div>
 
@@ -845,7 +848,7 @@ function WorkspacePage() {
                 }
               >
                 <Excalidraw
-                  theme="dark"
+                  theme={theme}
                   UIOptions={EXCALIDRAW_UI_OPTIONS}
                   onChange={handleExcalidrawChange}
                 />
