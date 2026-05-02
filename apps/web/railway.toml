@@ -5,7 +5,10 @@
 # Root directory must stay at / (repo root).
 #
 # Required build-time environment variables (set in Railway service variables):
-#   VITE_API_URL   Public URL of the API service (e.g. https://api.hello.design)
+#   VITE_API_URL   URL of the API service — must use https:// in production.
+#                  The frontend is served over HTTPS; using http:// triggers
+#                  mixed-content blocking in the browser.
+#                  Internal Railway URL: https://sys-api.railway.internal
 #                  Must be set BEFORE the build — Vite bakes it in at build time.
 
 [build]
