@@ -6,6 +6,7 @@ import { createTheme } from "@uiw/codemirror-themes";
 import { tags as t } from "@lezer/highlight";
 import { EditorView } from "@codemirror/view";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/hooks/useTheme";
 
 // ── Theme matching "Technical Precision" palette ───────────────────────────
 
@@ -53,6 +54,39 @@ const archTheme = createTheme({
   ],
 });
 
+const archThemeLight = createTheme({
+  theme: "light",
+  settings: {
+    background: "#fbfcfe",
+    foreground: "#263243",
+    caret: "#536bd7",
+    selection: "rgba(83,107,215,0.16)",
+    selectionMatch: "rgba(83,107,215,0.1)",
+    lineHighlight: "rgba(83,107,215,0.05)",
+    gutterBackground: "#fbfcfe",
+    gutterForeground: "#8793a4",
+  },
+  styles: [
+    { tag: t.heading1, color: "#263b70", fontWeight: "700", fontSize: "1.25em" },
+    { tag: t.heading2, color: "#3e55bd", fontWeight: "600", fontSize: "1.1em" },
+    { tag: t.heading3, color: "#536bd7", fontWeight: "600" },
+    { tag: t.strong, color: "#263243", fontWeight: "700" },
+    { tag: t.emphasis, color: "#526174", fontStyle: "italic" },
+    { tag: t.strikethrough, color: "#738094" },
+    { tag: t.link, color: "#3e55bd", textDecoration: "underline" },
+    { tag: t.url, color: "#3e55bd" },
+    { tag: t.monospace, color: "#16745d", background: "rgba(23,132,104,0.08)", borderRadius: "3px", padding: "0 3px" },
+    { tag: t.quote, color: "#667487", fontStyle: "italic" },
+    { tag: t.list, color: "#536bd7" },
+    { tag: t.punctuation, color: "#8793a4" },
+    { tag: t.meta, color: "#8793a4" },
+    { tag: t.comment, color: "#8793a4", fontStyle: "italic" },
+    { tag: t.keyword, color: "#3e55bd" },
+    { tag: t.string, color: "#16745d" },
+    { tag: t.number, color: "#9c650e" },
+  ],
+});
+
 // ── Base editor extensions ─────────────────────────────────────────────────
 
 const baseExtensions: ReactCodeMirrorProps["extensions"] = [
@@ -77,6 +111,7 @@ export function RichTextEditor({
   className,
   autoFocus = false,
 }: RichTextEditorProps) {
+  const { theme } = useTheme();
   const handleChange = useCallback(
     (value: string) => onChange(value),
     [onChange],
@@ -89,7 +124,7 @@ export function RichTextEditor({
       <CodeMirror
         value={value}
         className="flex-1 overflow-auto text-sm"
-        theme={archTheme}
+        theme={theme === "light" ? archThemeLight : archTheme}
         extensions={extensions}
         onChange={handleChange}
         placeholder={placeholder ?? "Start writing your answer…"}

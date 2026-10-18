@@ -61,6 +61,14 @@ function QuestionsPage() {
 
   const { data: questions = [], isLoading, isError, refetch } = useQuery(questionsQueryOptions)
   const { data: session } = useSession()
+  const { data: progress } = useQuery<{ solved: number; avgScore: number | null; streak: number }>({
+    queryKey: ["me/stats"],
+    enabled: !!session?.user,
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/api/me/stats`, { credentials: "include" }).then((response) => {
+      if (!response.ok) throw new Error("Could not load practice progress")
+      return response.json()
+    }),
+  })
 
   const categories = [...new Set(questions.map((q) => q.category))]
 
@@ -141,7 +149,7 @@ function QuestionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8" style={{ color: "var(--app-fg)" }}>
+    <div className="page-shell max-w-7xl" style={{ color: "var(--app-fg)" }}>
 
       {/* ── Page header ─────────────────────────────────────────── */}
       <div className="mb-6">
@@ -168,40 +176,42 @@ function QuestionsPage() {
       </div>
 
       {/* ── Dashboard Metrics (logged in only) ─────────────────── */}
-      {session?.user && (
+      {session?.user && progress && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
               Your Progress
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <MetricsCard
               label="Problems Solved"
-              value="15"
-              unit="/ 50"
+              value={progress.solved}
+              unit={questions.length ? `/ ${questions.length}` : undefined}
               icon={<CheckCircle2 size={20} />}
               iconColor="var(--app-green)"
               accentColor="tertiary"
-              progress={30}
-              description="28% of the library"
+              progress={questions.length ? Math.min(100, (progress.solved / questions.length) * 100) : undefined}
+              description={questions.length ? `${Math.round((progress.solved / questions.length) * 100)}% of the current library` : "Completed practice questions"}
             />
             <MetricsCard
-              label="Current Streak"
-              value="12"
+              label="Average score"
+              value={progress.avgScore ?? "—"}
+              unit={progress.avgScore !== null ? "/ 100" : undefined}
+              icon={<Trophy size={20} />}
+              iconColor="var(--app-indigo)"
+              accentColor="primary"
+              progress={progress.avgScore ?? undefined}
+              description={progress.avgScore !== null ? "Across completed reviews" : "Complete a review to see your average"}
+            />
+            <MetricsCard
+              label="Practice streak"
+              value={progress.streak}
               unit="days"
               icon={<Flame size={20} />}
-              iconColor="#b9c8de"
-              accentColor="secondary"
-              description="Keep it up! 3 days to next milestone"
-            />
-            <MetricsCard
-              label="Global Rank"
-              value="45,892"
-              icon={<Trophy size={20} />}
               iconColor="var(--app-indigo-pale)"
-              accentColor="primary"
-              description="Top 3% of all users"
+              accentColor="secondary"
+              description="Consecutive days with completed practice"
             />
           </div>
         </div>
@@ -213,7 +223,7 @@ function QuestionsPage() {
         style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }}
       >
         {/* Row 1: Search + Sort */}
-        <div className="flex gap-3 items-center p-4">
+        <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:p-4">
           <div className="relative flex-1">
             <Search
               size={15}

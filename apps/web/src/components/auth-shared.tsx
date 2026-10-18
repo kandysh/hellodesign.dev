@@ -7,7 +7,7 @@ export function BrandingPanel() {
   return (
     <div
       className="hidden lg:flex w-120 shrink-0 flex-col justify-between p-12 relative overflow-hidden"
-      style={{ background: "#0b1326", borderRight: "1px solid #1e2a3d" }}
+      style={{ background: "var(--app-bg-elevated)", borderRight: "1px solid var(--app-border)" }}
     >
       {/* Background Image */}
       <img
@@ -28,8 +28,8 @@ export function BrandingPanel() {
       {/* Content */}
       <div className="relative z-10">
         <div
-          className="text-xl font-black tracking-tighter mb-12"
-          style={{ color: "#dae2fd" }}
+          className="text-xl font-semibold tracking-tight mb-12"
+          style={{ color: "var(--app-fg)" }}
         >
           Hello Design
         </div>
@@ -85,17 +85,17 @@ export function SocialButton({
   return (
     <a
       href={href}
-      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded text-sm font-medium transition-all duration-150 active:scale-95"
+      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 active:scale-95"
       style={{
-        background: "#131b2e",
-        border: "1px solid #2d3449",
-        color: "#c7c4d7",
+        background: "var(--app-surface)",
+        border: "1px solid var(--app-border)",
+        color: "var(--app-fg)",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "#464554";
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--app-indigo)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "#2d3449";
+        (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)";
       }}
     >
       {icon}
@@ -107,11 +107,11 @@ export function SocialButton({
 export function Divider() {
   return (
     <div className="flex items-center gap-3 mb-5">
-      <div className="flex-1 h-px" style={{ background: "#2d3449" }} />
-      <span className="text-xs" style={{ color: "#464554" }}>
+      <div className="flex-1 h-px" style={{ background: "var(--app-border)" }} />
+      <span className="text-xs" style={{ color: "var(--app-muted)" }}>
         or continue with email
       </span>
-      <div className="flex-1 h-px" style={{ background: "#2d3449" }} />
+      <div className="flex-1 h-px" style={{ background: "var(--app-border)" }} />
     </div>
   );
 }
@@ -131,7 +131,7 @@ export function Field({
     <div className="space-y-1.5">
       <p
         className="block text-xs font-bold uppercase tracking-wider"
-        style={{ color: "#908fa0" }}
+        style={{ color: "var(--app-subtle)" }}
       >
         {label}
       </p>
@@ -207,9 +207,9 @@ export function RightPanel() {
       <div className="relative z-10 space-y-6">
         <div className="max-w-lg space-y-3">
           <p className="text-xs font-semibold uppercase tracking-widest text-indigo-200">System design practice</p>
-          <h2 className="text-3xl font-bold text-slate-100">Practice the decisions behind the diagram.</h2>
-          <p className="text-sm leading-relaxed text-slate-300">Work through a question, explain your trade-offs, and review rubric-based feedback from the model provider you choose.</p>
-          <p className="text-xs text-slate-400">You bring the API key and pay your provider directly for model usage.</p>
+          <h2 className="text-3xl font-bold text-base-content">Practice the decisions behind the diagram.</h2>
+          <p className="text-sm leading-relaxed text-base-content/80">Work through a question, explain your trade-offs, and review rubric-based feedback from the model provider you choose.</p>
+          <p className="text-xs text-base-content/60">You bring the API key and pay your provider directly for model usage.</p>
         </div>
       </div>
     </div>
@@ -221,16 +221,16 @@ export function AuthHeader() {
     <header
       className="fixed top-0 w-full z-50 border-b"
       style={{
-        background: "rgba(6, 8, 20, 0.9)",
+        background: "var(--app-header-bg)",
         backdropFilter: "blur(12px)",
-        borderColor: "#1e293b",
+        borderColor: "var(--app-header-border)",
       }}
     >
       <nav className="flex items-center justify-between h-16 px-6 max-w-[1440px] mx-auto">
         {/* Brand */}
         <Link
           to="/"
-          className="flex items-center gap-2 text-xl font-black tracking-tighter text-slate-50 hover:text-white transition-colors duration-150 shrink-0"
+          className="flex items-center gap-2 text-xl font-semibold tracking-tight text-base-content hover:text-primary transition-colors duration-150 shrink-0"
         >
           <HdLogo />
           Hello Design
@@ -251,7 +251,7 @@ function AuthNavLink({ to, label, icon }: { to: string; label: string; icon?: Re
   return (
     <Link
       to={to}
-      className="flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-indigo-400 transition-colors duration-150 active:scale-95"
+      className="flex items-center gap-1.5 text-sm font-medium text-base-content/60 hover:text-primary transition-colors duration-150 active:scale-95"
     >
       {icon}
       {label}
@@ -275,7 +275,7 @@ function HdLogo() {
       <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
         <path
           d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
-          fill="#6366f1"
+          fill="var(--app-indigo)"
         />
       </svg>
     </svg>

@@ -7,6 +7,23 @@ import { initTheme } from "./lib/theme"
 import "@excalidraw/excalidraw/index.css"
 import "./styles.css"
 
+// A long-lived tab can keep an older entry bundle across a deployment. If that
+// bundle later requests a removed hashed chunk, reload once for that build.
+const preloadRecoveryKey = "hellodesign:preload-recovery"
+window.addEventListener("vite:preloadError", (event) => {
+  const entryBundle = document.querySelector<HTMLScriptElement>('script[type="module"][src]')?.src
+  if (!entryBundle) return
+
+  try {
+    if (sessionStorage.getItem(preloadRecoveryKey) === entryBundle) return
+    sessionStorage.setItem(preloadRecoveryKey, entryBundle)
+    event.preventDefault()
+    window.location.reload()
+  } catch {
+    // Keep the import error visible when session storage is unavailable.
+  }
+})
+
 // Apply saved or OS-preferred theme before first paint
 initTheme()
 

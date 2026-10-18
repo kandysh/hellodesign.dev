@@ -33,7 +33,7 @@ const STEPS = [
   {
     n: "02",
     title: "Write & diagram your answer",
-    desc: "Use the CodeMirror editor to explain your architecture and the Excalidraw canvas to draw component diagrams.",
+    desc: "Explain your decisions in Markdown, add an architecture diagram, and include an optional code example.",
     icon: PenLine,
   },
   {
@@ -55,7 +55,7 @@ function HomePage() {
   return (
     <div className="flex flex-col min-h-screen" style={{ background: "var(--app-bg)" }}>
       {/* ── Hero ──────────────────────────────────────────────── */}
-      <section className="w-full max-w-[1440px] mx-auto px-6 py-20 lg:py-32">
+      <section className="w-full max-w-[1440px] mx-auto px-6 py-16 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           {/* Left */}
           <div className="flex flex-col gap-6 z-10">
@@ -69,7 +69,7 @@ function HomePage() {
                 style={{ background: "var(--app-green)" }}
               />
               <span style={{ fontFamily: "'Space Grotesk', monospace" }}>
-                Practice with your own model key
+                BYOK · Use a provider key you control
               </span>
             </div>
 
@@ -81,26 +81,25 @@ function HomePage() {
                 color: "var(--app-fg)",
               }}
             >
-              Master Technical Interviews with{" "}
-              <span style={{ color: "var(--app-indigo)" }}>AI‑Led Precision.</span>
+              Practice system design interviews with{" "}
+              <span style={{ color: "var(--app-indigo)" }}>your chosen model.</span>
             </h1>
 
             <p className="text-base leading-relaxed max-w-xl" style={{ color: "var(--app-body)" }}>
-              High‑density environments for data‑driven architects. Simulate real‑world system
-              design constraints with our Excalidraw canvas and CodeMirror technical editor.
+              Work through system design prompts, organize your thinking in a notebook, and get rubric-based AI feedback on your design.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Link
                 to="/questions"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 transition-all duration-150 active:scale-95"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-semibold text-white bg-primary hover:brightness-110 border border-indigo-400/50 transition-all duration-150 active:scale-95"
                 style={{ boxShadow: "0 0 16px rgba(99,102,241,0.4)" }}
               >
-                Start Interview Simulation
+                Explore practice questions
                 <ArrowRight size={15} />
               </Link>
               <Link
-                to="/questions"
+                to="/pricing"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded text-sm font-medium transition-all duration-150 active:scale-95 border"
                 style={{ color: "var(--app-indigo-pale)", borderColor: "var(--app-muted)", background: "transparent" }}
                 onMouseEnter={(e) => {
@@ -110,16 +109,19 @@ function HomePage() {
                   ;(e.currentTarget as HTMLElement).style.background = "transparent"
                 }}
               >
-                Browse Questions
+                How BYOK works
               </Link>
             </div>
+            <p className="text-xs" style={{ color: "var(--app-muted)" }}>
+              Browse and write before adding a key. <Link to="/settings" className="font-medium underline underline-offset-4" style={{ color: "var(--app-indigo-pale)" }}>Set up a provider key</Link> when you’re ready for an AI review.
+            </p>
           </div>
 
           {/* Right — clearly illustrative architecture diagram */}
           <div className="relative hidden lg:block">
             <div
               className="absolute -inset-6 rounded-3xl blur-3xl opacity-20"
-              style={{ background: "radial-gradient(ellipse at center, #6366f1, transparent)" }}
+              style={{ background: "radial-gradient(ellipse at center, var(--app-indigo), transparent)" }}
             />
             <IllustrativeDiagram />
           </div>
@@ -173,7 +175,7 @@ function HomePage() {
             return (
               <div
                 key={step.n}
-                className="flex flex-col gap-4 p-6 rounded-lg group hover:border-indigo-500/40 transition-all duration-200"
+        className="surface-card flex flex-col gap-4 p-6 rounded-2xl"
                 style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
               >
                 <div className="flex items-center gap-3">
@@ -205,7 +207,7 @@ function HomePage() {
       {/* ── Categories ────────────────────────────────────────── */}
       <section
         className="border-t"
-        style={{ borderColor: "var(--app-surface-4)", background: "rgba(23,31,51,0.5)" }}
+        style={{ borderColor: "var(--app-border-2)", background: "var(--app-bg-elevated)" }}
       >
         <div className="w-full max-w-[1440px] mx-auto px-6 py-20">
           <div className="mb-12 text-center">
@@ -268,10 +270,10 @@ function HomePage() {
       <section className="w-full max-w-[1440px] mx-auto px-6 py-20">
         <div className="mb-10">
           <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--app-fg)" }}>
-            Technical Tooling for Architects
+            A focused system design workspace
           </h2>
           <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
-            High-fidelity components designed for rigorous system planning.
+            Use one workspace for your written answer, architecture diagram, code, and AI review.
           </p>
         </div>
 
@@ -294,11 +296,10 @@ function HomePage() {
             </div>
             <div className="flex flex-col gap-1 mt-2">
               <h3 className="font-bold text-base" style={{ color: "var(--app-fg)" }}>
-                Infinite Excalidraw-Style Canvas
+                Architecture diagrams
               </h3>
               <p className="text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>
-                Map out complex microservices architectures with low-latency rendering and
-                snap-to-grid precision. Native support for AWS, GCP, and Azure iconography.
+                Sketch components and connections alongside your written design. Diagrams are included with your submission when added.
               </p>
             </div>
             {/* Visual preview */}
@@ -349,11 +350,10 @@ function HomePage() {
             </div>
             <div className="flex flex-col gap-1 mt-2">
               <h3 className="font-bold text-base" style={{ color: "var(--app-fg)" }}>
-                CodeMirror Technical Editor
+                Markdown and code
               </h3>
               <p className="text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>
-                Write API contracts and schema definitions with rich Markdown formatting,
-                syntax-highlighted code blocks, and multi-language support.
+                Explain trade-offs in Markdown and add an optional syntax-highlighted code example to your notebook.
               </p>
             </div>
             {/* Code preview */}
@@ -415,7 +415,7 @@ function HomePage() {
           </div>
           <Link
             to="/questions"
-            className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/50 transition-all duration-150 active:scale-95"
+            className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold text-white bg-primary hover:brightness-110 border border-indigo-400/50 transition-all duration-150 active:scale-95"
             style={{ boxShadow: "0 0 16px rgba(99,102,241,0.35)" }}
           >
             <Activity size={15} />

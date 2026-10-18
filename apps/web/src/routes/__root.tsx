@@ -26,9 +26,12 @@ function RootLayout() {
       <ErrorBoundary>
         <div className="flex flex-col min-h-screen">
           {!isAuthPage && <Header />}
-          <main className={`${isAuthPage ? "" : "pt-16"} flex-1`}>
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:text-sm focus:font-medium">
+            Skip to content
+          </a>
+          <div id="main-content" className={`${isAuthPage ? "" : "pt-16"} flex-1`}>
             <Outlet />
-          </main>
+          </div>
           {!isAuthPage && !isFullScreenWorkspace && <Footer />}
         </div>
         <OfflineIndicator />

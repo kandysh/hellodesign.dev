@@ -484,7 +484,7 @@ function WorkspacePage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+    <div className="practice-workspace flex h-[calc(100dvh-4rem)] overflow-hidden">
       {/* ── Left panel ─────────────────────────────────────────── */}
       <aside
         className={cn(

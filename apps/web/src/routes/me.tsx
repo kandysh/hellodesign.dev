@@ -104,23 +104,23 @@ function MePage() {
   )
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <main className="page-shell max-w-7xl">
 
       {/* ── Page header ─────────────────────────────────────── */}
       <div className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "var(--app-indigo)" }}>
+        <p className="page-eyebrow mb-2">
           WORKSPACE
         </p>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-1" style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}>
-          System Design Dashboard
+        <h1 className="page-title mb-2">
+          Practice history
         </h1>
-        <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
-          Track your performance and mastery.
+        <p className="page-description text-sm">
+          Review completed practice and feedback across your submissions.
         </p>
       </div>
 
       {/* ── Stats strip ─────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+      <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MetricsCard
           label="Problems Solved"
           value={String(submissions.filter((s) => s.status === "done").length)}
@@ -223,7 +223,7 @@ function MePage() {
             </p>
             <Link
               to="/questions"
-              className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+              className="text-sm text-primary hover:text-primary transition-colors"
             >
               Browse Questions →
             </Link>
@@ -271,6 +271,6 @@ function MePage() {
           </div>
         )}
       </section>
-    </div>
+    </main>
   )
 }

@@ -164,7 +164,7 @@ function ResultPage() {
           to="/questions/$questionId"
           params={{ questionId }}
           style={{ color: DS.textSecondary }}
-          className="flex items-center gap-1.5 text-xs hover:text-slate-200 transition-colors"
+          className="flex items-center gap-1.5 text-xs hover:text-base-content/90 transition-colors"
         >
           ← Back to question
         </Link>
@@ -619,7 +619,7 @@ function ResultPage() {
         <Link
           to="/questions/$questionId"
           params={{ questionId }}
-          className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-2 transition-colors hover:text-slate-200"
+          className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-2 transition-colors hover:text-base-content/90"
           style={{
             color: DS.textSecondary,
             background: DS.elevatedBg,

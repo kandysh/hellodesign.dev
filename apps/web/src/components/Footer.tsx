@@ -15,7 +15,7 @@ function HdLogo() {
       <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
         <path
           d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
-          fill="#6366f1"
+          fill="var(--app-indigo)"
         />
       </svg>
     </svg>
@@ -26,9 +26,9 @@ export function Footer() {
   return (
     <footer
       className="w-full border-t mt-auto"
-      style={{ background: "var(--app-bg-deep)", borderColor: "#1e293b" }}
+      style={{ background: "var(--app-bg-elevated)", borderColor: "var(--app-border-2)" }}
     >
-      <div className="flex flex-col md:flex-row justify-between items-center py-10 px-8 max-w-[1440px] mx-auto gap-4">
+      <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-5 px-6 py-8 md:flex-row">
         {/* Brand */}
         <div className="flex items-center gap-2">
           <HdLogo />

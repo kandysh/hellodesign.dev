@@ -33,6 +33,7 @@ const NAV_LINKS = [
 ]
 
 export default function Header() {
+  const { theme, toggle } = useTheme()
   const { data: session } = useQuery<{ user: SessionUser } | null>({
     queryKey: ["session"],
     queryFn: () =>
@@ -87,16 +88,16 @@ export default function Header() {
   return (
     <>
       <header
-        className="fixed top-0 w-full z-50 border-b"
+        className="fixed inset-x-0 top-0 z-50 border-b"
         style={{
           background: "var(--app-header-bg)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          backdropFilter: "blur(20px) saturate(150%)",
+          WebkitBackdropFilter: "blur(20px) saturate(150%)",
           borderColor: "var(--app-header-border)",
           transition: "background 0.2s ease, border-color 0.2s ease",
         }}
       >
-        <nav className="flex items-center justify-between h-14 px-4 sm:px-6 max-w-[1440px] mx-auto">
+        <nav className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-4 sm:px-6">
           {/* Brand */}
           <Link
             to="/"
@@ -105,7 +106,7 @@ export default function Header() {
           >
             <HdLogo />
             <span
-              className="text-lg font-black tracking-tight transition-colors duration-150"
+              className="text-base font-semibold tracking-tight transition-colors duration-150"
               style={{ color: "var(--app-fg)" }}
             >
               Hello Design
@@ -138,6 +139,16 @@ export default function Header() {
             >
               <Settings size={15} />
             </Link>
+
+            <button
+              type="button"
+              onClick={toggle}
+              aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-base-content/60 transition-colors hover:bg-base-200 hover:text-base-content"
+            >
+              {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
 
             <div className="w-px h-5 mx-1" style={{ background: "var(--app-border)" }} />
 
@@ -216,10 +227,11 @@ export default function Header() {
 
             <Link
               to="/questions"
-              className="inline-flex items-center gap-1.5 text-white text-sm font-semibold px-4 py-1.5 rounded transition-all duration-150 active:scale-95"
+              className="btn btn-primary btn-sm inline-flex min-h-9 items-center gap-1.5 px-4 text-sm font-semibold transition-transform active:scale-[0.98]"
               style={{
                 background: "var(--app-indigo)",
-                boxShadow: "0 0 12px var(--app-indigo-glow)",
+                color: "var(--app-bg-deep)",
+                boxShadow: "none",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.filter = "brightness(1.1)"
@@ -308,6 +320,14 @@ export default function Header() {
               >
                 <Settings size={16} /> Settings
               </Link>
+              <button
+                type="button"
+                onClick={toggle}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-base-content/75 hover:bg-base-200"
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                Switch to {theme === "dark" ? "light" : "dark"} theme
+              </button>
             </nav>
 
             <div className="border-t px-3 py-4" style={{ borderColor: "var(--app-border)" }}>

@@ -305,7 +305,7 @@ function ActivityMessage({ title, subtitle }: { title: string; subtitle: string 
 
 function ActivityEntry({ line, isLast }: { line: string; isLast: boolean }) {
   const flow = line.match(/^→\s*(.*?)(?:\s+\((\{.*\})\))?$/s)
-  const title = flow ? flow[1].trim() : "Interviewer note"
+  const title = flow?.[1]?.trim() || "Interviewer note"
   const rawDetails = flow?.[2]
   let details: unknown
   if (rawDetails) {
@@ -315,7 +315,7 @@ function ActivityEntry({ line, isLast }: { line: string; isLast: boolean }) {
       details = rawDetails
     }
   }
-  const detailsText = typeof details === "string" ? details : details && typeof details === "object"
+  const detailsText = typeof details === "string" ? details : details !== null && typeof details === "object"
     ? Object.entries(details).map(([key, value]) => `${key}: ${String(value)}`).join(" · ")
     : ""
 

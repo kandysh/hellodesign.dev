@@ -31,36 +31,25 @@ export function MetricsCard({
 
   return (
     <div
-      className="rounded-xl p-6 flex flex-col gap-4 relative overflow-hidden group"
+      className="surface-card flex min-h-40 flex-col gap-4 p-5 relative overflow-hidden"
       style={{
-        background: "var(--app-surface-2)",
-        border: "1px solid var(--app-border)",
+        background: "var(--app-card-gradient), var(--app-card-bg)",
       }}
     >
-      {/* Gradient blur circles */}
-      <div
-        className="absolute -right-8 -top-8 w-32 h-32 rounded-full blur-2xl group-hover:opacity-100 opacity-70 transition-all duration-500"
-        style={{
-          background: accent.light,
-        }}
-      />
-
-      {/* Header: label + icon */}
-      <div className="flex items-center justify-between relative z-10">
+      <div className="relative z-10 flex items-center justify-between gap-3">
         <h3
-          className="uppercase tracking-wider text-xs font-bold"
+          className="text-xs font-semibold tracking-wide"
           style={{ color: "var(--app-subtle)" }}
         >
           {label}
         </h3>
-        <div style={{ color: iconColor }}>{icon}</div>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: accent.light, color: iconColor }}>{icon}</div>
       </div>
 
-      {/* Value */}
-      <div className="flex items-baseline gap-2 relative z-10">
+      <div className="relative z-10 flex items-baseline gap-2">
         <span
-          className="text-5xl font-extrabold"
-          style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
+          className="text-3xl font-semibold tabular-nums"
+          style={{ color: "var(--app-fg)", letterSpacing: "-0.045em" }}
         >
           {value}
         </span>
@@ -73,9 +62,9 @@ export function MetricsCard({
 
       {/* Progress bar */}
       {progress !== undefined && (
-        <div className="w-full bg-surface-container-highest rounded-full h-1 mt-2 relative z-10">
+        <div className="relative z-10 mt-auto h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--app-surface-4)" }}>
           <div
-            className="h-1 rounded-full transition-all duration-500"
+            className="h-full rounded-full transition-all duration-500"
             style={{
               background: accent.bg,
               width: `${progress}%`,
@@ -86,7 +75,7 @@ export function MetricsCard({
 
       {/* Description */}
       {description && (
-        <p className="text-sm mt-2 relative z-10" style={{ color: "var(--app-subtle)" }}>
+        <p className="relative z-10 text-xs leading-relaxed" style={{ color: "var(--app-subtle)" }}>
           {description}
         </p>
       )}

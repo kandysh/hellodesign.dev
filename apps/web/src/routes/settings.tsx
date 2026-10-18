@@ -82,17 +82,19 @@ function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <main className="page-shell max-w-3xl" style={{ paddingTop: "2.5rem", paddingBottom: "3rem" }}>
+      <p className="page-eyebrow mb-2">Workspace</p>
       <h1
         style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
-        className="mb-8 text-2xl font-extrabold"
+        className="mb-2 text-3xl font-semibold"
       >
         Settings
       </h1>
+      <p className="page-description mb-8">Manage your model provider, appearance, and account data.</p>
 
       <SectionCard icon={<AlertTriangle size={15} style={{ color: "var(--app-red)" }} />} title="Guest session data" subtitle="Guest activity is stored separately from your account, including on this browser">
         <p className="mb-3 text-sm" style={{ color: "var(--app-subtle)" }}>Clear submissions, results, and saved API keys created before signing in on this browser.</p>
-        <button type="button" disabled={dataActionBusy} onClick={() => void clearGuestData()} className="rounded border border-rose-800 px-4 py-2 text-sm text-rose-300 disabled:opacity-50">{dataActionBusy ? "Working…" : "Clear guest data"}</button>
+        <button type="button" disabled={dataActionBusy} onClick={() => void clearGuestData()} className="rounded border border-error/40 px-4 py-2 text-sm text-error disabled:opacity-50">{dataActionBusy ? "Working…" : "Clear guest data"}</button>
       </SectionCard>
 
       {user ? (
@@ -252,8 +254,8 @@ function SettingsPage() {
               <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">Delete account and data</p>
               <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-1">Deletes your account, API keys, private practice history, shared posts, and comments.</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <input aria-label="Confirm account email" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} placeholder={user.email} className="min-w-56 flex-1 rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100" />
-                <button type="button" disabled={dataActionBusy || confirmEmail !== user.email} onClick={() => void deleteAccount()} className="rounded border border-rose-800 px-4 py-2 text-sm text-rose-300 disabled:opacity-50">Delete account</button>
+                <input aria-label="Confirm account email" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} placeholder={user.email} className="min-w-56 flex-1 rounded border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content" />
+                <button type="button" disabled={dataActionBusy || confirmEmail !== user.email} onClick={() => void deleteAccount()} className="rounded border border-error/40 px-4 py-2 text-sm text-error disabled:opacity-50">Delete account</button>
               </div>
             </div>
           </div>
@@ -293,7 +295,7 @@ function SettingsPage() {
                 color: "white",
                 boxShadow: "0 0 12px var(--app-indigo-glow)",
               }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold hover:bg-indigo-500 transition-colors active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold hover:brightness-110 transition-colors active:scale-95"
             >
               Sign In to Sync
             </Link>
@@ -335,7 +337,7 @@ function SettingsPage() {
           </div>
         </>
       )}
-    </div>
+    </main>
   )
 }
 
@@ -466,6 +468,9 @@ function ApiKeySection({
 
   return (
     <div className="space-y-3">
+      <p className="max-w-2xl text-sm leading-6" style={{ color: "var(--app-subtle)" }}>
+        A key is only needed to request an AI review. You can explore questions and draft answers without one; model usage is billed by your provider under its account and pricing.
+      </p>
       {keysLoading ? (
         <div className="animate-pulse h-12 rounded-lg" style={{ background: "var(--app-surface-3)" }} />
       ) : activeKey ? (

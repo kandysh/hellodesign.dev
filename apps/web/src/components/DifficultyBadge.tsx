@@ -8,38 +8,30 @@ interface DifficultyBadgeProps {
   className?: string
 }
 
-const config: Record<Difficulty, { label: string; bg: string; border: string; text: string }> = {
+const config: Record<Difficulty, { label: string; color: string }> = {
   easy: {
     label: "Easy",
-    bg: "rgba(78,222,163,0.1)",
-    border: "rgba(78,222,163,0.35)",
-    text: "#4edea3",
+    color: "var(--app-green)",
   },
   medium: {
     label: "Medium",
-    bg: "rgba(251,191,36,0.1)",
-    border: "rgba(251,191,36,0.35)",
-    text: "#fbbf24",
+    color: "var(--app-amber)",
   },
   hard: {
     label: "Hard",
-    bg: "rgba(255,180,171,0.1)",
-    border: "rgba(255,180,171,0.35)",
-    text: "#ffb4ab",
+    color: "var(--app-red)",
   },
 }
 
 export function DifficultyBadge({ difficulty, solid = false, className }: DifficultyBadgeProps) {
-  const { label, bg, border, text } = config[difficulty] ?? config.medium
+  const { label, color } = config[difficulty] ?? config.medium
   return (
     <span
-      className={cn("inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold", className)}
+      className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold", className)}
       style={{
-        background: solid ? bg.replace("0.1", "0.25") : bg,
-        border: `1px solid ${border}`,
-        color: text,
-        fontFamily: "'Space Grotesk', monospace",
-        letterSpacing: "0.02em",
+        background: `color-mix(in srgb, ${color} ${solid ? "20%" : "10%"}, transparent)`,
+        border: `1px solid color-mix(in srgb, ${color} 28%, transparent)`,
+        color,
       }}
     >
       {label}

@@ -44,8 +44,8 @@ function RegisterPage() {
   return (
     <>
       <AuthHeader />
-      <div className="min-h-screen flex pt-16" style={{ background: "var(--app-bg)" }}>
-        <div className="w-1/2 flex flex-col items-center justify-center px-8 lg:px-16 py-16">
+      <div className="min-h-[100dvh] flex pt-16" style={{ background: "var(--app-bg)" }}>
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-5 sm:px-8 lg:px-16 py-12 sm:py-16">
           <div className="w-full max-w-sm">
           <div className="mb-8">
             <h1
@@ -98,7 +98,7 @@ function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/45 hover:text-base-content/80 transition-colors"
                 >
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
@@ -153,7 +153,7 @@ function RegisterPage() {
 
           <p className="mt-6 text-center text-xs" style={{ color: "var(--app-muted)" }}>
             Already have an account?{" "}
-            <Link to="/auth/login" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+            <Link to="/auth/login" className="text-primary hover:text-primary transition-colors">
               Sign in
             </Link>
           </p>
