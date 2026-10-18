@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { useQuery } from "@tanstack/react-query"
 import {
   Activity,
   ArrowRight,
@@ -15,20 +16,18 @@ import {
 
 export const Route = createFileRoute("/")({ component: HomePage })
 
-const CATEGORIES = [
-  { slug: "messaging", label: "Messaging", icon: MessageSquare, count: 4 },
-  { slug: "storage", label: "Storage", icon: Database, count: 6 },
-  { slug: "networking", label: "CDN & Networks", icon: Globe, count: 3 },
-  { slug: "caching", label: "Rate Limiting", icon: Gauge, count: 5 },
-  { slug: "api-design", label: "Search Systems", icon: Search, count: 4 },
-  { slug: "distributed-systems", label: "Auth & Security", icon: Shield, count: 5 },
-]
+const CATEGORY_INFO: Record<string, { label: string; icon: typeof MessageSquare }> = {
+  messaging: { label: "Messaging", icon: MessageSquare }, storage: { label: "Storage", icon: Database },
+  networking: { label: "Networking", icon: Globe }, caching: { label: "Caching", icon: Gauge },
+  "api-design": { label: "API Design", icon: Search }, "distributed-systems": { label: "Distributed Systems", icon: Shield },
+  databases: { label: "Databases", icon: Database }, general: { label: "General", icon: Layers },
+}
 
 const STEPS = [
   {
     n: "01",
     title: "Pick a question",
-    desc: "Browse 30+ real system design questions — URL shorteners, distributed caches, video streaming platforms, and more.",
+    desc: "Browse the available system design questions and practice architecture decisions with AI feedback.",
     icon: Search,
   },
   {
@@ -40,12 +39,19 @@ const STEPS = [
   {
     n: "03",
     title: "Get evaluated by AI",
-    desc: "7 specialist agents score your answer across requirements, scalability, data model, API design, and more.",
+    desc: "Get AI feedback across the rubric dimensions configured for each question.",
     icon: Sparkles,
   },
 ]
 
 function HomePage() {
+  const { data: questions = [] } = useQuery<{ category: string }[]>({
+    queryKey: ["questions", "home-counts"],
+    queryFn: () => fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/api/questions`).then((r) => { if (!r.ok) throw new Error("Could not load questions"); return r.json() }),
+    staleTime: 60_000,
+  })
+  const categoryCounts = questions.reduce<Record<string, number>>((counts, question) => { counts[question.category] = (counts[question.category] ?? 0) + 1; return counts }, {})
+  const categories = Object.entries(categoryCounts).map(([slug, count]) => ({ slug, count, ...(CATEGORY_INFO[slug] ?? { label: slug.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()), icon: Layers }) }))
   return (
     <div className="flex flex-col min-h-screen" style={{ background: "var(--app-bg)" }}>
       {/* ── Hero ──────────────────────────────────────────────── */}
@@ -63,7 +69,7 @@ function HomePage() {
                 style={{ background: "var(--app-green)" }}
               />
               <span style={{ fontFamily: "'Space Grotesk', monospace" }}>
-                System Design V2.0 is Live
+                Practice with your own model key
               </span>
             </div>
 
@@ -109,13 +115,13 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Right — mock architecture canvas */}
+          {/* Right — clearly illustrative architecture diagram */}
           <div className="relative hidden lg:block">
             <div
               className="absolute -inset-6 rounded-3xl blur-3xl opacity-20"
               style={{ background: "radial-gradient(ellipse at center, #6366f1, transparent)" }}
             />
-            <MockCanvas />
+            <IllustrativeDiagram />
           </div>
         </div>
       </section>
@@ -124,10 +130,10 @@ function HomePage() {
       <div className="border-y" style={{ borderColor: "var(--app-surface-4)", background: "var(--app-surface)" }}>
         <div className="max-w-[1440px] mx-auto px-6 py-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { val: "30+", label: "Design problems" },
-            { val: "7", label: "AI evaluation agents" },
-            { val: "4", label: "Scoring dimensions" },
-            { val: "100%", label: "Free to start" },
+            { val: questions.length ? String(questions.length) : "—", label: "Available questions" },
+            { val: "BYOK", label: "Use your model key" },
+            { val: "Quick + Deep", label: "Practice modes" },
+            { val: "Personal", label: "Progress tracking" },
           ].map((stat) => (
             <div key={stat.label} className="flex flex-col gap-1">
               <span
@@ -218,7 +224,7 @@ function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const Icon = cat.icon
               return (
                 <Link
@@ -404,7 +410,7 @@ function HomePage() {
               Ready to level up your system design?
             </h2>
             <p className="text-sm" style={{ color: "var(--app-subtle)" }}>
-              Start practicing with real-world challenges. Free forever.
+              Bring your own model key. Provider usage charges are billed to your provider account.
             </p>
           </div>
           <Link
@@ -421,9 +427,9 @@ function HomePage() {
   )
 }
 
-// ── Mock Architecture Canvas ──────────────────────────────────
+// ── Illustrative architecture diagram ─────────────────────────
 
-function MockCanvas() {
+function IllustrativeDiagram() {
   return (
     <div
       className="relative w-full rounded-xl overflow-hidden flex flex-col"
@@ -445,7 +451,7 @@ function MockCanvas() {
           className="ml-2 text-xs"
           style={{ color: "var(--app-muted)", fontFamily: "'Space Grotesk', monospace" }}
         >
-          design-workspace.canvas
+          Illustrative architecture
         </span>
       </div>
 
@@ -541,17 +547,6 @@ function MockCanvas() {
           Redis Cache
         </div>
 
-        {/* Score badge */}
-        <div
-          className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded text-xs"
-          style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)", color: "var(--app-subtle)" }}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{ background: "var(--app-green)" }}
-          />
-          <span style={{ fontFamily: "'Space Grotesk', monospace" }}>AI evaluating…</span>
-        </div>
       </div>
 
       {/* Bottom editor strip */}
@@ -562,7 +557,7 @@ function MockCanvas() {
         <span style={{ color: "var(--app-indigo)", fontFamily: "'Space Grotesk', monospace" }}>
           Design Notes:{" "}
         </span>
-        Use read replicas for global latency reduction. Add CDN layer…
+        Diagram is illustrative; answer layouts depend on the question.
       </div>
     </div>
   )

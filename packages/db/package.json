@@ -11,6 +11,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx src/seed.ts",
+    "admin:set": "tsx src/set-admin.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

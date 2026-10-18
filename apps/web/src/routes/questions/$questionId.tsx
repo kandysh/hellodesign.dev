@@ -954,7 +954,7 @@ function WorkspacePage() {
               {submitMutation.isSuccess
                 ? "Submitted"
                 : reviewMode === "deep"
-                  ? "Deep Review"
+                  ? "Deep Interview"
                   : "Submit"}
             </span>
             {canSubmit && !submitMutation.isSuccess && !submitMutation.isPending && (
@@ -984,8 +984,8 @@ function WorkspacePage() {
                   }}
                   title={
                     val === "deep"
-                      ? "Deep: agent asks 2–3 follow-up questions then evaluates"
-                      : "Quick: instant structured feedback · ~5s"
+                      ? "Deep interview: the agent can ask follow-up questions before evaluation"
+                      : "Quick review: structured feedback without follow-up questions"
                   }
                 >
                   {label}

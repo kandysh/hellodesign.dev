@@ -205,66 +205,11 @@ export function RightPanel() {
 
       {/* Content */}
       <div className="relative z-10 space-y-6">
-        {/* Status Badge */}
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs w-fit"
-          style={{
-            background: "rgba(11, 19, 38, 0.6)",
-            border: "1px solid rgba(78,222,163,0.3)",
-            backdropFilter: "blur(8px)",
-          }}
-        >
-          <span
-            className="w-1.5 h-1.5 rounded-full animate-pulse"
-            style={{
-              background: "#4edea3",
-              boxShadow: "0 0 8px rgba(78,222,163,0.8)",
-            }}
-          />
-          <span
-            style={{
-              color: "#4edea3",
-              fontFamily: "'Space Grotesk', monospace",
-            }}
-          >
-            System Status: Optimal
-          </span>
-        </div>
-
-        {/* Quote */}
-        <p className="text-sm leading-relaxed" style={{ color: "#c7c4d7" }}>
-          "The Hello Design infrastructure provides an uncompromising foundation
-          for high-density data visualization and technical application
-          development."
-        </p>
-
-        {/* Social Proof */}
-        <div
-          className="flex items-center gap-3 pt-4"
-          style={{ borderTop: "1px solid rgba(78,222,163,0.1)" }}
-        >
-          {/* Avatars */}
-          <div className="flex -space-x-2">
-            {["A", "B", "C"].map((letter) => (
-              <div
-                key={letter}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                style={{
-                  background: "#131b2e",
-                  border: "1px solid #2d3449",
-                  color: "#dae2fd",
-                }}
-              >
-                {letter}
-              </div>
-            ))}
-          </div>
-          {/* Text */}
-          <div className="text-xs" style={{ color: "#c7c4d7" }}>
-            Join{" "}
-            <span style={{ color: "#dae2fd", fontWeight: 600 }}>10,000+</span>{" "}
-            engineers building the future.
-          </div>
+        <div className="max-w-lg space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-200">System design practice</p>
+          <h2 className="text-3xl font-bold text-slate-100">Practice the decisions behind the diagram.</h2>
+          <p className="text-sm leading-relaxed text-slate-300">Work through a question, explain your trade-offs, and review rubric-based feedback from the model provider you choose.</p>
+          <p className="text-xs text-slate-400">You bring the API key and pay your provider directly for model usage.</p>
         </div>
       </div>
     </div>

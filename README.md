@@ -31,6 +31,20 @@ Requirements: Node.js 20+, pnpm 9.15.4, and Docker Compose.
 The web app runs at `http://localhost:3000` and the API at `http://localhost:3001`.
 Add your own AI provider key in Settings to run evaluations.
 
+Signed-in users can publish completed answers to the community. Publishing includes the answer,
+diagram, question title, account name, and publication date. Evaluation feedback and scores are
+included only when the publisher opts in. Community members can comment, vote, and report content.
+
+To grant the moderator role to an existing account after applying migrations, run:
+
+```sh
+pnpm --filter @sysdesign/db admin:set -- moderator@example.com
+```
+
+The Terms and Privacy pages describe the current beta behavior. Before a broad public launch, the
+operator still needs to add its legal business identity, contact route, jurisdiction, and retention
+details; those business-specific details are not present in this repository.
+
 ## Run the full stack with Docker
 
 Set `BETTER_AUTH_SECRET`, `ENCRYPTION_KEY`, and `VITE_API_URL` in `.env`, then run:

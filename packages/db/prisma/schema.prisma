@@ -41,11 +41,17 @@ model User {
   image         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  isAdmin       Boolean  @default(false)
 
   apiKeys     UserApiKey[]
   submissions Submission[]
   sessions    Session[]
   accounts    Account[]
+  communityPosts CommunityPost[]
+  communityComments CommunityComment[]
+  postVotes CommunityPostVote[]
+  commentVotes CommunityCommentVote[]
+  communityReports CommunityReport[]
 }
 
 model Session {
@@ -102,7 +108,7 @@ model UserApiKey {
   validatedAt  DateTime?
   createdAt    DateTime  @default(now())
 
-  user User? @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // ─── Interview content ────────────────────────────────────────────────────────
@@ -122,6 +128,7 @@ model Question {
   updatedAt         DateTime   @updatedAt
 
   submissions Submission[]
+  communityPosts CommunityPost[]
 }
 
 model Submission {
@@ -136,10 +143,11 @@ model Submission {
   agentJobId     String?
   createdAt      DateTime         @default(now())
 
-  question Question       @relation(fields: [questionId], references: [id])
-  user     User?          @relation(fields: [userId], references: [id])
+  question Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   result   EvalResult?
   messages AgentMessage[]
+  communityPost CommunityPost?
 }
 
 model AgentMessage {
@@ -150,7 +158,7 @@ model AgentMessage {
   metadata     Json? // { type: "followup" | "reasoning" | "evaluation_progress" }
   createdAt    DateTime    @default(now())
 
-  submission Submission @relation(fields: [submissionId], references: [id])
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 }
 
 model EvalResult {
@@ -164,5 +172,94 @@ model EvalResult {
   followupRounds  Int      @default(0)
   createdAt       DateTime @default(now())
 
-  submission Submission @relation(fields: [submissionId], references: [id])
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+}
+
+enum CommunityReportStatus {
+  OPEN
+  DISMISSED
+  ACTIONED
+}
+
+model CommunityPost {
+  id               String   @id @default(cuid())
+  submissionId     String   @unique
+  authorId         String
+  questionId       String
+  title            String
+  answerText       String   @db.Text
+  diagram          Json?
+  includeEvaluation Boolean @default(false)
+  evaluation       Json?
+  isHidden         Boolean @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  comments   CommunityComment[]
+  votes      CommunityPostVote[]
+  reports    CommunityReport[]
+
+  @@index([createdAt])
+  @@index([questionId, createdAt])
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String   @db.Text
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post    CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  votes   CommunityCommentVote[]
+  reports CommunityReport[]
+
+  @@index([postId, createdAt])
+}
+
+model CommunityPostVote {
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+}
+
+model CommunityCommentVote {
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment CommunityComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+}
+
+model CommunityReport {
+  id             String                @id @default(cuid())
+  reporterId     String
+  postId         String?
+  commentId      String?
+  reason         String
+  details        String?               @db.Text
+  status         CommunityReportStatus @default(OPEN)
+  resolvedById   String?
+  createdAt      DateTime              @default(now())
+  resolvedAt     DateTime?
+
+  reporter User             @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  post     CommunityPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment  CommunityComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
 }

@@ -13,6 +13,8 @@ import submissionsRouter from "./routes/submissions.js"
 import keysRouter from "./routes/keys.js"
 import meRouter from "./routes/me.js"
 import modelsRouter from "./routes/models.js"
+import communityRouter from "./routes/community.js"
+import adminRouter from "./routes/admin.js"
 
 const fastify = Fastify({
   logger: { level: "info" },
@@ -82,6 +84,8 @@ fastify.register(submissionsRouter, { prefix: "/api/submissions" })
 fastify.register(keysRouter, { prefix: "/api/keys" })
 fastify.register(meRouter, { prefix: "/api/me" })
 fastify.register(modelsRouter, { prefix: "/api/models" })
+fastify.register(communityRouter, { prefix: "/api/community" })
+fastify.register(adminRouter, { prefix: "/api/admin" })
 
 fastify.get("/health", async () => ({ ok: true }))
 

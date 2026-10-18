@@ -98,7 +98,7 @@ const submissionsPlugin: FastifyPluginAsync = async (fastify) => {
         lexicalContent,
         excalidrawSummary,
       },
-      { jobId: submission.id },
+      { jobId: submission.id, removeOnComplete: true, removeOnFail: true },
     )
 
     await db.submission.update({

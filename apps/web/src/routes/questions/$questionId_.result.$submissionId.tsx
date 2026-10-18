@@ -20,10 +20,8 @@ import {
   Zap,
   GitBranch,
   Activity,
-  TrendingUp,
-  AlertCircle,
+  Share2,
 } from "lucide-react"
-import { generateMockSubmissionStats } from "@/lib/mockSubmissionStats"
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
@@ -100,6 +98,15 @@ function ResultPage() {
     submissionId: string
   }
   const [activeTab, setActiveTab] = useState<"feedback" | "answer" | "conversation">("feedback")
+  const [includeEvaluation, setIncludeEvaluation] = useState(false)
+  const [shareMessage, setShareMessage] = useState("")
+  const [sharedPostId, setSharedPostId] = useState<string | null>(null)
+  const [sharing, setSharing] = useState(false)
+
+  const { data: session } = useQuery<{ user?: { id: string } } | null>({
+    queryKey: ["session"],
+    queryFn: () => fetch(`${API}/api/auth/get-session`, { credentials: "include" }).then((r) => r.ok ? r.json() : null),
+  })
 
   const { data: submission, isLoading } = useQuery<SubmissionRow>({
     queryKey: ["submission", submissionId],
@@ -121,10 +128,19 @@ function ResultPage() {
     : []
   const isEvaluating = !result && submission?.status !== "FAILED"
 
-  // Generate mock stats (replace with real API when backend is ready)
-  const mockStats = overallScore != null ? generateMockSubmissionStats(overallScore, questionId) : null
-
   const answerText = extractLexicalText(submission?.lexicalState ?? {})
+
+  async function shareSubmission() {
+    setSharing(true); setShareMessage("")
+    try {
+      const response = await fetch(`${API}/api/community`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ submissionId, includeEvaluation }) })
+      const data = await response.json().catch(() => ({})) as { id?: string; error?: string }
+      if (!response.ok) throw new Error(data.error ?? "Could not share this answer")
+      setSharedPostId(data.id ?? null)
+      setShareMessage("Published to the community.")
+    } catch (error) { setShareMessage(error instanceof Error ? error.message : "Could not share this answer") }
+    finally { setSharing(false) }
+  }
 
   const statusLabel =
     overallScore == null
@@ -246,24 +262,15 @@ function ResultPage() {
                 {statusLabel}
               </span>
             </div>
-            {/* Percentile (new) */}
-            {mockStats && (
-              <div className="flex flex-col">
-                <span
-                  className="text-[10px] font-bold uppercase tracking-widest mb-1"
-                  style={{ color: DS.textSecondary }}
-                >
-                  Percentile
-                </span>
-                <span className="flex items-center gap-2 text-sm font-medium" style={{ color: DS.indigoPale }}>
-                  <TrendingUp size={14} />
-                  Top {Math.round(100 - mockStats.percentileRank)}%
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </header>
+
+      {submission?.status === "DONE" && <section className="mb-8 flex flex-wrap items-center gap-3 rounded-xl p-4" style={{ background: DS.cardBg, border: DS.cardBorder }}>
+        <div className="mr-auto"><p className="text-sm font-semibold" style={{ color: DS.textPrimary }}>Share your answer</p><p className="mt-1 text-xs" style={{ color: DS.textSecondary }}>Your answer and any diagram will be public with your account name.</p></div>
+        {session?.user ? <><label className="flex items-center gap-2 text-xs" style={{ color: DS.textSecondary }}><input type="checkbox" checked={includeEvaluation} onChange={(e) => setIncludeEvaluation(e.target.checked)} /> Include AI feedback and score</label><button type="button" disabled={sharing} onClick={() => void shareSubmission()} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" style={{ background: DS.indigo }}><Share2 size={14}/>{sharing ? "Publishing…" : "Publish"}</button></> : <p className="w-full text-xs" style={{ color: DS.textSecondary }}>Guest submissions are not transferred to accounts, so this answer can’t be published. <Link to="/auth/login" className="underline">Sign in before your next submission</Link>.</p>}
+        {shareMessage && <p role="status" className="w-full text-xs" style={{ color: DS.textSecondary }}>{shareMessage}{sharedPostId && <> <Link to="/community/$threadId" params={{ threadId: sharedPostId }} className="underline">View post</Link></>}</p>}
+      </section>}
 
       {/* ── Pillar Breakdown grid ── */}
       {(componentScores.length > 0 || isLoading || isEvaluating) && (
@@ -414,56 +421,6 @@ function ResultPage() {
                 </ul>
               </div>
             )}
-          </div>
-        </section>
-      )}
-
-      {/* ── Weak Areas Section (new) ── */}
-      {mockStats && mockStats.weakAreas.length > 0 && (
-        <section
-          className="mb-8 p-6 rounded-xl border"
-          style={{ background: DS.cardBg, border: DS.cardBorder }}
-        >
-          <div className="flex items-start gap-3 mb-4">
-            <AlertCircle size={18} style={{ color: DS.amber, flexShrink: 0, marginTop: "2px" }} />
-            <div>
-              <h2 className="text-lg font-bold" style={{ color: DS.textPrimary }}>
-                Areas for Improvement
-              </h2>
-              <p className="text-sm mt-1" style={{ color: DS.textSecondary }}>
-                Focus on these weak areas to strengthen your design skills
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {mockStats.weakAreas.map((area) => (
-              <div
-                key={area.dimensionId}
-                className="flex items-center justify-between p-3 rounded-lg"
-                style={{
-                  background: "var(--app-amber-10)",
-                  border: "1px solid var(--app-amber-15)",
-                }}
-              >
-                <div className="flex-1">
-                  <p className="font-medium text-sm" style={{ color: DS.textPrimary }}>
-                    {area.label}
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: DS.textSecondary }}>
-                    {area.suggestion}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <span
-                    className="text-sm font-bold"
-                    style={{ color: area.score >= 50 ? DS.green : DS.red }}
-                  >
-                    {Math.round(area.score)}/100
-                  </span>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
       )}

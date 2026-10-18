@@ -28,6 +28,8 @@ export const Route = createFileRoute("/settings")({ component: SettingsPage })
 
 function SettingsPage() {
   const { toast } = useToast()
+  const [confirmEmail, setConfirmEmail] = useState("")
+  const [dataActionBusy, setDataActionBusy] = useState(false)
 
   const { data: session } = useQuery<{ user: SessionUser } | null>({
     queryKey: ["session"],
@@ -43,7 +45,6 @@ function SettingsPage() {
       fetch(`${API}/api/me/stats`, { credentials: "include" }).then((r) =>
         r.json(),
       ),
-    enabled: !!session?.user,
   })
 
   const user = session?.user ?? null
@@ -51,6 +52,33 @@ function SettingsPage() {
   function handleSignOut() {
     fetch(`${API}/api/auth/sign-out`, { method: "POST", credentials: "include" })
       .finally(() => { window.location.href = "/" })
+  }
+
+  async function clearGuestData() {
+    if (!window.confirm("Clear all practice submissions and saved API keys from this guest session?")) return
+    setDataActionBusy(true)
+    try {
+      const response = await fetch(`${API}/api/me/session-data`, { method: "DELETE", credentials: "include" })
+      const result = await response.json().catch(() => ({})) as { error?: string }
+      if (!response.ok) throw new Error(result.error ?? "Could not clear guest data")
+      if (!user) localStorage.removeItem(STORAGE_KEY)
+      toast("Guest session data cleared", "success")
+      window.location.reload()
+    } catch (error) { toast(error instanceof Error ? error.message : "Could not clear guest data", "error") }
+    finally { setDataActionBusy(false) }
+  }
+
+  async function deleteAccount() {
+    if (!user || confirmEmail !== user.email || !window.confirm("Permanently delete your account and its submissions, API keys, community posts, and comments?")) return
+    setDataActionBusy(true)
+    try {
+      const response = await fetch(`${API}/api/me`, { method: "DELETE", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirmEmail }) })
+      const result = await response.json().catch(() => ({})) as { error?: string }
+      if (!response.ok) throw new Error(result.error ?? "Could not delete account")
+      localStorage.removeItem(STORAGE_KEY)
+      window.location.href = "/"
+    } catch (error) { toast(error instanceof Error ? error.message : "Could not delete account", "error") }
+    finally { setDataActionBusy(false) }
   }
 
   return (
@@ -61,6 +89,11 @@ function SettingsPage() {
       >
         Settings
       </h1>
+
+      <SectionCard icon={<AlertTriangle size={15} style={{ color: "var(--app-red)" }} />} title="Guest session data" subtitle="Guest activity is stored separately from your account, including on this browser">
+        <p className="mb-3 text-sm" style={{ color: "var(--app-subtle)" }}>Clear submissions, results, and saved API keys created before signing in on this browser.</p>
+        <button type="button" disabled={dataActionBusy} onClick={() => void clearGuestData()} className="rounded border border-rose-800 px-4 py-2 text-sm text-rose-300 disabled:opacity-50">{dataActionBusy ? "Working…" : "Clear guest data"}</button>
+      </SectionCard>
 
       {user ? (
         <>
@@ -214,6 +247,14 @@ function SettingsPage() {
               >
                 Sign Out
               </button>
+            </div>
+            <div className="px-6 pb-5">
+              <p style={{ color: "var(--app-fg)" }} className="text-sm font-medium">Delete account and data</p>
+              <p style={{ color: "var(--app-subtle)" }} className="text-xs mt-1">Deletes your account, API keys, private practice history, shared posts, and comments.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <input aria-label="Confirm account email" value={confirmEmail} onChange={(e) => setConfirmEmail(e.target.value)} placeholder={user.email} className="min-w-56 flex-1 rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100" />
+                <button type="button" disabled={dataActionBusy || confirmEmail !== user.email} onClick={() => void deleteAccount()} className="rounded border border-rose-800 px-4 py-2 text-sm text-rose-300 disabled:opacity-50">Delete account</button>
+              </div>
             </div>
           </div>
         </>

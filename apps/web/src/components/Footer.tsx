@@ -43,14 +43,15 @@ export function Footer() {
         {/* Links */}
         <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm">
           {[
-            "Documentation",
-            "API Reference",
-            "Terms of Service",
-            "Privacy Policy",
-          ].map((label) => (
+            { label: "Documentation", to: "/docs" as const },
+            { label: "API Reference", to: "/docs" as const, hash: "api-reference" },
+            { label: "Terms of Service", to: "/legal" as const, hash: "terms" },
+            { label: "Privacy Policy", to: "/legal" as const, hash: "privacy" },
+          ].map(({ label, to, hash }) => (
             <Link
               key={label}
-              to="/wip"
+              to={to}
+              hash={hash}
               className="transition-colors"
               style={{ color: "var(--app-muted)" }}
               onMouseEnter={(e) => {

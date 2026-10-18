@@ -19,7 +19,16 @@ import { redisPub, createSubscriber, submissionChannel, replyChannel, eventBufKe
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+class SubmissionRemovedError extends Error {}
+
+async function ensureSubmissionExists(submissionId: string) {
+  if (!await db.submission.findUnique({ where: { id: submissionId }, select: { id: true } })) {
+    throw new SubmissionRemovedError("Submission was deleted")
+  }
+}
+
 async function publish(submissionId: string, event: AgentEvent) {
+  if (!await db.submission.findUnique({ where: { id: submissionId }, select: { id: true } })) return
   console.log(`[worker:publish] ${submissionId} -> ${event.type}`)
   const serialized = JSON.stringify(event)
   const bufKey = eventBufKey(submissionId)
@@ -65,20 +74,26 @@ async function waitForReply(
   return new Promise((resolve) => {
     const sub = createSubscriber()
     const channel = replyChannel(submissionId)
-
-    const timer = setTimeout(() => {
+    let settled = false
+    const finish = (reply: string | null) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      clearInterval(deletionCheck)
       sub.unsubscribe(channel).catch(() => {})
       sub.quit().catch(() => {})
-      resolve(null)
-    }, timeoutMs)
+      resolve(reply)
+    }
+
+    const timer = setTimeout(() => finish(null), timeoutMs)
+    const deletionCheck = setInterval(() => {
+      void db.submission.findUnique({ where: { id: submissionId }, select: { id: true } })
+        .then((submission) => { if (!submission) finish(null) })
+        .catch(() => {})
+    }, 2000)
 
     sub.subscribe(channel).then(() => {
-      sub.on("message", (_, reply) => {
-        clearTimeout(timer)
-        sub.unsubscribe(channel).catch(() => {})
-        sub.quit().catch(() => {})
-        resolve(reply)
-      })
+      sub.on("message", (_, reply) => finish(reply))
     })
   })
 }
@@ -91,10 +106,12 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
 
   console.log(`[eval] Starting submission ${submissionId}`)
 
+  if (!await db.submission.findUnique({ where: { id: submissionId }, select: { id: true } })) return
+
   // 1. Resolve API key
   const resolved = await resolveApiKey({ userId, sessionId })
   if (!resolved) {
-    await publish(submissionId, { type: "error", message: "NO_API_KEY: No OpenAI API key found." })
+    await publish(submissionId, { type: "error", message: "NO_API_KEY: No provider API key found. Add your key in Settings." })
     await db.submission.update({ where: { id: submissionId }, data: { status: "FAILED" } })
     return
   }
@@ -126,6 +143,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
   })
 
   try {
+    await ensureSubmissionExists(submissionId)
     // 3. Build initial messages
     const systemPrompt = buildSystemPrompt(questionCtx, mood)
     const answerPrompt = buildAnswerPrompt(questionCtx, lexicalContent, excalidrawSummary)
@@ -160,6 +178,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
       waitForReply: async (sid) => {
         await db.submission.update({ where: { id: sid }, data: { status: "FOLLOWUP" } })
         const reply = await waitForReply(sid)
+        await ensureSubmissionExists(sid)
         if (reply) {
           await db.submission.update({ where: { id: sid }, data: { status: "PROCESSING" } })
         }
@@ -168,6 +187,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     })
 
     // 5. Evaluation phase
+    await ensureSubmissionExists(submissionId)
     await db.submission.update({ where: { id: submissionId }, data: { status: "EVALUATING" } })
 
     const componentScores = await runEvaluationPhase({
@@ -179,6 +199,8 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
       submissionId,
       publishEvent: (event) => publish(submissionId, event),
     })
+
+    await ensureSubmissionExists(submissionId)
 
     const overallScore = computeWeightedScore(componentScores, rubric)
 
@@ -192,6 +214,8 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
       overallScore,
       rubric,
     })
+
+    await ensureSubmissionExists(submissionId)
 
     // 7. Persist result
     await db.evalResult.create({
@@ -214,6 +238,8 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
       `[eval] Completed ${submissionId} — score: ${overallScore.toFixed(1)}, rounds: ${followupRounds}`,
     )
   } catch (error) {
+    if (error instanceof SubmissionRemovedError) return
+    if (!await db.submission.findUnique({ where: { id: submissionId }, select: { id: true } })) return
     const message = error instanceof Error ? error.message : "Unknown error"
     console.error(`[eval] Failed ${submissionId}:`, message)
 
