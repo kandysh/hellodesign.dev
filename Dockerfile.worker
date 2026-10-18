@@ -1,37 +1,39 @@
-# ── Dockerfile.worker ───────────────────────────────────────────────────────
-# Worker service image. Build context must be the repository root for workspace packages.
-
-FROM node:20-alpine
+# Build the worker bundle and its isolated production dependencies.
+FROM node:20-alpine AS build
 
 ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
 
-RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
-
+RUN corepack enable
 WORKDIR /app
+ENV COREPACK_HOME=/app/.corepack
 
-# Copy workspace manifests first — maximise Docker layer cache
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
+COPY apps/api/package.json ./apps/api/
+COPY apps/worker/package.json ./apps/worker/
+COPY apps/web/package.json ./apps/web/
+COPY packages/ai/package.json ./packages/ai/
+COPY packages/auth/package.json ./packages/auth/
+COPY packages/config/package.json ./packages/config/
+COPY packages/db/package.json ./packages/db/
+COPY packages/queue/package.json ./packages/queue/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/types/package.json ./packages/types/
+COPY packages/ui/package.json ./packages/ui/
 
-COPY apps/api/package.json          ./apps/api/
-COPY apps/worker/package.json       ./apps/worker/
-COPY apps/web/package.json          ./apps/web/
-COPY packages/ai/package.json       ./packages/ai/
-COPY packages/auth/package.json     ./packages/auth/
-COPY packages/config/package.json   ./packages/config/
-COPY packages/db/package.json       ./packages/db/
-COPY packages/queue/package.json    ./packages/queue/
-COPY packages/shared/package.json   ./packages/shared/
-COPY packages/types/package.json    ./packages/types/
-COPY packages/ui/package.json       ./packages/ui/
-
+RUN chown -R node:node /app
+USER node
+RUN corepack prepare pnpm@9.15.4 --activate
 RUN pnpm install --frozen-lockfile
 
-COPY . .
-
+COPY --chown=node:node . .
 ENV DATABASE_URL=${DATABASE_URL}
 RUN pnpm --filter @sysdesign/db exec prisma generate
-ENV DATABASE_URL=
+RUN pnpm --filter @sysdesign/worker build
+RUN pnpm --filter @sysdesign/worker deploy --prod --legacy /app/deploy/worker
 
+FROM node:20-alpine AS runtime
+WORKDIR /app
 ENV NODE_ENV=production
-
-CMD ["pnpm", "--filter", "@sysdesign/worker", "exec", "tsx", "src/index.ts"]
+COPY --from=build --chown=node:node /app/deploy/worker/ ./
+USER node
+CMD ["node", "dist/index.js"]

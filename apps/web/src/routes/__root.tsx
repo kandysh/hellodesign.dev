@@ -1,9 +1,9 @@
 import type { QueryClient } from "@tanstack/react-query"
 import { createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react-router"
+import { ErrorBoundary, OfflineIndicator } from "../components/ErrorBoundary"
 import { Footer } from "../components/Footer"
 import Header from "../components/Header"
 import { ToastProvider } from "../components/Toast"
-import { ErrorBoundary, OfflineIndicator } from "../components/ErrorBoundary"
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -26,9 +26,13 @@ function RootLayout() {
       <ErrorBoundary>
         <div className="flex flex-col min-h-screen">
           {!isAuthPage && <Header />}
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:text-sm focus:font-medium">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[60] focus:rounded-lg focus:bg-base-100 focus:px-4 focus:py-2 focus:text-sm focus:font-medium"
+          >
             Skip to content
           </a>
+          {/* biome-ignore lint/correctness/useUniqueElementIds: Stable target for the page skip link. */}
           <div id="main-content" className={`${isAuthPage ? "" : "pt-16"} flex-1`}>
             <Outlet />
           </div>

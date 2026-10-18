@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/sysdesign
+      BETTER_AUTH_SECRET: ci-auth-secret-0123456789-abcdefghijklmnopqrstuvwxyz
+      ENCRYPTION_KEY: ci-encryption-key-0123456789-abcdefghijklmnopqrstuvwxyz
+      ENCRYPTION_KEY_V2: ci-encryption-key-v2-0123456789-abcdefghijklmnopqrstuvwxyz
+      ENCRYPTION_KEY_VERSION: v1
+      NODE_ENV: test
+      REDIS_URL: redis://localhost:6379
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: sysdesign
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d sysdesign"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+          run_install: false
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate Prisma client
+        run: pnpm --filter @sysdesign/db db:generate
+      - name: Apply database migrations
+        run: pnpm --filter @sysdesign/db db:deploy
+      - name: Seed question catalog
+        run: pnpm --filter @sysdesign/db db:seed
+      - name: Unit tests
+        run: pnpm test
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Format and import checks
+        run: pnpm check
+      - name: Build
+        run: pnpm build
+      - name: Build API container
+        run: docker build --file Dockerfile.api --tag hello-design-api:ci .
+      - name: Build worker container
+        run: docker build --file Dockerfile.worker --tag hello-design-worker:ci .
+      - name: Build web container
+        run: docker build --file Dockerfile.web --tag hello-design-web:ci .

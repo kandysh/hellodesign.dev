@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react"
 import { AlertTriangle, RotateCcw } from "lucide-react"
+import React, { useEffect, useState } from "react"
 
 interface ErrorBoundaryProps {
   children: React.ReactNode
@@ -46,8 +46,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 {this.state.error?.message || "An unexpected error occurred"}
               </p>
               <button
+                type="button"
                 onClick={this.handleReset}
-                className="btn btn-sm btn-outline gap-2 rounded-lg"
+                className="app-button app-button-sm app-button-outline gap-2 rounded-lg"
               >
                 <RotateCcw size={14} />
                 Try again
@@ -97,7 +98,8 @@ export function useNetworkError() {
 
   useEffect(() => {
     const handleNetworkError = (event: Event) => {
-      const err = event instanceof ErrorEvent ? new Error(event.message) : new Error("Network error")
+      const err =
+        event instanceof ErrorEvent ? new Error(event.message) : new Error("Network error")
       setError(err)
     }
 

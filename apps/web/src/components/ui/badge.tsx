@@ -1,14 +1,14 @@
-import type * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
+import type * as React from "react"
 import { cn } from "@/lib/utils"
 
-const badgeVariants = cva("badge", {
+const badgeVariants = cva("app-badge", {
   variants: {
     variant: {
-      default: "badge-primary",
-      secondary: "badge-secondary",
-      destructive: "badge-error",
-      outline: "badge-outline",
+      default: "app-badge-primary",
+      secondary: "app-badge-secondary",
+      destructive: "app-badge-error",
+      outline: "app-badge-outline",
     },
   },
   defaultVariants: {

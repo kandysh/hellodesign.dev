@@ -5,8 +5,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: sysdesign
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -17,8 +15,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -26,6 +22,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+      target: build
+      args:
+        DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sysdesign
+    command: ["pnpm", "--filter", "@sysdesign/db", "db:deploy"]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sysdesign
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
 
   api:
     build:
@@ -36,21 +47,23 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sysdesign
       REDIS_URL: redis://redis:6379
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-dev-secret-change-before-production}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:3001}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set BETTER_AUTH_URL in .env}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:-}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      ENCRYPTION_KEY_V2: ${ENCRYPTION_KEY_V2:-}
+      ENCRYPTION_KEY_VERSION: ${ENCRYPTION_KEY_VERSION:-v1}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
-      WEB_URL: ${WEB_URL:-http://localhost:3000}
-      API_URL: ${API_URL:-http://localhost:3001}
+      WEB_URL: ${WEB_URL:?Set WEB_URL in .env}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
       PORT: 3001
-    ports:
-      - "3001:3001"
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
     healthcheck:
@@ -76,8 +89,14 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/sysdesign
       REDIS_URL: redis://redis:6379
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-}
+      ENCRYPTION_KEY_V2: ${ENCRYPTION_KEY_V2:-}
+      ENCRYPTION_KEY_VERSION: ${ENCRYPTION_KEY_VERSION:-v1}
+      DEEP_EVAL_CONCURRENCY: ${DEEP_EVAL_CONCURRENCY:-2}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -89,9 +108,9 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+        VITE_API_URL: ${VITE_API_URL:-}
     ports:
-      - "3000:80"
+      - "3000:8080"
     depends_on:
       api:
         condition: service_healthy

@@ -1,6 +1,6 @@
+import type { AgentResult } from "@sysdesign/types"
 import { cn } from "../lib/utils.js"
 import { ScoreRing } from "./score-ring.js"
-import type { AgentResult } from "@sysdesign/types"
 
 const agentLabels: Record<string, string> = {
   RequirementsAgent: "Requirements",
@@ -36,8 +36,8 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
             <div className="mt-2">
               <p className="text-xs font-medium text-success mb-1">✓ Strengths</p>
               <ul className="text-xs text-base-content/60 space-y-0.5">
-                {result.strengths.map((s, i) => (
-                  <li key={i}>• {s}</li>
+                {result.strengths.map((s) => (
+                  <li key={s}>• {s}</li>
                 ))}
               </ul>
             </div>
@@ -46,8 +46,8 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
             <div className="mt-2">
               <p className="text-xs font-medium text-error mb-1">✗ Gaps</p>
               <ul className="text-xs text-base-content/60 space-y-0.5">
-                {result.weaknesses.map((w, i) => (
-                  <li key={i}>• {w}</li>
+                {result.weaknesses.map((w) => (
+                  <li key={w}>• {w}</li>
                 ))}
               </ul>
             </div>
@@ -56,8 +56,8 @@ export function AgentFeedbackPanel({ result, isNew = false }: AgentFeedbackPanel
             <div className="mt-2">
               <p className="text-xs font-medium text-info mb-1">→ Suggestions</p>
               <ul className="text-xs text-base-content/60 space-y-0.5">
-                {result.suggestions.map((s, i) => (
-                  <li key={i}>• {s}</li>
+                {result.suggestions.map((s) => (
+                  <li key={s}>• {s}</li>
                 ))}
               </ul>
             </div>

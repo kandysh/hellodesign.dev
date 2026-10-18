@@ -12,23 +12,22 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as MeRouteImport } from './routes/me'
+import { Route as LegalRouteImport } from './routes/legal'
+import { Route as DocsRouteImport } from './routes/docs'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
 import { Route as CommunityIndexRouteImport } from './routes/community/index'
 import { Route as SubmissionsSubmissionIdRouteImport } from './routes/submissions/$submissionId'
 import { Route as QuestionsQuestionIdRouteImport } from './routes/questions/$questionId'
 import { Route as CommunityThreadIdRouteImport } from './routes/community/$threadId'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as QuestionsQuestionIdInterviewRouteImport } from './routes/questions/$questionId_.interview'
 import { Route as QuestionsQuestionIdResultSubmissionIdRouteImport } from './routes/questions/$questionId_.result.$submissionId'
-import { Route as DocsRouteImport } from './routes/docs'
-import { Route as LegalRouteImport } from './routes/legal'
-import { Route as AdminRouteImport } from './routes/admin'
-
-const DocsRoute = DocsRouteImport.update({ id: '/docs', path: '/docs', getParentRoute: () => rootRouteImport } as any)
-const LegalRoute = LegalRouteImport.update({ id: '/legal', path: '/legal', getParentRoute: () => rootRouteImport } as any)
-const AdminRoute = AdminRouteImport.update({ id: '/admin', path: '/admin', getParentRoute: () => rootRouteImport } as any)
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -43,6 +42,26 @@ const PricingRoute = PricingRouteImport.update({
 const MeRoute = MeRouteImport.update({
   id: '/me',
   path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -75,6 +94,11 @@ const CommunityThreadIdRoute = CommunityThreadIdRouteImport.update({
   path: '/community/$threadId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
   id: '/auth/register',
   path: '/auth/register',
@@ -83,6 +107,11 @@ const AuthRegisterRoute = AuthRegisterRouteImport.update({
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QuestionsQuestionIdInterviewRoute =
@@ -99,15 +128,18 @@ const QuestionsQuestionIdResultSubmissionIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/demo': typeof DemoRoute
   '/docs': typeof DocsRoute
   '/legal': typeof LegalRoute
-  '/admin': typeof AdminRoute
-  '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/community/$threadId': typeof CommunityThreadIdRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
@@ -117,15 +149,18 @@ export interface FileRoutesByFullPath {
   '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/demo': typeof DemoRoute
   '/docs': typeof DocsRoute
   '/legal': typeof LegalRoute
-  '/admin': typeof AdminRoute
-  '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/community/$threadId': typeof CommunityThreadIdRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
@@ -135,16 +170,19 @@ export interface FileRoutesByTo {
   '/questions/$questionId/result/$submissionId': typeof QuestionsQuestionIdResultSubmissionIdRoute
 }
 export interface FileRoutesById {
-  '/docs': typeof DocsRoute
-  '/legal': typeof LegalRoute
-  '/admin': typeof AdminRoute
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/demo': typeof DemoRoute
+  '/docs': typeof DocsRoute
+  '/legal': typeof LegalRoute
   '/me': typeof MeRoute
   '/pricing': typeof PricingRoute
   '/settings': typeof SettingsRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/community/$threadId': typeof CommunityThreadIdRoute
   '/questions/$questionId': typeof QuestionsQuestionIdRoute
   '/submissions/$submissionId': typeof SubmissionsSubmissionIdRoute
@@ -156,15 +194,18 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
+    | '/admin'
+    | '/demo'
     | '/docs'
     | '/legal'
-    | '/admin'
-    | '/'
     | '/me'
     | '/pricing'
     | '/settings'
+    | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/reset-password'
     | '/community/$threadId'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
@@ -174,15 +215,18 @@ export interface FileRouteTypes {
     | '/questions/$questionId/result/$submissionId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
+    | '/admin'
+    | '/demo'
     | '/docs'
     | '/legal'
-    | '/admin'
-    | '/'
     | '/me'
     | '/pricing'
     | '/settings'
+    | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/reset-password'
     | '/community/$threadId'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
@@ -191,16 +235,19 @@ export interface FileRouteTypes {
     | '/questions/$questionId/interview'
     | '/questions/$questionId/result/$submissionId'
   id:
-    | '/docs'
-    | '/legal'
-    | '/admin'
     | '__root__'
     | '/'
+    | '/admin'
+    | '/demo'
+    | '/docs'
+    | '/legal'
     | '/me'
     | '/pricing'
     | '/settings'
+    | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/reset-password'
     | '/community/$threadId'
     | '/questions/$questionId'
     | '/submissions/$submissionId'
@@ -211,15 +258,18 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  DemoRoute: typeof DemoRoute
   DocsRoute: typeof DocsRoute
   LegalRoute: typeof LegalRoute
-  AdminRoute: typeof AdminRoute
-  IndexRoute: typeof IndexRoute
   MeRoute: typeof MeRoute
   PricingRoute: typeof PricingRoute
   SettingsRoute: typeof SettingsRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   CommunityThreadIdRoute: typeof CommunityThreadIdRoute
   QuestionsQuestionIdRoute: typeof QuestionsQuestionIdRoute
   SubmissionsSubmissionIdRoute: typeof SubmissionsSubmissionIdRoute
@@ -231,9 +281,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/docs': { id: '/docs'; path: '/docs'; fullPath: '/docs'; preLoaderRoute: typeof DocsRouteImport; parentRoute: typeof rootRouteImport }
-    '/legal': { id: '/legal'; path: '/legal'; fullPath: '/legal'; preLoaderRoute: typeof LegalRouteImport; parentRoute: typeof rootRouteImport }
-    '/admin': { id: '/admin'; path: '/admin'; fullPath: '/admin'; preLoaderRoute: typeof AdminRouteImport; parentRoute: typeof rootRouteImport }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -253,6 +300,34 @@ declare module '@tanstack/react-router' {
       path: '/me'
       fullPath: '/me'
       preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -297,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CommunityThreadIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/register': {
       id: '/auth/register'
       path: '/auth/register'
@@ -309,6 +391,13 @@ declare module '@tanstack/react-router' {
       path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/questions/$questionId_/interview': {
@@ -329,15 +418,18 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  DemoRoute: DemoRoute,
   DocsRoute: DocsRoute,
   LegalRoute: LegalRoute,
-  AdminRoute: AdminRoute,
-  IndexRoute: IndexRoute,
   MeRoute: MeRoute,
   PricingRoute: PricingRoute,
   SettingsRoute: SettingsRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
   CommunityThreadIdRoute: CommunityThreadIdRoute,
   QuestionsQuestionIdRoute: QuestionsQuestionIdRoute,
   SubmissionsSubmissionIdRoute: SubmissionsSubmissionIdRoute,

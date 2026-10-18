@@ -13,13 +13,36 @@ const score = (dimensionId: string) => ({
 
 test("validates one bounded score for every rubric dimension", () => {
   assert.deepEqual(
-    validateEvaluationScores({ scores: dimensions.map(score) }, dimensions).map((item) => item.dimensionId),
+    validateEvaluationScores({ scores: dimensions.map(score) }, dimensions).map(
+      (item) => item.dimensionId,
+    ),
     dimensions,
   )
-  assert.throws(() => validateEvaluationScores({ scores: [score("requirements")] }, dimensions), /missing: scalability/)
-  assert.throws(() => validateEvaluationScores({ scores: [score("requirements"), score("requirements")] }, dimensions), /duplicate/)
-  assert.throws(() => validateEvaluationScores({ scores: [score("requirements"), score("unknown")] }, dimensions), /unknown/)
-  assert.throws(() => validateEvaluationScores({ scores: [score("requirements"), { ...score("scalability"), score: 101 }] }, dimensions), /score schema/)
+  assert.throws(
+    () => validateEvaluationScores({ scores: [score("requirements")] }, dimensions),
+    /missing: scalability/,
+  )
+  assert.throws(
+    () =>
+      validateEvaluationScores(
+        { scores: [score("requirements"), score("requirements")] },
+        dimensions,
+      ),
+    /duplicate/,
+  )
+  assert.throws(
+    () =>
+      validateEvaluationScores({ scores: [score("requirements"), score("unknown")] }, dimensions),
+    /unknown/,
+  )
+  assert.throws(
+    () =>
+      validateEvaluationScores(
+        { scores: [score("requirements"), { ...score("scalability"), score: 101 }] },
+        dimensions,
+      ),
+    /score schema/,
+  )
 })
 
 test("closes every unanswered tool call before the next user turn", () => {
@@ -40,6 +63,16 @@ test("closes every unanswered tool call before the next user turn", () => {
   const closed = closeDanglingToolCalls(original)
   const index = closed.indexOf(toolCallMessage)
   const toolReplies = closed.slice(index + 1).filter((message) => message instanceof ToolMessage)
-  assert.deepEqual(toolReplies.map((message) => message.tool_call_id), ["risk-1", "satisfied-1"])
-  assert.ok(closed.indexOf(toolReplies[1]!) < closed.findIndex((message) => message instanceof HumanMessage && message.content === "Continue"))
+  const secondToolReply = toolReplies[1]
+  assert.ok(secondToolReply)
+  assert.deepEqual(
+    toolReplies.map((message) => message.tool_call_id),
+    ["risk-1", "satisfied-1"],
+  )
+  assert.ok(
+    closed.indexOf(secondToolReply) <
+      closed.findIndex(
+        (message) => message instanceof HumanMessage && message.content === "Continue",
+      ),
+  )
 })

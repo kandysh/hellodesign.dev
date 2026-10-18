@@ -1,33 +1,34 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
 import type { QuestionSummary } from "@sysdesign/types"
-import { DifficultyBadge } from "@/components/DifficultyBadge"
-import { MetricsCard } from "@/components/MetricsCard"
-import { useSession } from "@/lib/auth-client"
+import { useQuery } from "@tanstack/react-query"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   ArrowRight,
-  Clock,
-  LayoutGrid,
-  Trophy,
-  Flame,
   CheckCircle2,
-  Search,
-  X,
   ChevronDown,
+  Clock,
+  Flame,
+  LayoutGrid,
+  Search,
+  Trophy,
+  X,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from "react"
+import { DifficultyBadge } from "@/components/DifficultyBadge"
+import { MetricsCard } from "@/components/MetricsCard"
+import { apiJson } from "@/lib/api-client"
+import { useSession } from "@/lib/auth-client"
 import { questionsQueryOptions } from "@/lib/queries/questions"
+import { cn } from "@/lib/utils"
 
 const categoryLabels: Record<string, string> = {
   "distributed-systems": "Distributed Systems",
-  databases:             "Databases",
-  caching:               "Caching",
-  messaging:             "Messaging",
-  "api-design":          "API Design",
-  storage:               "Storage",
-  networking:            "Networking",
-  general:               "General",
+  databases: "Databases",
+  caching: "Caching",
+  messaging: "Messaging",
+  "api-design": "API Design",
+  storage: "Storage",
+  networking: "Networking",
+  general: "General",
 }
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const
@@ -35,7 +36,9 @@ type SortOption = "default" | "az" | "za" | "diff-asc" | "diff-desc" | "time-asc
 
 const difficultyOrder: Record<string, number> = { easy: 1, medium: 2, hard: 3 }
 const difficultyColors: Record<string, string> = {
-  easy: "var(--app-green)", medium: "var(--app-amber)", hard: "var(--app-red)",
+  easy: "var(--app-green)",
+  medium: "var(--app-amber)",
+  hard: "var(--app-red)",
 }
 
 function matchesSearch(q: QuestionSummary, query: string): boolean {
@@ -48,8 +51,7 @@ function matchesSearch(q: QuestionSummary, query: string): boolean {
 }
 
 export const Route = createFileRoute("/questions/")({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.prefetchQuery(questionsQueryOptions),
+  loader: ({ context: { queryClient } }) => queryClient.prefetchQuery(questionsQueryOptions),
   component: QuestionsPage,
 })
 
@@ -64,10 +66,8 @@ function QuestionsPage() {
   const { data: progress } = useQuery<{ solved: number; avgScore: number | null; streak: number }>({
     queryKey: ["me/stats"],
     enabled: !!session?.user,
-    queryFn: () => fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:3001"}/api/me/stats`, { credentials: "include" }).then((response) => {
-      if (!response.ok) throw new Error("Could not load practice progress")
-      return response.json()
-    }),
+    queryFn: () =>
+      apiJson<{ solved: number; avgScore: number | null; streak: number }>("/api/me/stats"),
   })
 
   const categories = [...new Set(questions.map((q) => q.category))]
@@ -101,17 +101,25 @@ function QuestionsPage() {
       ? filtered
       : [...filtered].sort((a, b) => {
           switch (sortBy) {
-            case "az":        return a.title.localeCompare(b.title)
-            case "za":        return b.title.localeCompare(a.title)
-            case "diff-asc":  return (difficultyOrder[a.difficulty] ?? 2) - (difficultyOrder[b.difficulty] ?? 2)
-            case "diff-desc": return (difficultyOrder[b.difficulty] ?? 2) - (difficultyOrder[a.difficulty] ?? 2)
-            case "time-asc":  return (a.estimatedMins ?? 25) - (b.estimatedMins ?? 25)
-            case "time-desc": return (b.estimatedMins ?? 25) - (a.estimatedMins ?? 25)
-            default:          return 0
+            case "az":
+              return a.title.localeCompare(b.title)
+            case "za":
+              return b.title.localeCompare(a.title)
+            case "diff-asc":
+              return (difficultyOrder[a.difficulty] ?? 2) - (difficultyOrder[b.difficulty] ?? 2)
+            case "diff-desc":
+              return (difficultyOrder[b.difficulty] ?? 2) - (difficultyOrder[a.difficulty] ?? 2)
+            case "time-asc":
+              return (a.estimatedMins ?? 25) - (b.estimatedMins ?? 25)
+            case "time-desc":
+              return (b.estimatedMins ?? 25) - (a.estimatedMins ?? 25)
+            default:
+              return 0
           }
         })
 
-  const hasFilters = selectedDifficulties.size > 0 || selectedCategories.size > 0 || searchQuery !== ""
+  const hasFilters =
+    selectedDifficulties.size > 0 || selectedCategories.size > 0 || searchQuery !== ""
   // Hide featured when user is filtering or sorting — avoid competing list logic on the page
   const showFeatured = !hasFilters && sortBy === "default"
 
@@ -119,8 +127,12 @@ function QuestionsPage() {
   const todaySeed = new Date().toISOString().slice(0, 10)
   const featured = [...questions]
     .sort((a, b) => {
-      const ha = Math.abs(Array.from(a.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997)
-      const hb = Math.abs(Array.from(b.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997)
+      const ha = Math.abs(
+        Array.from(a.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997,
+      )
+      const hb = Math.abs(
+        Array.from(b.id + todaySeed).reduce((s, c) => s * 31 + c.charCodeAt(0), 0) % 997,
+      )
       return ha - hb
     })
     .slice(0, 4)
@@ -128,7 +140,8 @@ function QuestionsPage() {
   function toggleDifficulty(d: string) {
     setSelectedDifficulties((prev) => {
       const next = new Set(prev)
-      if (next.has(d)) next.delete(d); else next.add(d)
+      if (next.has(d)) next.delete(d)
+      else next.add(d)
       return next
     })
   }
@@ -136,7 +149,8 @@ function QuestionsPage() {
   function toggleCategory(cat: string) {
     setSelectedCategories((prev) => {
       const next = new Set(prev)
-      if (next.has(cat)) next.delete(cat); else next.add(cat)
+      if (next.has(cat)) next.delete(cat)
+      else next.add(cat)
       return next
     })
   }
@@ -150,27 +164,33 @@ function QuestionsPage() {
 
   return (
     <div className="page-shell max-w-7xl" style={{ color: "var(--app-fg)" }}>
-
       {/* ── Page header ─────────────────────────────────────────── */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-2">
           <LayoutGrid size={16} style={{ color: "var(--app-indigo)" }} />
           <span
             className="text-xs uppercase tracking-widest font-bold"
-            style={{ color: "var(--app-indigo)", fontFamily: "'Space Grotesk', monospace" }}
+            style={{ color: "var(--app-indigo)", fontFamily: "'Geist Mono Variable', monospace" }}
           >
             Problem Library
           </span>
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight mb-1" style={{ letterSpacing: "-0.02em" }}>
+        <h1
+          className="text-3xl font-extrabold tracking-tight mb-1"
+          style={{ letterSpacing: "-0.02em" }}
+        >
           Architecture Challenges
         </h1>
         {/* Library-wide stats — shown once data loads */}
         {!isLoading && questions.length > 0 && (
           <div className="flex items-center gap-2 mt-1.5">
-            <span className="text-xs" style={{ color: "var(--app-muted)" }}>{questions.length} problems</span>
+            <span className="text-xs" style={{ color: "var(--app-muted)" }}>
+              {questions.length} problems
+            </span>
             <span style={{ color: "var(--app-border)" }}>·</span>
-            <span className="text-xs" style={{ color: "var(--app-muted)" }}>{categories.length} categories</span>
+            <span className="text-xs" style={{ color: "var(--app-muted)" }}>
+              {categories.length} categories
+            </span>
           </div>
         )}
       </div>
@@ -179,7 +199,10 @@ function QuestionsPage() {
       {session?.user && progress && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
+            <span
+              className="text-sm font-bold uppercase tracking-widest"
+              style={{ color: "var(--app-indigo)" }}
+            >
               Your Progress
             </span>
           </div>
@@ -191,8 +214,16 @@ function QuestionsPage() {
               icon={<CheckCircle2 size={20} />}
               iconColor="var(--app-green)"
               accentColor="tertiary"
-              progress={questions.length ? Math.min(100, (progress.solved / questions.length) * 100) : undefined}
-              description={questions.length ? `${Math.round((progress.solved / questions.length) * 100)}% of the current library` : "Completed practice questions"}
+              progress={
+                questions.length
+                  ? Math.min(100, (progress.solved / questions.length) * 100)
+                  : undefined
+              }
+              description={
+                questions.length
+                  ? `${Math.round((progress.solved / questions.length) * 100)}% of the current library`
+                  : "Completed practice questions"
+              }
             />
             <MetricsCard
               label="Average score"
@@ -202,7 +233,11 @@ function QuestionsPage() {
               iconColor="var(--app-indigo)"
               accentColor="primary"
               progress={progress.avgScore ?? undefined}
-              description={progress.avgScore !== null ? "Across completed reviews" : "Complete a review to see your average"}
+              description={
+                progress.avgScore !== null
+                  ? "Across completed reviews"
+                  : "Complete a review to see your average"
+              }
             />
             <MetricsCard
               label="Practice streak"
@@ -242,8 +277,12 @@ function QuestionsPage() {
                 color: "var(--app-fg)",
                 outline: "none",
               }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "var(--app-indigo)" }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = "var(--app-indigo)"
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = "var(--app-border)"
+              }}
             />
           </div>
 
@@ -305,7 +344,10 @@ function QuestionsPage() {
                     color: active ? difficultyColors[d] : "var(--app-subtle)",
                   }}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: difficultyColors[d] }} />
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: difficultyColors[d] }}
+                  />
                   {d}
                   {count > 0 && <span style={{ opacity: 0.65 }}>({count})</span>}
                 </button>
@@ -313,7 +355,10 @@ function QuestionsPage() {
             })}
 
             {/* Divider */}
-            <div className="h-4 w-px mx-1 self-center" style={{ background: "var(--app-border)" }} />
+            <div
+              className="h-4 w-px mx-1 self-center"
+              style={{ background: "var(--app-border)" }}
+            />
 
             {/* Category pills */}
             {categories.map((cat) => {
@@ -345,7 +390,9 @@ function QuestionsPage() {
             className="px-4 py-2.5 flex items-center gap-2 flex-wrap"
             style={{ borderTop: "1px solid var(--app-border)" }}
           >
-            <span className="text-xs shrink-0" style={{ color: "var(--app-muted)" }}>Active:</span>
+            <span className="text-xs shrink-0" style={{ color: "var(--app-muted)" }}>
+              Active:
+            </span>
 
             {searchQuery && (
               <FilterTag label={`"${searchQuery}"`} onRemove={() => setSearchQuery("")} />
@@ -374,8 +421,12 @@ function QuestionsPage() {
               onClick={clearAll}
               className="text-xs transition-colors shrink-0"
               style={{ color: "var(--app-subtle)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-red)" }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--app-subtle)" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--app-red)"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--app-subtle)"
+              }}
             >
               Clear all
             </button>
@@ -387,7 +438,10 @@ function QuestionsPage() {
       {showFeatured && featured.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--app-indigo)" }}>
+            <span
+              className="text-xs font-bold uppercase tracking-widest"
+              style={{ color: "var(--app-indigo)" }}
+            >
               Featured
             </span>
           </div>
@@ -406,21 +460,28 @@ function QuestionsPage() {
                     maxWidth: 240,
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = dot
+                    ;(e.currentTarget as HTMLElement).style.borderColor = dot
                     ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-2)"
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)"
+                    ;(e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)"
                     ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface)"
                   }}
                 >
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: dot }} />
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold truncate" style={{ color: "var(--app-fg)", maxWidth: 180 }}>
+                    <p
+                      className="text-xs font-semibold truncate"
+                      style={{ color: "var(--app-fg)", maxWidth: 180 }}
+                    >
                       {q.title}
                     </p>
-                    <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--app-muted)" }}>
-                      {categoryLabels[q.category] ?? q.category} · {q.estimatedMins ? `${q.estimatedMins}m` : "25m"}
+                    <p
+                      className="text-[11px] mt-0.5 truncate"
+                      style={{ color: "var(--app-muted)" }}
+                    >
+                      {categoryLabels[q.category] ?? q.category} ·{" "}
+                      {q.estimatedMins ? `${q.estimatedMins}m` : "25m"}
                     </p>
                   </div>
                 </Link>
@@ -433,16 +494,15 @@ function QuestionsPage() {
       {/* ── Question list ────────────────────────────────────────── */}
       <div className="flex flex-col gap-2">
         {isLoading ? (
-          <>
-            {[...Array(6)].map((_, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
+          ["question-1", "question-2", "question-3", "question-4", "question-5", "question-6"].map(
+            (skeletonId) => (
               <div
-                key={i}
+                key={skeletonId}
                 className="h-[74px] w-full rounded-lg animate-pulse"
                 style={{ background: "var(--app-surface)" }}
               />
-            ))}
-          </>
+            ),
+          )
         ) : isError ? (
           <div
             className="flex flex-col items-center justify-center rounded-xl py-16 text-center"
@@ -455,7 +515,11 @@ function QuestionsPage() {
               type="button"
               onClick={() => refetch()}
               className="px-4 py-2 rounded text-xs font-semibold transition-all"
-              style={{ background: "var(--app-red-10)", border: "1px solid var(--app-red-15)", color: "var(--app-red)" }}
+              style={{
+                background: "var(--app-red-10)",
+                border: "1px solid var(--app-red-15)",
+                color: "var(--app-red)",
+              }}
             >
               Retry
             </button>
@@ -477,18 +541,18 @@ function QuestionsPage() {
               onClick={clearAll}
               className="mt-2 text-sm transition-colors"
               style={{ color: "var(--app-indigo)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.75" }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1" }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.75"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1"
+              }}
             >
               Clear all filters
             </button>
           </div>
         ) : (
-          <>
-            {sorted.map((q) => (
-              <QuestionCard key={q.id} question={q} />
-            ))}
-          </>
+          sorted.map((q) => <QuestionCard key={q.id} question={q} />)
         )}
       </div>
     </div>
@@ -568,7 +632,10 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden sm:flex items-center gap-1 text-xs" style={{ color: "var(--app-muted)" }}>
+          <div
+            className="hidden sm:flex items-center gap-1 text-xs"
+            style={{ color: "var(--app-muted)" }}
+          >
             <Clock size={11} />
             {q.estimatedMins ? `${q.estimatedMins}m` : "25m"}
           </div>
@@ -576,7 +643,7 @@ function QuestionCard({ question: q }: { question: QuestionSummary }) {
             className="hidden sm:inline text-xs px-2 py-0.5 rounded-full"
             style={{
               color: "var(--app-muted)",
-              fontFamily: "'Space Grotesk', monospace",
+              fontFamily: "'Geist Mono Variable', monospace",
               background: "var(--app-surface)",
               border: "1px solid var(--app-border)",
             }}

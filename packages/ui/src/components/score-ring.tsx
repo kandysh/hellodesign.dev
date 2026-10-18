@@ -5,9 +5,9 @@ interface ScoreRingProps {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 75) return "#4ade80"  // success green
-  if (score >= 50) return "#fbbf24"  // warning amber
-  return "#f87171"                    // error red
+  if (score >= 75) return "#4ade80" // success green
+  if (score >= 50) return "#fbbf24" // warning amber
+  return "#f87171" // error red
 }
 
 export function ScoreRing({ score, size = 80, label }: ScoreRingProps) {
@@ -23,7 +23,7 @@ export function ScoreRing({ score, size = 80, label }: ScoreRingProps) {
       role="img"
       aria-label={`Score: ${Math.round(normalized)} out of 100`}
     >
-      <svg width={size} height={size}>
+      <svg width={size} height={size} aria-hidden="true">
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -57,9 +57,7 @@ export function ScoreRing({ score, size = 80, label }: ScoreRingProps) {
           {Math.round(normalized)}
         </text>
       </svg>
-      {label && (
-        <span className="text-xs text-base-content/50">{label}</span>
-      )}
+      {label && <span className="text-xs text-base-content/50">{label}</span>}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link, useRouterState } from "@tanstack/react-router"
 import {
   Activity,
@@ -15,9 +15,8 @@ import {
   Zap,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { apiJson } from "@/lib/api-client"
 import { useTheme } from "../hooks/useTheme"
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 
 interface SessionUser {
   id: string
@@ -36,25 +35,38 @@ export default function Header() {
   const { theme, toggle } = useTheme()
   const { data: session } = useQuery<{ user: SessionUser } | null>({
     queryKey: ["session"],
-    queryFn: () =>
-      fetch(`${API}/api/auth/get-session`, { credentials: "include" })
-        .then((r) => (r.ok ? r.json() : null))
-        .catch(() => null),
+    queryFn: () => apiJson<{ user: SessionUser } | null>("/api/auth/get-session").catch(() => null),
     staleTime: 1000 * 60 * 5,
   })
 
   const user = session?.user ?? null
+  const queryClient = useQueryClient()
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const routerState = useRouterState()
   const currentPath = routerState.location.pathname
 
+  useEffect(() => {
+    if (!user?.id) return
+    let cancelled = false
+    void apiJson("/api/me/claim-session", {
+      method: "POST",
+    })
+      .then(() => {
+        if (!cancelled) void queryClient.invalidateQueries()
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [user?.id, queryClient])
+
   // Close menus on route change
   useEffect(() => {
     setMobileOpen(false)
     setUserMenuOpen(false)
-  }, [currentPath])
+  }, [])
 
   // Close user menu on outside click
   useEffect(() => {
@@ -70,20 +82,26 @@ export default function Header() {
   // Lock body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
+    return () => {
+      document.body.style.overflow = ""
+    }
   }, [mobileOpen])
 
   async function handleSignOut() {
-    await fetch(`${API}/api/auth/sign-out`, { method: "POST", credentials: "include" })
+    await apiJson("/api/auth/sign-out", { method: "POST" }).catch(() => {})
     window.location.href = "/"
   }
 
   const initials = user?.name
-    ? user.name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
     : "?"
 
-  const isActive = (to: string) =>
-    to === "/" ? currentPath === "/" : currentPath.startsWith(to)
+  const isActive = (to: string) => (to === "/" ? currentPath === "/" : currentPath.startsWith(to))
 
   return (
     <>
@@ -129,11 +147,11 @@ export default function Header() {
               className="w-8 h-8 rounded flex items-center justify-center transition-all duration-150"
               style={{ color: "var(--app-subtle)" }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
+                ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
                 ;(e.currentTarget as HTMLElement).style.color = "var(--app-indigo)"
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "transparent"
+                ;(e.currentTarget as HTMLElement).style.background = "transparent"
                 ;(e.currentTarget as HTMLElement).style.color = "var(--app-subtle)"
               }}
             >
@@ -170,7 +188,9 @@ export default function Header() {
                   }}
                 >
                   <UserAvatar user={user} initials={initials} size={26} />
-                  <span className="hidden sm:block max-w-[100px] truncate">{user.name.split(" ")[0]}</span>
+                  <span className="hidden sm:block max-w-[100px] truncate">
+                    {user.name.split(" ")[0]}
+                  </span>
                   <ChevronDown size={11} style={{ color: "var(--app-muted)" }} />
                 </button>
 
@@ -183,7 +203,10 @@ export default function Header() {
                       boxShadow: "0 16px 32px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.15)",
                     }}
                   >
-                    <div className="px-4 py-2.5 border-b" style={{ borderColor: "var(--app-border)" }}>
+                    <div
+                      className="px-4 py-2.5 border-b"
+                      style={{ borderColor: "var(--app-border)" }}
+                    >
                       <p className="font-semibold truncate" style={{ color: "var(--app-fg)" }}>
                         {user.name}
                       </p>
@@ -191,16 +214,30 @@ export default function Header() {
                         {user.email}
                       </p>
                     </div>
-                    <DropdownItem to="/me" icon={<User size={13} />} label="Profile" onClick={() => setUserMenuOpen(false)} />
-                    <DropdownItem to="/settings" icon={<Settings size={13} />} label="Settings" onClick={() => setUserMenuOpen(false)} />
+                    <DropdownItem
+                      to="/me"
+                      icon={<User size={13} />}
+                      label="Profile"
+                      onClick={() => setUserMenuOpen(false)}
+                    />
+                    <DropdownItem
+                      to="/settings"
+                      icon={<Settings size={13} />}
+                      label="Settings"
+                      onClick={() => setUserMenuOpen(false)}
+                    />
                     <div className="my-1 border-t" style={{ borderColor: "var(--app-border)" }} />
                     <button
                       type="button"
                       onClick={handleSignOut}
                       className="flex w-full items-center gap-2.5 px-4 py-2.5 transition-colors duration-150 text-left"
                       style={{ color: "var(--app-red)" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,100,100,0.08)" }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = "rgba(255,100,100,0.08)"
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent"
+                      }}
                     >
                       <LogOut size={13} /> Sign out
                     </button>
@@ -213,11 +250,11 @@ export default function Header() {
                 className="text-sm font-medium px-3 py-1.5 rounded transition-all duration-150 active:scale-95"
                 style={{ color: "var(--app-subtle)" }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--app-fg)"
+                  ;(e.currentTarget as HTMLElement).style.color = "var(--app-fg)"
                   ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.color = "var(--app-subtle)"
+                  ;(e.currentTarget as HTMLElement).style.color = "var(--app-subtle)"
                   ;(e.currentTarget as HTMLElement).style.background = "transparent"
                 }}
               >
@@ -227,17 +264,17 @@ export default function Header() {
 
             <Link
               to="/questions"
-              className="btn btn-primary btn-sm inline-flex min-h-9 items-center gap-1.5 px-4 text-sm font-semibold transition-transform active:scale-[0.98]"
+              className="app-button app-button-primary app-button-sm inline-flex min-h-9 items-center gap-1.5 px-4 text-sm font-semibold transition-transform active:scale-[0.98]"
               style={{
                 background: "var(--app-indigo)",
                 color: "var(--app-bg-deep)",
                 boxShadow: "none",
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.filter = "brightness(1.1)"
+                ;(e.currentTarget as HTMLElement).style.filter = "brightness(1.1)"
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.filter = "none"
+                ;(e.currentTarget as HTMLElement).style.filter = "none"
               }}
             >
               <Activity size={13} />
@@ -264,13 +301,12 @@ export default function Header() {
       {mobileOpen && (
         <>
           {/* Overlay */}
-          <div
+          <button
+            type="button"
             className="mobile-nav-overlay"
             onClick={() => setMobileOpen(false)}
-            onKeyDown={(e) => e.key === "Escape" && setMobileOpen(false)}
-            role="button"
             tabIndex={-1}
-            aria-label="Close navigation"
+            aria-label="Close navigation menu"
           />
 
           {/* Drawer */}
@@ -280,8 +316,13 @@ export default function Header() {
             aria-modal="true"
             aria-label="Navigation menu"
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--app-border)" }}>
-              <span className="font-bold text-base" style={{ color: "var(--app-fg)" }}>Navigation</span>
+            <div
+              className="flex items-center justify-between px-5 py-4 border-b"
+              style={{ borderColor: "var(--app-border)" }}
+            >
+              <span className="font-bold text-base" style={{ color: "var(--app-fg)" }}>
+                Navigation
+              </span>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
@@ -336,8 +377,15 @@ export default function Header() {
                   <div className="flex items-center gap-3 px-4 py-3">
                     <UserAvatar user={user} initials={initials} size={32} />
                     <div className="min-w-0">
-                      <p className="font-semibold text-sm truncate" style={{ color: "var(--app-fg)" }}>{user.name}</p>
-                      <p className="text-xs truncate" style={{ color: "var(--app-subtle)" }}>{user.email}</p>
+                      <p
+                        className="font-semibold text-sm truncate"
+                        style={{ color: "var(--app-fg)" }}
+                      >
+                        {user.name}
+                      </p>
+                      <p className="text-xs truncate" style={{ color: "var(--app-subtle)" }}>
+                        {user.email}
+                      </p>
                     </div>
                   </div>
                   <Link
@@ -393,12 +441,14 @@ function NavLink({ to, label, active }: { to: string; label: string; active: boo
       style={{ color: active ? "var(--app-indigo)" : "var(--app-subtle)" }}
       onMouseEnter={(e) => {
         if (!active) {
-          (e.currentTarget as HTMLElement).style.color = "var(--app-body)"
+          ;(e.currentTarget as HTMLElement).style.color = "var(--app-body)"
           ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
         }
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.color = active ? "var(--app-indigo)" : "var(--app-subtle)"
+        ;(e.currentTarget as HTMLElement).style.color = active
+          ? "var(--app-indigo)"
+          : "var(--app-subtle)"
         ;(e.currentTarget as HTMLElement).style.background = "transparent"
       }}
     >
@@ -431,11 +481,11 @@ function DropdownItem({
       className="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors duration-150"
       style={{ color: "var(--app-body)" }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
+        ;(e.currentTarget as HTMLElement).style.background = "var(--app-surface-3)"
         ;(e.currentTarget as HTMLElement).style.color = "var(--app-fg)"
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = "transparent"
+        ;(e.currentTarget as HTMLElement).style.background = "transparent"
         ;(e.currentTarget as HTMLElement).style.color = "var(--app-body)"
       }}
     >
@@ -445,7 +495,15 @@ function DropdownItem({
   )
 }
 
-function UserAvatar({ user, initials, size = 28 }: { user: SessionUser; initials: string; size?: number }) {
+function UserAvatar({
+  user,
+  initials,
+  size = 28,
+}: {
+  user: SessionUser
+  initials: string
+  size?: number
+}) {
   return (
     <div
       className="rounded-full flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
@@ -483,7 +541,7 @@ function HdLogo() {
       className="shrink-0"
     >
       <rect width="32" height="32" rx="7" fill="var(--app-surface)" />
-      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
+      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960" aria-hidden="true">
         <path
           d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
           fill="var(--app-indigo)"
@@ -492,4 +550,3 @@ function HdLogo() {
     </svg>
   )
 }
-

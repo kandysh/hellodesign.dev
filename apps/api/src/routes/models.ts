@@ -1,5 +1,5 @@
-import type { FastifyPluginAsync } from "fastify"
 import { db, decryptKey } from "@sysdesign/db"
+import type { FastifyPluginAsync } from "fastify"
 import { redis } from "../lib/redis.js"
 
 const CACHE_KEY = "openrouter:models"
@@ -23,9 +23,8 @@ interface OpenRouterModel {
 
 const modelsPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.get<{ Querystring: { sort?: string } }>("/", async (req, reply) => {
-    const sort = req.query.sort && SORTS.has(req.query.sort)
-      ? req.query.sort
-      : "intelligence-high-to-low"
+    const sort =
+      req.query.sort && SORTS.has(req.query.sort) ? req.query.sort : "intelligence-high-to-low"
     const cacheKey = sort ? `${CACHE_KEY}:${sort}` : CACHE_KEY
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -34,14 +33,20 @@ const modelsPlugin: FastifyPluginAsync = async (fastify) => {
     }
 
     const keyRecord = await db.userApiKey.findFirst({
-      where: req.user ? { userId: req.user.id, provider: "openai" } : { sessionId: req.sessionId, provider: "openai" },
+      where: req.user
+        ? { userId: req.user.id, provider: "openai" }
+        : { sessionId: req.sessionId, provider: "openai" },
       orderBy: { createdAt: "desc" },
     })
-    const openRouterKey = keyRecord?.baseUrl && new URL(keyRecord.baseUrl).hostname === "openrouter.ai"
-      ? decryptKey(keyRecord.encryptedKey, keyRecord.iv)
-      : null
+    const openRouterKey =
+      keyRecord?.baseUrl && new URL(keyRecord.baseUrl).hostname === "openrouter.ai"
+        ? decryptKey(keyRecord.encryptedKey, keyRecord.iv)
+        : null
     if (!openRouterKey) {
-      return reply.status(401).send({ error: "Add an OpenRouter key in Settings to load its model catalog, or enter a model ID manually." })
+      return reply.status(401).send({
+        error:
+          "Add an OpenRouter key in Settings to load its model catalog, or enter a model ID manually.",
+      })
     }
 
     const url = new URL("https://openrouter.ai/api/v1/models")
@@ -52,9 +57,13 @@ const modelsPlugin: FastifyPluginAsync = async (fastify) => {
       return reply.status(502).send({ error: "Failed to fetch models from OpenRouter" })
     }
 
-    const json = await res.json() as { data: OpenRouterModel[] }
-    const models: OpenRouterModel[] = json.data
-      .map(({ id, name, context_length, pricing }) => ({ id, name, context_length, pricing }))
+    const json = (await res.json()) as { data: OpenRouterModel[] }
+    const models: OpenRouterModel[] = json.data.map(({ id, name, context_length, pricing }) => ({
+      id,
+      name,
+      context_length,
+      pricing,
+    }))
     await redis.set(cacheKey, JSON.stringify(models), "EX", TTL_SECONDS)
 
     reply.header("X-Cache", "MISS")

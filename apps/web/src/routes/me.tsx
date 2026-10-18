@@ -1,9 +1,9 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { useQuery } from "@tanstack/react-query"
-import { ArrowRight, CheckCircle2, BarChart3, Layers } from "lucide-react"
+import { ArrowRight, BarChart3, CheckCircle2, Layers } from "lucide-react"
+import { useState } from "react"
 import { MetricsCard } from "@/components/MetricsCard"
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+import { apiJson } from "@/lib/api-client"
 
 export const Route = createFileRoute("/me")({ component: MePage })
 
@@ -15,6 +15,24 @@ interface SubmissionRow {
   status: string
   createdAt: string
   overallScore: number | null
+}
+
+interface SubmissionPage {
+  items: SubmissionRow[]
+  nextCursor: string | null
+}
+
+interface PracticeStats {
+  solved: number
+  attempted: number
+  avgScore: number | null
+  streak: number
+  categories: Array<{
+    category: string
+    attempted: number
+    solved: number
+    avgScore: number | null
+  }>
 }
 
 const categoryLabels: Record<string, string> = {
@@ -69,51 +87,62 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function MePage() {
-  const { data: submissions = [], isLoading } = useQuery<SubmissionRow[]>({
+  const queryClient = useQueryClient()
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [loadMoreError, setLoadMoreError] = useState("")
+  const submissionsQuery = useQuery<SubmissionPage>({
     queryKey: ["me/submissions"],
-    queryFn: () =>
-      fetch(`${API}/api/me/submissions`, { credentials: "include" }).then((r) => r.json()),
+    queryFn: () => apiJson<SubmissionPage>("/api/me/submissions"),
   })
+  const { data: stats } = useQuery<PracticeStats>({
+    queryKey: ["me/stats"],
+    queryFn: () => apiJson<PracticeStats>("/api/me/stats"),
+  })
+  const submissions = submissionsQuery.data?.items ?? []
+  const isLoading = submissionsQuery.isLoading
+  const avgScore = stats?.avgScore ?? null
 
-  const done = submissions.filter((s) => s.status === "done" && s.overallScore !== null)
-  const avgScore =
-    done.length > 0
-      ? done.reduce((sum, s) => sum + (s.overallScore ?? 0), 0) / done.length
-      : null
+  const masteryEntries = (stats?.categories ?? [])
+    .map(
+      (entry) =>
+        [
+          entry.category,
+          {
+            count: entry.solved,
+            totalScore: (entry.avgScore ?? 0) * entry.solved,
+            attempted: entry.attempted,
+          },
+        ] as const,
+    )
+    .sort((a, b) => (categoryLabels[a[0]] ?? a[0]).localeCompare(categoryLabels[b[0]] ?? b[0]))
 
-  // Group completed submissions by category for mastery view
-  const masteryByCategory = done.reduce<
-    Record<string, { count: number; totalScore: number; attempted: number }>
-  >((acc, s) => {
-    const cat = s.questionCategory
-    if (!acc[cat]) acc[cat] = { count: 0, totalScore: 0, attempted: 0 }
-    acc[cat].count += 1
-    acc[cat].totalScore += s.overallScore ?? 0
-    return acc
-  }, {})
-
-  // Count total attempted (any status) per category
-  for (const s of submissions) {
-    const cat = s.questionCategory
-    if (!masteryByCategory[cat]) masteryByCategory[cat] = { count: 0, totalScore: 0, attempted: 0 }
-    masteryByCategory[cat].attempted += 1
+  async function loadMoreSubmissions() {
+    const cursor = submissionsQuery.data?.nextCursor
+    if (!cursor || loadingMore) return
+    setLoadingMore(true)
+    setLoadMoreError("")
+    try {
+      const nextPage = await apiJson<SubmissionPage>(
+        `/api/me/submissions?cursor=${encodeURIComponent(cursor)}`,
+      )
+      queryClient.setQueryData<SubmissionPage>(["me/submissions"], (current) =>
+        current
+          ? { items: [...current.items, ...nextPage.items], nextCursor: nextPage.nextCursor }
+          : nextPage,
+      )
+    } catch (error) {
+      setLoadMoreError(error instanceof Error ? error.message : "Could not load more submissions")
+    } finally {
+      setLoadingMore(false)
+    }
   }
-
-  const masteryEntries = Object.entries(masteryByCategory).sort((a, b) =>
-    (categoryLabels[a[0]] ?? a[0]).localeCompare(categoryLabels[b[0]] ?? b[0]),
-  )
 
   return (
     <main className="page-shell max-w-7xl">
-
       {/* ── Page header ─────────────────────────────────────── */}
       <div className="mb-8">
-        <p className="page-eyebrow mb-2">
-          WORKSPACE
-        </p>
-        <h1 className="page-title mb-2">
-          Practice history
-        </h1>
+        <p className="page-eyebrow mb-2">WORKSPACE</p>
+        <h1 className="page-title mb-2">Practice history</h1>
         <p className="page-description text-sm">
           Review completed practice and feedback across your submissions.
         </p>
@@ -123,12 +152,15 @@ function MePage() {
       <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MetricsCard
           label="Problems Solved"
-          value={String(submissions.filter((s) => s.status === "done").length)}
+          value={String(stats?.solved ?? 0)}
           icon={<CheckCircle2 size={20} />}
           iconColor="var(--app-green)"
           accentColor="tertiary"
-          progress={Math.min(100, Math.round(submissions.filter((s) => s.status === "done").length / Math.max(submissions.length, 1) * 100))}
-          description={`${submissions.filter((s) => s.status === "done").length} of ${submissions.length} attempted`}
+          progress={Math.min(
+            100,
+            Math.round(((stats?.solved ?? 0) / Math.max(stats?.attempted ?? 0, 1)) * 100),
+          )}
+          description={`${stats?.solved ?? 0} of ${stats?.attempted ?? 0} attempted`}
         />
         <MetricsCard
           label="Avg Score"
@@ -138,22 +170,37 @@ function MePage() {
           iconColor="#b9c8de"
           accentColor="secondary"
           progress={avgScore ?? 0}
-          description={avgScore != null ? (avgScore >= 75 ? "Excellent performance" : avgScore >= 50 ? "Good — keep improving" : "Needs more practice") : "Submit your first answer"}
+          description={
+            avgScore != null
+              ? avgScore >= 75
+                ? "Excellent performance"
+                : avgScore >= 50
+                  ? "Good — keep improving"
+                  : "Needs more practice"
+              : "Submit your first answer"
+          }
         />
         <MetricsCard
           label="Total Attempted"
-          value={String(submissions.length)}
+          value={String(stats?.attempted ?? 0)}
           icon={<Layers size={20} />}
           iconColor="var(--app-indigo-pale)"
           accentColor="primary"
-          description={submissions.length === 0 ? "Start practicing today" : `Across ${Object.keys(masteryByCategory).length} categories`}
+          description={
+            (stats?.attempted ?? 0) === 0
+              ? "Start practicing today"
+              : `Across ${masteryEntries.length} categories`
+          }
         />
       </div>
 
       {/* ── Mastery by category ──────────────────────────────── */}
       {masteryEntries.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "var(--app-muted)" }}>
+          <h2
+            className="text-sm font-bold uppercase tracking-widest mb-4"
+            style={{ color: "var(--app-muted)" }}
+          >
             Mastery by Category
           </h2>
           <div
@@ -161,12 +208,14 @@ function MePage() {
             className="rounded-lg px-6 py-5 flex flex-col gap-4"
           >
             {masteryEntries.map(([cat, entry]) => {
-              const pct = entry.count > 0
-                ? Math.round((entry.totalScore / entry.count) / 100 * 100)
-                : 0
+              const pct =
+                entry.count > 0 ? Math.round((entry.totalScore / entry.count / 100) * 100) : 0
               return (
                 <div key={cat} className="flex items-center gap-3">
-                  <span className="text-sm w-28 sm:w-36 shrink-0" style={{ color: "var(--app-subtle)" }}>
+                  <span
+                    className="text-sm w-28 sm:w-36 shrink-0"
+                    style={{ color: "var(--app-subtle)" }}
+                  >
                     {categoryLabels[cat] ?? cat}
                   </span>
                   <div
@@ -177,13 +226,21 @@ function MePage() {
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${pct}%`,
-                        background: pct >= 75 ? "var(--app-green)" : pct >= 50 ? "var(--app-indigo-pale)" : "var(--app-red)",
+                        background:
+                          pct >= 75
+                            ? "var(--app-green)"
+                            : pct >= 50
+                              ? "var(--app-indigo-pale)"
+                              : "var(--app-red)",
                       }}
                     />
                   </div>
                   <span
                     className="text-xs w-8 text-right font-medium"
-                    style={{ color: "var(--app-subtle)", fontFamily: "'Space Grotesk', monospace" }}
+                    style={{
+                      color: "var(--app-subtle)",
+                      fontFamily: "'Geist Mono Variable', monospace",
+                    }}
                   >
                     {pct}%
                   </span>
@@ -196,22 +253,22 @@ function MePage() {
 
       {/* ── Recent submissions ───────────────────────────────── */}
       <section>
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-4" style={{ color: "var(--app-muted)" }}>
+        <h2
+          className="text-sm font-bold uppercase tracking-widest mb-4"
+          style={{ color: "var(--app-muted)" }}
+        >
           Recent Submissions
         </h2>
 
         {isLoading ? (
           <div className="space-y-2">
-            {[...Array(4)].map((_, i) => {
-              // biome-ignore lint/suspicious/noArrayIndexKey: static skeleton loader
-              return (
-                <div
-                  key={i}
-                  className="h-16 animate-pulse rounded-lg"
-                  style={{ background: "var(--app-surface)" }}
-                />
-              )
-            })}
+            {["history-1", "history-2", "history-3", "history-4"].map((skeletonId) => (
+              <div
+                key={skeletonId}
+                className="h-16 animate-pulse rounded-lg"
+                style={{ background: "var(--app-surface)" }}
+              />
+            ))}
           </div>
         ) : submissions.length === 0 ? (
           <div
@@ -268,6 +325,19 @@ function MePage() {
                 </div>
               </Link>
             ))}
+            {submissionsQuery.data?.nextCursor && (
+              <div className="pt-3 text-center">
+                <button
+                  type="button"
+                  onClick={() => void loadMoreSubmissions()}
+                  disabled={loadingMore}
+                  className="app-button app-button-ghost app-button-sm"
+                >
+                  {loadingMore ? "Loading…" : "Load more"}
+                </button>
+                {loadMoreError && <p className="mt-2 text-xs text-error">{loadMoreError}</p>}
+              </div>
+            )}
           </div>
         )}
       </section>

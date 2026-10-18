@@ -1,15 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+import { apiFetch } from "@/lib/api-client"
 
 export const Route = createFileRoute("/submissions/$submissionId")({
   // Fetch the submission to obtain its questionId, then redirect to the
   // canonical result page at /questions/:questionId/result/:submissionId.
   beforeLoad: async ({ params }) => {
     try {
-      const res = await fetch(`${API}/api/submissions/${params.submissionId}`, {
-        credentials: "include",
-      })
+      const res = await apiFetch(`/api/submissions/${params.submissionId}`)
       if (res.ok) {
         const data: { questionId?: string } = await res.json()
         if (data.questionId) {

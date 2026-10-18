@@ -3,11 +3,7 @@ import { cn } from "@/lib/utils"
 
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      className={cn("card bg-base-100 border border-base-300 shadow-sm", className)}
-      {...props}
-    />
+    <div ref={ref} className={cn("surface-panel flex flex-col shadow-sm", className)} {...props} />
   ),
 )
 Card.displayName = "Card"
@@ -33,11 +29,12 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTML
 )
 CardTitle.displayName = "CardTitle"
 
-const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
-  ({ className, ...props }, ref) => (
-    <p ref={ref} className={cn("text-sm text-base-content/60", className)} {...props} />
-  ),
-)
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p ref={ref} className={cn("text-sm text-base-content/60", className)} {...props} />
+))
 CardDescription.displayName = "CardDescription"
 
 export { Card, CardHeader, CardContent, CardTitle, CardDescription }

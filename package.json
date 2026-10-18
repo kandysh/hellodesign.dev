@@ -6,7 +6,7 @@
     "build": "pnpm --filter @sysdesign/web --filter @sysdesign/api --filter @sysdesign/worker build",
     "lint": "pnpm --filter @sysdesign/web --filter @sysdesign/api --filter @sysdesign/worker lint",
     "typecheck": "pnpm --filter @sysdesign/web --filter @sysdesign/api --filter @sysdesign/worker typecheck",
-    "test": "pnpm --filter @sysdesign/worker exec tsx --test ../../packages/shared/src/index.test.ts ../../packages/ai/src/graph.test.ts",
+    "test": "pnpm --filter @sysdesign/worker exec tsx --test ../../packages/shared/src/index.test.ts ../../packages/ai/src/graph.test.ts ../../packages/ai/src/graph.integration.test.ts ../../apps/api/src/lib/rate-limit.test.ts ../../apps/api/src/lib/key-access.test.ts ../../apps/api/src/lib/request-schemas.test.ts ../../apps/api/src/lib/submission-access.test.ts ../../apps/api/src/lib/websocket-origin.test.ts ../../apps/api/src/e2e.integration.test.ts ../../apps/web/src/lib/api-client.test.ts ../../packages/db/src/crypto.test.ts ../../packages/db/src/seed.test.ts ../../packages/db/src/database.integration.test.ts ../../packages/queue/src/followup.test.ts ../../packages/queue/src/followup.redis.test.ts",
     "format": "biome format --write .",
     "check": "biome check .",
     "db:migrate": "pnpm --filter @sysdesign/db db:migrate",
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
+    "esbuild": "0.27.7",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@9.15.4",

@@ -1,6 +1,6 @@
 import {
-  AlertTriangle,
   Activity,
+  AlertTriangle,
   Brain,
   CheckCircle2,
   ChevronDown,
@@ -29,7 +29,12 @@ export type AgentPanelState =
   | { phase: "processing"; trace: ActivityItem[] }
   | { phase: "follow-up"; question: string; trace: ActivityItem[] }
   | { phase: "evaluating"; agentResults: EvalProgressItem[]; dimensionLabels: string[] }
-  | { phase: "done"; submissionId: string; agentResults: EvalProgressItem[]; dimensionLabels: string[] }
+  | {
+      phase: "done"
+      submissionId: string
+      agentResults: EvalProgressItem[]
+      dimensionLabels: string[]
+    }
 
 export interface Message {
   id: string
@@ -86,7 +91,7 @@ export const AgentPanel = memo(function AgentPanel({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
-  }, [messages.length, state.phase])
+  }, [])
 
   useEffect(() => {
     if (state.phase === "follow-up") setShowTrace(false)
@@ -101,7 +106,8 @@ export const AgentPanel = memo(function AgentPanel({
 
   const trace = state.phase === "processing" || state.phase === "follow-up" ? state.trace : []
   const latestMessage = messages[messages.length - 1]
-  const needsQuestionFallback = state.phase === "follow-up" &&
+  const needsQuestionFallback =
+    state.phase === "follow-up" &&
     !(latestMessage?.role === "agent" && latestMessage.content === state.question)
 
   return (
@@ -118,7 +124,8 @@ export const AgentPanel = memo(function AgentPanel({
               Your interviewer
             </div>
             <p className="mt-3 text-sm leading-relaxed text-base-content/60">
-              Submit your notebook when you’re ready. I’ll review the design, ask follow-up questions in this thread, and share the evaluation here.
+              Submit your notebook when you’re ready. I’ll review the design, ask follow-up
+              questions in this thread, and share the evaluation here.
             </p>
           </div>
         )}
@@ -134,13 +141,23 @@ export const AgentPanel = memo(function AgentPanel({
 
         {needsQuestionFallback && (
           <ChatBubble
-            message={{ id: "active-follow-up", role: "agent", content: state.question, timestamp: new Date() }}
+            message={{
+              id: "active-follow-up",
+              role: "agent",
+              content: state.question,
+              timestamp: new Date(),
+            }}
             userInitials={userInitials}
             userAvatar={userAvatar}
           />
         )}
 
-        {state.phase === "processing" && <ActivityMessage title="Reviewing your notebook" subtitle="Checking the architecture and key trade-offs" />}
+        {state.phase === "processing" && (
+          <ActivityMessage
+            title="Reviewing your notebook"
+            subtitle="Checking the architecture and key trade-offs"
+          />
+        )}
         {state.phase === "follow-up" && (
           <div className="flex items-center gap-2 pl-10 text-xs font-medium text-warning">
             <span className="h-1.5 w-1.5 rounded-full bg-warning" />
@@ -184,7 +201,7 @@ export const AgentPanel = memo(function AgentPanel({
             <button
               type="button"
               onClick={() => onViewFeedback?.(state.submissionId)}
-              className="btn btn-success btn-block mt-5 rounded-xl gap-2"
+              className="app-button app-button-success app-button-block mt-5 rounded-xl gap-2"
             >
               View detailed feedback
               <ChevronRight size={15} />
@@ -204,11 +221,21 @@ export const AgentPanel = memo(function AgentPanel({
                 <Activity size={15} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold text-base-content/80">Review activity</span>
-                <span className="mt-0.5 block text-[10px] text-base-content/40">Progress and interviewer notes</span>
+                <span className="block text-xs font-semibold text-base-content/80">
+                  Review activity
+                </span>
+                <span className="mt-0.5 block text-[10px] text-base-content/40">
+                  Progress and interviewer notes
+                </span>
               </span>
-              <span className="rounded-full bg-base-300/60 px-2 py-1 text-[10px] font-medium text-base-content/55">{trace.length}</span>
-              {showTrace ? <ChevronDown size={14} className="text-base-content/40" /> : <ChevronRight size={14} className="text-base-content/40" />}
+              <span className="rounded-full bg-base-300/60 px-2 py-1 text-[10px] font-medium text-base-content/55">
+                {trace.length}
+              </span>
+              {showTrace ? (
+                <ChevronDown size={14} className="text-base-content/40" />
+              ) : (
+                <ChevronRight size={14} className="text-base-content/40" />
+              )}
             </button>
             {showTrace && (
               <ol className="space-y-0 border-t border-base-300/40 px-3.5 py-2">
@@ -230,7 +257,9 @@ export const AgentPanel = memo(function AgentPanel({
               {showRisks ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
               <ShieldAlert size={13} />
               Risk flags
-              <span className="ml-auto rounded-full bg-error/15 px-1.5 py-0.5 text-[10px] font-bold text-error">{riskFlags.length}</span>
+              <span className="ml-auto rounded-full bg-error/15 px-1.5 py-0.5 text-[10px] font-bold text-error">
+                {riskFlags.length}
+              </span>
             </button>
             {showRisks && (
               <div className="space-y-2 border-t border-base-300/40 p-3">
@@ -238,13 +267,26 @@ export const AgentPanel = memo(function AgentPanel({
                   const config = severityConfig(flag.severity)
                   const Icon = config.icon
                   return (
-                    <div key={`${flag.component}-${index}`} className="rounded-lg border p-3" style={{ borderColor: `${config.color}30`, background: `${config.color}0a` }}>
+                    <div
+                      key={`${flag.component}-${index}`}
+                      className="rounded-lg border p-3"
+                      style={{ borderColor: `${config.color}30`, background: `${config.color}0a` }}
+                    >
                       <div className="mb-1 flex items-center gap-2">
                         <Icon size={12} style={{ color: config.color }} />
-                        <span className="text-xs font-semibold text-base-content/80">{flag.component}</span>
-                        <span className="ml-auto text-[10px] font-bold uppercase" style={{ color: config.color }}>{config.label}</span>
+                        <span className="text-xs font-semibold text-base-content/80">
+                          {flag.component}
+                        </span>
+                        <span
+                          className="ml-auto text-[10px] font-bold uppercase"
+                          style={{ color: config.color }}
+                        >
+                          {config.label}
+                        </span>
                       </div>
-                      <p className="pl-5 text-xs leading-relaxed text-base-content/60">{flag.risk}</p>
+                      <p className="pl-5 text-xs leading-relaxed text-base-content/60">
+                        {flag.risk}
+                      </p>
                     </div>
                   )
                 })}
@@ -273,12 +315,14 @@ export const AgentPanel = memo(function AgentPanel({
               className="max-h-28 min-h-12 w-full resize-y bg-transparent px-2 py-1 text-sm leading-relaxed text-base-content outline-none placeholder:text-base-content/35"
             />
             <div className="flex items-center justify-between px-1 pt-1">
-              <span className="text-[10px] text-base-content/35">Enter to send · Shift+Enter for a new line</span>
+              <span className="text-[10px] text-base-content/35">
+                Enter to send · Shift+Enter for a new line
+              </span>
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={!input.trim() || !onSendMessage}
-                className="btn btn-primary btn-sm h-8 min-h-8 rounded-xl px-3"
+                className="app-button app-button-primary app-button-sm h-8 min-h-8 rounded-xl px-3"
                 aria-label="Send reply"
               >
                 <Send size={13} />
@@ -320,10 +364,16 @@ function ActivityEntry({ item, isLast }: { item: ActivityItem; isLast: boolean }
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-xs font-medium leading-relaxed text-base-content/80">Interviewer reasoning</span>
-            <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">Reasoning</span>
+            <span className="text-xs font-medium leading-relaxed text-base-content/80">
+              Interviewer reasoning
+            </span>
+            <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">
+              Reasoning
+            </span>
           </div>
-          <p className="mt-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-base-content/55">{line}</p>
+          <p className="mt-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-base-content/55">
+            {line}
+          </p>
         </div>
       </li>
     )
@@ -340,17 +390,24 @@ function ActivityEntry({ item, isLast }: { item: ActivityItem; isLast: boolean }
       details = rawDetails
     }
   }
-  const detailsText = typeof details === "string" ? details : details !== null && typeof details === "object"
-    ? Object.entries(details).map(([key, value]) => `${key}: ${String(value)}`).join(" · ")
-    : ""
+  const detailsText =
+    typeof details === "string"
+      ? details
+      : details !== null && typeof details === "object"
+        ? Object.entries(details)
+            .map(([key, value]) => `${key}: ${String(value)}`)
+            .join(" · ")
+        : ""
 
   return (
     <li className="relative flex gap-3 py-2.5">
       <div className="flex w-4 shrink-0 justify-center">
-        <span className={cn(
-          "relative z-10 mt-1.5 h-2 w-2 rounded-full",
-          flow ? "bg-primary" : "bg-base-content/30",
-        )} />
+        <span
+          className={cn(
+            "relative z-10 mt-1.5 h-2 w-2 rounded-full",
+            flow ? "bg-primary" : "bg-base-content/30",
+          )}
+        />
         {!isLast && <span className="absolute bottom-0 left-[19px] top-5 w-px bg-base-300/70" />}
       </div>
       <div className="min-w-0 flex-1">
@@ -360,8 +417,16 @@ function ActivityEntry({ item, isLast }: { item: ActivityItem; isLast: boolean }
             {flow ? "System" : "Note"}
           </span>
         </div>
-        {!flow && <p className="mt-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-base-content/55">{line}</p>}
-        {detailsText && <p className="mt-1 break-words text-[10px] leading-relaxed text-base-content/40">{detailsText}</p>}
+        {!flow && (
+          <p className="mt-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-base-content/55">
+            {line}
+          </p>
+        )}
+        {detailsText && (
+          <p className="mt-1 break-words text-[10px] leading-relaxed text-base-content/40">
+            {detailsText}
+          </p>
+        )}
       </div>
     </li>
   )
@@ -402,11 +467,22 @@ function ScoreRow({ label, score }: { label: string; score?: number }) {
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-medium text-base-content/70">{label}</span>
         {scored ? (
-          <span className="text-xs font-bold tabular-nums" style={{ color }}>{score}<span className="ml-0.5 font-normal text-base-content/35">/100</span></span>
-        ) : <span className="text-[10px] text-base-content/35">Pending</span>}
+          <span className="text-xs font-bold tabular-nums" style={{ color }}>
+            {score}
+            <span className="ml-0.5 font-normal text-base-content/35">/100</span>
+          </span>
+        ) : (
+          <span className="text-[10px] text-base-content/35">Pending</span>
+        )}
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-base-300/50">
-        <div className={cn("h-full rounded-full transition-all duration-700", scored ? "" : "w-1/3 animate-pulse bg-base-content/15")} style={scored ? { width: `${score}%`, background: color } : undefined} />
+        <div
+          className={cn(
+            "h-full rounded-full transition-all duration-700",
+            scored ? "" : "w-1/3 animate-pulse bg-base-content/15",
+          )}
+          style={scored ? { width: `${score}%`, background: color } : undefined}
+        />
       </div>
     </div>
   )
@@ -433,21 +509,29 @@ function ChatBubble({
       )}
       <div className={cn("flex max-w-[88%] flex-col", isAgent ? "items-start" : "items-end")}>
         <div className="mb-1 flex items-center gap-2 px-1">
-          <span className="text-[10px] font-semibold text-base-content/45">{isAgent ? "Interviewer" : "You"}</span>
+          <span className="text-[10px] font-semibold text-base-content/45">
+            {isAgent ? "Interviewer" : "You"}
+          </span>
           <time className="text-[10px] text-base-content/30">{time}</time>
         </div>
-        <div className={cn(
-          "whitespace-pre-wrap break-words rounded-2xl px-3.5 py-3 text-sm leading-relaxed shadow-sm",
-          isAgent
-            ? "rounded-bl-md border border-base-300/60 bg-base-200/60 text-base-content"
-            : "rounded-br-md bg-primary text-primary-content",
-        )}>
+        <div
+          className={cn(
+            "whitespace-pre-wrap break-words rounded-2xl px-3.5 py-3 text-sm leading-relaxed shadow-sm",
+            isAgent
+              ? "rounded-bl-md border border-base-300/60 bg-base-200/60 text-base-content"
+              : "rounded-br-md bg-primary text-primary-content",
+          )}
+        >
           {message.content}
         </div>
       </div>
       {!isAgent && (
         <div className="mb-5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-base-300 text-[10px] font-semibold text-base-content/70">
-          {userAvatar ? <img src={userAvatar} alt="You" referrerPolicy="no-referrer" /> : userInitials}
+          {userAvatar ? (
+            <img src={userAvatar} alt="You" referrerPolicy="no-referrer" />
+          ) : (
+            userInitials
+          )}
         </div>
       )}
     </div>

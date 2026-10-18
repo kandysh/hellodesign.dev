@@ -1,23 +1,14 @@
+import type { QuestionDetail, QuestionSummary } from "@sysdesign/types"
 import { queryOptions } from "@tanstack/react-query"
-import type { QuestionSummary, QuestionDetail } from "@sysdesign/types"
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+import { apiJson } from "@/lib/api-client"
 
 export const questionsQueryOptions = queryOptions({
   queryKey: ["questions"],
-  queryFn: async (): Promise<QuestionSummary[]> => {
-    const r = await fetch(`${API}/api/questions`)
-    if (!r.ok) throw new Error(`Failed to fetch questions (${r.status})`)
-    return r.json()
-  },
+  queryFn: (): Promise<QuestionSummary[]> => apiJson("/api/questions"),
 })
 
 export const questionQueryOptions = (questionId: string) =>
   queryOptions({
     queryKey: ["question", questionId],
-    queryFn: async (): Promise<QuestionDetail> => {
-      const r = await fetch(`${API}/api/questions/${questionId}`)
-      if (!r.ok) throw new Error(`Failed to fetch question (${r.status})`)
-      return r.json()
-    },
+    queryFn: (): Promise<QuestionDetail> => apiJson(`/api/questions/${questionId}`),
   })

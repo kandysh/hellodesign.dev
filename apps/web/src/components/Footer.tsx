@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router"
 
 function HdLogo() {
   return (
@@ -12,14 +12,14 @@ function HdLogo() {
       className="shrink-0"
     >
       <rect width="32" height="32" rx="7" fill="var(--app-surface)" />
-      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
+      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960" aria-hidden="true">
         <path
           d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
           fill="var(--app-indigo)"
         />
       </svg>
     </svg>
-  );
+  )
 }
 
 export function Footer() {
@@ -55,10 +55,10 @@ export function Footer() {
               className="transition-colors"
               style={{ color: "var(--app-muted)" }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--app-fg)";
+                ;(e.currentTarget as HTMLElement).style.color = "var(--app-fg)"
               }}
               onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.color = "var(--app-muted)";
+                ;(e.currentTarget as HTMLElement).style.color = "var(--app-muted)"
               }}
             >
               {label}
@@ -67,5 +67,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

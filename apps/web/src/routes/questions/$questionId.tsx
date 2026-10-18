@@ -1,4 +1,6 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import type { ExcalidrawProps } from "@excalidraw/excalidraw/types"
+import { getDefaultModelName } from "@sysdesign/shared"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   AlertTriangle,
@@ -6,54 +8,41 @@ import {
   BookOpen,
   Check,
   CheckSquare,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
   Code2,
   FileText,
-  Info,
   Layers,
   ListTodo,
   Lock,
-  Map,
+  Map as MapIcon,
   Square,
   Unlock,
   X,
   Zap,
 } from "lucide-react"
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useCallback, useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { AgentPanel, type ActivityItem, type AgentPanelState, type Message } from "@/components/AgentPanel"
-import { useApiKey } from "@/components/ApiKeyInput"
-import { CodeEditor, type CodeLanguage } from "@/components/CodeEditor"
+import { AgentPanel } from "@/components/AgentPanel"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { ModelCombobox } from "@/components/ModelCombobox"
 import { RichTextEditor } from "@/components/RichTextEditor"
 import { useToast } from "@/components/Toast"
+import { useDraft } from "@/hooks/useDraft"
+import { useSubmissionStream } from "@/hooks/useSubmissionStream"
 import { useTheme } from "@/hooks/useTheme"
+import { apiJson } from "@/lib/api-client"
 import { questionQueryOptions } from "@/lib/queries/questions"
 import { cn } from "@/lib/utils"
 
 const Excalidraw = lazy(() =>
   import("@excalidraw/excalidraw").then((m) => ({ default: m.Excalidraw })),
 )
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
-const WS_API = API.replace(/^http/, "ws")
-const REASONING_MODELS_QUERY_KEY = ["openrouter-models", "intelligence-high-to-low"] as const
-
-interface RecommendedModel {
-  id: string
-  name: string
-}
-
-async function fetchReasoningModels(): Promise<RecommendedModel[]> {
-  const response = await fetch(`${API}/api/models?sort=intelligence-high-to-low`, { credentials: "include" })
-  if (!response.ok) throw new Error("Reasoning model recommendations are unavailable")
-  return response.json()
-}
+const CodeEditor = lazy(() =>
+  import("@/components/CodeEditor").then((module) => ({ default: module.CodeEditor })),
+)
 
 const EXCALIDRAW_UI_OPTIONS = { canvasActions: { export: false } } as const
 
@@ -90,63 +79,70 @@ function WorkspacePage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { theme } = useTheme()
-  const apiKey = useApiKey()
-  const elapsed = useElapsedTimer()
-  const { data: reasoningModels } = useQuery({
-    queryKey: REASONING_MODELS_QUERY_KEY,
-    queryFn: fetchReasoningModels,
-    staleTime: 1000 * 60 * 30,
-    gcTime: 1000 * 60 * 60,
+  const [agentVisible, setAgentVisible] = useState(true)
+  const { data: providerKeys, isLoading: providerKeysLoading } = useQuery({
+    queryKey: ["api-keys"],
+    queryFn: () => apiJson<Array<{ baseUrl: string | null }>>("/api/keys"),
   })
-
+  const hasProviderKey = (providerKeys?.length ?? 0) > 0
+  const elapsed = useElapsedTimer()
   // Panel state
   const [leftCollapsed, setLeftCollapsed] = useState(false)
   const [sidebarTab, setSidebarTab] = useState<"overview" | "checklist">("overview")
   const [hintsOpen, setHintsOpen] = useState(false)
-  const [checklist, setChecklist] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<"notebook" | "diagram" | "code">("notebook")
+  const [codeEditorMounted, setCodeEditorMounted] = useState(false)
   const [reviewMode, setReviewMode] = useState<"quick" | "deep">("quick")
   const [mood, setMood] = useState<"pragmatist" | "systems" | "sre" | "pm">("pragmatist")
-  const [modelName, setModelName] = useState("openai/gpt-oss-20b:nitro")
+  const [modelName, setModelName] = useState(getDefaultModelName())
   const [modelOverridden, setModelOverridden] = useState(false)
   const [apiBannerDismissed, setApiBannerDismissed] = useState(false)
 
-  // Content state
-  const [answerCode, setAnswerCode] = useState("")
-  const [codeSnippet, setCodeSnippet] = useState("")
-  const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>("javascript")
-  const [excalidrawData, setExcalidrawData] = useState<Record<string, unknown> | null>(null)
-  const [hasExcalidrawElements, setHasExcalidrawElements] = useState(false)
-  const [diagramResetKey, setDiagramResetKey] = useState(0)
+  useEffect(() => {
+    if (!modelOverridden) {
+      setModelName(getDefaultModelName(providerKeys?.[0]?.baseUrl, reviewMode))
+    }
+  }, [modelOverridden, providerKeys, reviewMode])
+
+  const {
+    answerCode,
+    setAnswerCode,
+    codeSnippet,
+    setCodeSnippet,
+    codeLanguage,
+    setCodeLanguage,
+    excalidrawData,
+    setExcalidrawData,
+    hasExcalidrawElements,
+    setHasExcalidrawElements,
+    diagramResetKey,
+    checklist,
+    setChecklist,
+    draftRestored,
+    clearDraft,
+  } = useDraft(questionId)
+
   // Keep the canvas lazy until the notebook is mounted.
   const [diagramMounted, setDiagramMounted] = useState(false)
 
-  const handleExcalidrawChange = useCallback(
-    (elements: unknown, appState: unknown) => {
+  const handleExcalidrawChange = useCallback<NonNullable<ExcalidrawProps["onChange"]>>(
+    (elements, appState) => {
       setExcalidrawData({ elements, appState })
       setHasExcalidrawElements(Array.isArray(elements) && elements.length > 0)
     },
-    [],
+    [setExcalidrawData, setHasExcalidrawElements],
   )
-
-  // Agent panel state
-  const [agentVisible, setAgentVisible] = useState(true)
-  const [agentState, setAgentState] = useState<AgentPanelState>({ phase: "idle" })
-  const [agentMessages, setAgentMessages] = useState<Message[]>([])
-  const [riskFlags, setRiskFlags] = useState<Array<{ component: string; risk: string; severity: "critical" | "high" | "medium" }>>([])
-  const [currentSubmissionId, setCurrentSubmissionId] = useState<string | null>(null)
-  const wsRef = useRef<WebSocket | null>(null)
-  // Coalesce streamed reasoning chunks into one activity entry.
-  const reasoningBufRef = useRef("")
-  const reasoningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const reasoningEntryIdRef = useRef<string | null>(null)
 
   const { data: question, isLoading } = useQuery(questionQueryOptions(questionId))
 
   const formattedAnswer = [
     answerCode.trim(),
-    codeSnippet.trim() ? `## Code sketch\n\n\`\`\`${codeLanguage}\n${codeSnippet.trim()}\n\`\`\`` : "",
-  ].filter(Boolean).join("\n\n")
+    codeSnippet.trim()
+      ? `## Code sketch\n\n\`\`\`${codeLanguage}\n${codeSnippet.trim()}\n\`\`\``
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n")
   // Word count reflects text and code included in the submitted notebook.
   const wordCount = formattedAnswer.trim() ? formattedAnswer.trim().split(/\s+/).length : 0
   const checklistProgress = checklist.size
@@ -161,279 +157,22 @@ function WorkspacePage() {
     })
   }
 
-  const submitMutation = useMutation({
-    mutationFn: async () => {
-      const res = await fetch(`${API}/api/submissions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          questionId,
-          answerText: formattedAnswer,
-          excalidrawData: (excalidrawData as any)?.elements ?? [],
-          agentType: reviewMode,
-          mood,
-          modelName,
-        }),
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message ?? "Failed to submit")
-      }
-      return res.json() as Promise<{ submissionId: string }>
-    },
-    onSuccess: ({ submissionId }) => {
-      setCurrentSubmissionId(submissionId)
-      setAgentVisible(true)
-      setAgentState({ phase: "processing", trace: [] })
-      setAgentMessages([])
-      setRiskFlags([])
-      reasoningEntryIdRef.current = null
-      toast("Submission received — agent is reading your answer", "success")
-
-      // Open WebSocket stream
-      const ws = new WebSocket(`${WS_API}/api/submissions/${submissionId}/ws`)
-      wsRef.current = ws
-
-      const flushReasoningBuf = () => {
-        if (reasoningTimerRef.current) {
-          clearTimeout(reasoningTimerRef.current)
-          reasoningTimerRef.current = null
-        }
-        const content = reasoningBufRef.current
-        reasoningBufRef.current = ""
-        if (!content.trim()) return
-
-        const entryId = reasoningEntryIdRef.current ?? crypto.randomUUID()
-        reasoningEntryIdRef.current = entryId
-        setAgentState((prev) => {
-          if (prev.phase !== "processing" && prev.phase !== "follow-up") return prev
-          const existingIndex = prev.trace.findIndex((item) => item.id === entryId)
-          if (existingIndex < 0) {
-            return { ...prev, trace: [...prev.trace, { id: entryId, type: "reasoning", content } satisfies ActivityItem] }
-          }
-          return {
-            ...prev,
-            trace: prev.trace.map((item, index) => index === existingIndex
-              ? { ...item, content: item.content + content }
-              : item),
-          }
-        })
-      }
-
-      const cleanupReasoningBuf = () => {
-        flushReasoningBuf()
-        reasoningEntryIdRef.current = null
-      }
-
-      ws.onmessage = (e) => {
-        const ev = JSON.parse(e.data)
-        switch (ev.type) {
-          case "ping":
-            break
-
-          case "submission_status":
-            if (ev.status === "FAILED") {
-              cleanupReasoningBuf()
-              toast("This evaluation failed. Please retry; if it fails again, check your provider key.", "error")
-              ws.close()
-              wsRef.current = null
-              setAgentState({ phase: "idle" })
-              submitMutation.reset()
-            }
-            break
-
-          case "reasoning": {
-            const content = ev.content ?? ev.line ?? ""
-            if (!content) break
-            // Accumulate rapid token chunks and flush after 100ms of silence
-            reasoningBufRef.current += content
-            if (reasoningTimerRef.current) clearTimeout(reasoningTimerRef.current)
-            reasoningTimerRef.current = setTimeout(() => {
-              flushReasoningBuf()
-            }, 100)
-            break
-          }
-
-          case "agent_flow": {
-            flushReasoningBuf()
-            const flowLine = `→ ${ev.step ?? "Agent progress"}${ev.details ? ` (${JSON.stringify(ev.details)})` : ""}`
-            setAgentState((prev) => {
-              if (prev.phase === "processing" || prev.phase === "follow-up") {
-                return { ...prev, trace: [...prev.trace, { id: crypto.randomUUID(), type: "status", content: flowLine }] }
-              }
-              return prev
-            })
-            break
-          }
-
-          case "followup": {
-            flushReasoningBuf()
-            reasoningEntryIdRef.current = null
-            const q = ev.question ?? ev.content ?? ""
-            setAgentState((prev) => ({
-              phase: "follow-up",
-              question: q,
-              trace: prev.phase === "processing" || prev.phase === "follow-up" ? prev.trace : [],
-            }))
-            setAgentMessages((prev) => [
-              ...prev,
-              { id: crypto.randomUUID(), role: "agent", content: q, timestamp: new Date() },
-            ])
-            break
-          }
-
-          case "user_reply":
-            reasoningEntryIdRef.current = null
-            setAgentState((prev) => {
-              if (prev.phase === "follow-up") {
-                return { phase: "processing", trace: prev.trace ?? [] }
-              }
-              return prev
-            })
-            break
-
-          case "eval_start":
-            cleanupReasoningBuf()
-            setAgentState({
-              phase: "evaluating",
-              agentResults: [],
-              dimensionLabels: ev.dimensions?.map((id: string) => ev.dimensionLabels?.[id] ?? id) ?? [],
-            })
-            break
-
-          case "eval_progress":
-            setAgentState((prev) => {
-              if (prev.phase === "evaluating") {
-                return { phase: "evaluating", agentResults: [...prev.agentResults, ev], dimensionLabels: prev.dimensionLabels }
-              }
-              return prev
-            })
-            break
-
-          case "eval_done":
-            cleanupReasoningBuf()
-            setAgentState((prev) => ({
-              phase: "done",
-              submissionId,
-              agentResults: prev.phase === "evaluating" ? prev.agentResults : [],
-              dimensionLabels: prev.phase === "evaluating" ? prev.dimensionLabels : [],
-            }))
-            ws.close()
-            wsRef.current = null
-            break
-
-          case "risk_flag":
-            setRiskFlags((prev) => [
-              ...prev,
-              { component: ev.component, risk: ev.risk, severity: ev.severity },
-            ])
-            break
-
-          case "error":
-            cleanupReasoningBuf()
-            toast(ev.message ?? "Evaluation failed", "error")
-            ws.close()
-            wsRef.current = null
-            setAgentState({ phase: "idle" })
-            submitMutation.reset()
-            break
-        }
-      }
-
-      ws.onclose = () => {
-        wsRef.current = null
-      }
-
-      ws.onerror = () => {
-        if (wsRef.current) {
-          cleanupReasoningBuf()
-          toast("Lost connection to agent", "error")
-          setAgentState({ phase: "idle" })
-          submitMutation.reset()
-        }
-        ws.close()
-        wsRef.current = null
-      }
-    },
-    onError: (err: Error) => {
-      toast(err.message, "error")
-    },
-  })
-
-  // ── Draft auto-save ──────────────────────────────────────────
-  const draftKey = `workspace_draft_${questionId}`
-  const [draftRestored, setDraftRestored] = useState(false)
-
-  // Restore draft on mount
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(draftKey)
-      if (!raw) return
-      const { code, codeSnippet: savedCodeSnippet, codeLanguage: savedCodeLanguage, diagramElements, checklist: savedChecklist, savedAt } = JSON.parse(raw)
-      if (code) setAnswerCode(code)
-      if (typeof savedCodeSnippet === "string") setCodeSnippet(savedCodeSnippet)
-      if (savedCodeLanguage) setCodeLanguage(savedCodeLanguage)
-      if (Array.isArray(diagramElements)) {
-        setExcalidrawData({ elements: diagramElements })
-        setHasExcalidrawElements(diagramElements.length > 0)
-      }
-      if (Array.isArray(savedChecklist)) setChecklist(new Set(savedChecklist))
-      const mins = Math.round((Date.now() - savedAt) / 60000)
-      if (code?.trim().length > 0 || savedCodeSnippet?.trim().length > 0 || diagramElements?.length > 0) {
-        setDraftRestored(mins <= 10080) // show if < 1 week old
-      }
-    } catch { /* ignore corrupt data */ }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftKey])
-
-  // Auto-save every 30s when there's content
-  useEffect(() => {
-    if (!answerCode.trim() && !codeSnippet.trim() && !hasExcalidrawElements) return
-    const id = setInterval(() => {
-      try {
-        localStorage.setItem(draftKey, JSON.stringify({
-          code: answerCode,
-          codeSnippet,
-          codeLanguage,
-          diagramElements: (excalidrawData as any)?.elements ?? [],
-          checklist: [...checklist],
-          savedAt: Date.now(),
-        }))
-      } catch { /* ignore quota errors */ }
-    }, 30_000)
-    return () => clearInterval(id)
-  }, [answerCode, codeSnippet, codeLanguage, excalidrawData, hasExcalidrawElements, checklist, draftKey])
-
+  const { submitMutation, agentState, agentMessages, riskFlags, handleSendAgentMessage } =
+    useSubmissionStream({
+      questionId,
+      answerText: formattedAnswer,
+      excalidrawElements: excalidrawData?.elements ?? [],
+      reviewMode,
+      mood,
+      modelName,
+      modelOverridden,
+      question,
+      toast,
+      onSubmissionStarted: () => setAgentVisible(true),
+    })
   useEffect(() => {
     if (activeTab === "notebook") setDiagramMounted(true)
   }, [activeTab])
-
-  function clearDraft() {
-    localStorage.removeItem(draftKey)
-    setAnswerCode("")
-    setCodeSnippet("")
-    setExcalidrawData(null)
-    setHasExcalidrawElements(false)
-    setDiagramResetKey((key) => key + 1)
-    setChecklist(new Set())
-    setDraftRestored(false)
-  }
-
-  // ── Cleanup WebSocket and buffering on unmount ───────────────
-  useEffect(() => {
-    return () => {
-      wsRef.current?.close()
-      if (reasoningTimerRef.current) clearTimeout(reasoningTimerRef.current)
-    }
-  }, [])
-
-  // Use the current top result from the reasoning benchmark until the user
-  // explicitly picks a model. Keep the choice stable when review mode changes.
-  useEffect(() => {
-    const topReasoningModel = reasoningModels?.[0]?.id
-    if (topReasoningModel && !modelOverridden) setModelName(topReasoningModel)
-  }, [reasoningModels, modelOverridden])
 
   // canSubmit must be declared before the keyboard shortcut useEffect
   // so the dep array can evaluate it without TDZ error
@@ -451,23 +190,21 @@ function WorkspacePage() {
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSubmit, submitMutation.isPending, submitMutation.isSuccess])
-
-  function handleSendAgentMessage(msg: string) {
-    setAgentMessages((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), role: "user", content: msg, timestamp: new Date() },
-    ])
-    wsRef.current?.send(JSON.stringify({ type: "reply", content: msg }))
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canSubmit, submitMutation.isPending, submitMutation.isSuccess, submitMutation.mutate])
 
   const renderDiagramCanvas = (className: string) => (
     <div className={className}>
       <Suspense
         fallback={
-          <div className="flex h-full items-center justify-center gap-2 text-sm" style={{ color: "var(--app-muted)" }}>
-            <span className="h-4 w-4 animate-spin rounded-full border-2" style={{ borderColor: "var(--app-border)", borderTopColor: "var(--app-indigo)" }} />
+          <div
+            className="flex h-full items-center justify-center gap-2 text-sm"
+            style={{ color: "var(--app-muted)" }}
+          >
+            <span
+              className="h-4 w-4 animate-spin rounded-full border-2"
+              style={{ borderColor: "var(--app-border)", borderTopColor: "var(--app-indigo)" }}
+            />
             Loading canvas…
           </div>
         }
@@ -476,22 +213,29 @@ function WorkspacePage() {
           key={diagramResetKey}
           theme={theme}
           UIOptions={EXCALIDRAW_UI_OPTIONS}
-          initialData={excalidrawData ? {
-            elements: (excalidrawData as any).elements ?? [],
-            appState: (excalidrawData as any).appState ?? {},
-          } : undefined}
+          initialData={
+            excalidrawData
+              ? {
+                  elements: excalidrawData.elements ?? [],
+                  appState: excalidrawData.appState ?? {},
+                }
+              : undefined
+          }
           onChange={handleExcalidrawChange}
         />
       </Suspense>
     </div>
   )
 
-  const handleViewFeedback = useCallback((submissionId: string) => {
-    navigate({
-      to: "/questions/$questionId/result/$submissionId",
-      params: { questionId, submissionId },
-    } as never)
-  }, [navigate, questionId])
+  const handleViewFeedback = useCallback(
+    (submissionId: string) => {
+      navigate({
+        to: "/questions/$questionId/result/$submissionId",
+        params: { questionId, submissionId },
+      } as never)
+    },
+    [navigate, questionId],
+  )
 
   if (isLoading) {
     return (
@@ -528,7 +272,10 @@ function WorkspacePage() {
           "flex flex-col transition-all duration-200 ease-in-out overflow-hidden shrink-0",
           leftCollapsed ? "w-10" : "w-72",
         )}
-        style={{ background: "var(--app-bg-elevated)", borderRight: "1px solid var(--app-border-2)" }}
+        style={{
+          background: "var(--app-bg-elevated)",
+          borderRight: "1px solid var(--app-border-2)",
+        }}
       >
         {/* Sidebar header with collapse + tabs */}
         <div className="shrink-0" style={{ borderBottom: "1px solid var(--app-border-2)" }}>
@@ -538,8 +285,12 @@ function WorkspacePage() {
               onClick={() => setLeftCollapsed(false)}
               className="flex w-full items-center justify-center py-3 transition-colors"
               style={{ color: "var(--app-muted)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-subtle)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--app-muted)")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--app-subtle)"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--app-muted)"
+              }}
               aria-label="Expand sidebar"
             >
               <ChevronRight size={14} />
@@ -617,7 +368,10 @@ function WorkspacePage() {
                       {question.category.replace(/-/g, " ")}
                     </span>
                   </div>
-                  <h2 className="text-sm font-semibold leading-snug" style={{ color: "var(--app-fg)" }}>
+                  <h2
+                    className="text-sm font-semibold leading-snug"
+                    style={{ color: "var(--app-fg)" }}
+                  >
                     {question.title}
                   </h2>
                 </div>
@@ -641,7 +395,10 @@ function WorkspacePage() {
                 {/* Hints */}
                 <div
                   className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid var(--app-border)", background: "rgba(255,255,255,0.02)" }}
+                  style={{
+                    border: "1px solid var(--app-border)",
+                    background: "rgba(255,255,255,0.02)",
+                  }}
                 >
                   <button
                     type="button"
@@ -669,8 +426,12 @@ function WorkspacePage() {
                       className="px-3 py-2.5 space-y-2"
                       style={{ borderTop: "1px solid var(--app-border)" }}
                     >
-                      {question.hints?.map((hint, i) => (
-                        <p key={i} className="text-xs flex gap-1.5" style={{ color: "var(--app-subtle)" }}>
+                      {question.hints?.map((hint) => (
+                        <p
+                          key={hint}
+                          className="text-xs flex gap-1.5"
+                          style={{ color: "var(--app-subtle)" }}
+                        >
                           <span className="shrink-0" style={{ color: "rgba(128,131,255,0.5)" }}>
                             ›
                           </span>
@@ -680,7 +441,6 @@ function WorkspacePage() {
                     </div>
                   )}
                 </div>
-
               </div>
             )}
 
@@ -727,7 +487,11 @@ function WorkspacePage() {
                               className="shrink-0"
                             />
                           ) : (
-                            <Square size={13} style={{ color: "var(--app-border)" }} className="shrink-0" />
+                            <Square
+                              size={13}
+                              style={{ color: "var(--app-border)" }}
+                              className="shrink-0"
+                            />
                           )}
                           <span className="text-xs">{item}</span>
                         </button>
@@ -739,7 +503,10 @@ function WorkspacePage() {
                 {/* Progress summary */}
                 <div
                   className="rounded-xl p-3"
-                  style={{ border: "1px solid var(--app-border)", background: "rgba(255,255,255,0.02)" }}
+                  style={{
+                    border: "1px solid var(--app-border)",
+                    background: "rgba(255,255,255,0.02)",
+                  }}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span
@@ -751,7 +518,10 @@ function WorkspacePage() {
                     <span
                       className="text-xs font-semibold"
                       style={{
-                        color: checklistProgress === checklistTotal ? "var(--app-green)" : "var(--app-subtle)",
+                        color:
+                          checklistProgress === checklistTotal
+                            ? "var(--app-green)"
+                            : "var(--app-subtle)",
                       }}
                     >
                       {checklistProgress}/{checklistTotal}
@@ -765,7 +535,10 @@ function WorkspacePage() {
                       className="h-full rounded-full transition-all duration-500"
                       style={{
                         width: `${(checklistProgress / checklistTotal) * 100}%`,
-                        background: checklistProgress === checklistTotal ? "var(--app-green)" : "var(--app-indigo)",
+                        background:
+                          checklistProgress === checklistTotal
+                            ? "var(--app-green)"
+                            : "var(--app-indigo)",
                       }}
                     />
                   </div>
@@ -775,7 +548,6 @@ function WorkspacePage() {
                     </p>
                   )}
                 </div>
-
               </div>
             )}
           </div>
@@ -800,7 +572,10 @@ function WorkspacePage() {
           <span className="text-xs" style={{ color: "var(--app-border)" }}>
             /
           </span>
-          <span className="truncate text-xs font-medium min-w-0" style={{ color: "var(--app-subtle)" }}>
+          <span
+            className="truncate text-xs font-medium min-w-0"
+            style={{ color: "var(--app-subtle)" }}
+          >
             {question.title}
           </span>
           <div className="ml-auto flex items-center gap-3 shrink-0">
@@ -819,7 +594,10 @@ function WorkspacePage() {
         {draftRestored && (
           <div
             className="flex items-center justify-between gap-3 px-4 py-2.5 shrink-0"
-            style={{ background: "var(--app-indigo-10)", borderBottom: "1px solid var(--app-indigo-15)" }}
+            style={{
+              background: "var(--app-indigo-10)",
+              borderBottom: "1px solid var(--app-indigo-15)",
+            }}
           >
             <span className="text-xs" style={{ color: "var(--app-indigo)" }}>
               Draft restored — your previous work is loaded.
@@ -836,7 +614,7 @@ function WorkspacePage() {
         )}
 
         {/* API Key Warning Banner */}
-        {!apiKey && !apiBannerDismissed && (
+        {!providerKeysLoading && !hasProviderKey && !apiBannerDismissed && (
           <div
             className="flex items-center justify-between gap-3 px-4 py-3 shrink-0"
             style={{ background: "var(--app-red-10)", borderBottom: "1px solid var(--app-red-15)" }}
@@ -883,17 +661,23 @@ function WorkspacePage() {
               setActiveTab("diagram")
               setDiagramMounted(true)
             }}
-            icon={<Map size={13} />}
+            icon={<MapIcon size={13} />}
             label="Diagram"
           />
           <TabButton
             active={activeTab === "code"}
-            onClick={() => setActiveTab("code")}
+            onClick={() => {
+              setCodeEditorMounted(true)
+              setActiveTab("code")
+            }}
             icon={<Code2 size={13} />}
             label="Code"
           />
           {hasExcalidrawElements && activeTab !== "diagram" && (
-            <span className="ml-auto text-xs flex items-center gap-1" style={{ color: "var(--app-muted)" }}>
+            <span
+              className="ml-auto text-xs flex items-center gap-1"
+              style={{ color: "var(--app-muted)" }}
+            >
               <Layers size={11} style={{ color: "rgba(128,131,255,0.6)" }} />
               Diagram included
             </span>
@@ -903,21 +687,44 @@ function WorkspacePage() {
         {/* Notebook and focused editor views */}
         <div className="flex-1 overflow-hidden relative">
           {activeTab === "notebook" && (
-            <div className="absolute inset-0 overflow-y-auto" style={{ background: "var(--app-bg)" }}>
+            <div
+              className="absolute inset-0 overflow-y-auto"
+              style={{ background: "var(--app-bg)" }}
+            >
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-5 lg:px-6">
                 <div className="flex flex-wrap items-end justify-between gap-3 px-1">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--app-indigo)" }}>Design notes</p>
-                    <h2 className="mt-1 text-lg font-semibold" style={{ color: "var(--app-text)" }}>Work through your design</h2>
-                    <p className="mt-1 text-xs" style={{ color: "var(--app-muted)" }}>Use this space for your written answer. Your diagram and code have their own tabs.</p>
+                    <p
+                      className="text-[11px] font-semibold uppercase tracking-[0.18em]"
+                      style={{ color: "var(--app-indigo)" }}
+                    >
+                      Design notes
+                    </p>
+                    <h2 className="mt-1 text-lg font-semibold" style={{ color: "var(--app-text)" }}>
+                      Work through your design
+                    </h2>
+                    <p className="mt-1 text-xs" style={{ color: "var(--app-muted)" }}>
+                      Use this space for your written answer. Your diagram and code have their own
+                      tabs.
+                    </p>
                   </div>
                 </div>
 
-                <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
-                  <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
+                <section
+                  className="overflow-hidden rounded-2xl border"
+                  style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}
+                >
+                  <div
+                    className="flex items-center gap-2 border-b px-4 py-3"
+                    style={{ borderColor: "var(--app-border)" }}
+                  >
                     <FileText size={14} style={{ color: "var(--app-muted)" }} />
-                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Design notes</span>
-                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Markdown</span>
+                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>
+                      Design notes
+                    </span>
+                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>
+                      Markdown
+                    </span>
                   </div>
                   <div className="min-h-[360px] p-2" style={{ height: "min(68vh, 720px)" }}>
                     <RichTextEditor
@@ -937,22 +744,32 @@ function WorkspacePage() {
             className="absolute inset-0 p-3"
             style={{ display: activeTab === "code" ? "flex" : "none" }}
           >
-            <CodeEditor
-              value={codeSnippet}
-              onChange={setCodeSnippet}
-              language={codeLanguage}
-              onLanguageChange={setCodeLanguage}
-              filename="implementation"
-              className="w-full"
-              height="100%"
-              placeholder="// Add a focused code or pseudocode example…"
-              theme={theme}
-            />
+            {codeEditorMounted && (
+              <Suspense
+                fallback={
+                  <div className="flex w-full items-center justify-center text-xs text-base-content/50">
+                    Loading code editor…
+                  </div>
+                }
+              >
+                <CodeEditor
+                  value={codeSnippet}
+                  onChange={setCodeSnippet}
+                  language={codeLanguage}
+                  onLanguageChange={setCodeLanguage}
+                  filename="implementation"
+                  className="w-full"
+                  height="100%"
+                  placeholder="// Add a focused code or pseudocode example…"
+                  theme={theme}
+                />
+              </Suspense>
+            )}
           </div>
 
           {/* Focused diagram view shares the notebook canvas data. */}
           {diagramMounted && (
-            <div
+            <section
               className="absolute inset-0"
               style={{
                 opacity: activeTab === "diagram" ? 1 : 0,
@@ -962,7 +779,7 @@ function WorkspacePage() {
               aria-hidden={activeTab !== "diagram"}
             >
               {activeTab === "diagram" && renderDiagramCanvas("h-full w-full")}
-            </div>
+            </section>
           )}
         </div>
 
@@ -986,7 +803,12 @@ function WorkspacePage() {
             >
               <span
                 style={{
-                  color: wordCount >= 300 ? "var(--app-green)" : wordCount >= 150 ? "var(--app-indigo)" : "var(--app-muted)",
+                  color:
+                    wordCount >= 300
+                      ? "var(--app-green)"
+                      : wordCount >= 150
+                        ? "var(--app-indigo)"
+                        : "var(--app-muted)",
                   fontWeight: 600,
                 }}
               >
@@ -1018,11 +840,7 @@ function WorkspacePage() {
                 submitMutation.mutate()
               }
             }}
-            disabled={
-              !canSubmit ||
-              submitMutation.isPending ||
-              submitMutation.isSuccess
-            }
+            disabled={!canSubmit || submitMutation.isPending || submitMutation.isSuccess}
             className="flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all active:scale-95 disabled:cursor-not-allowed whitespace-nowrap"
             style={
               submitMutation.isSuccess
@@ -1072,13 +890,26 @@ function WorkspacePage() {
           {/* Right: Controls (review + mood + model) */}
           <div className="ml-auto flex flex-wrap items-end justify-end gap-2">
             <label className="flex w-[112px] flex-col gap-1">
-              <span className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--app-muted)" }}>Review</span>
+              <span
+                className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: "var(--app-muted)" }}
+              >
+                Review
+              </span>
               <select
                 value={reviewMode}
                 onChange={(event) => setReviewMode(event.target.value as "quick" | "deep")}
-                title={reviewMode === "deep" ? "The interviewer can ask follow-up questions before evaluation" : "Receive structured feedback without follow-up questions"}
+                title={
+                  reviewMode === "deep"
+                    ? "The interviewer can ask follow-up questions before evaluation"
+                    : "Receive structured feedback without follow-up questions"
+                }
                 className="h-9 w-full rounded-xl border px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                style={{ background: "var(--app-surface)", borderColor: "var(--app-border)", color: "var(--app-text)" }}
+                style={{
+                  background: "var(--app-surface)",
+                  borderColor: "var(--app-border)",
+                  color: "var(--app-text)",
+                }}
               >
                 <option value="quick">Quick review</option>
                 <option value="deep">Deep interview</option>
@@ -1086,12 +917,21 @@ function WorkspacePage() {
             </label>
 
             <label className="flex w-[145px] flex-col gap-1">
-              <span className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--app-muted)" }}>Interviewer lens</span>
+              <span
+                className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: "var(--app-muted)" }}
+              >
+                Interviewer lens
+              </span>
               <select
                 value={mood}
                 onChange={(event) => setMood(event.target.value as typeof mood)}
                 className="h-9 w-full rounded-xl border px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
-                style={{ background: "var(--app-surface)", borderColor: "var(--app-border)", color: "var(--app-text)" }}
+                style={{
+                  background: "var(--app-surface)",
+                  borderColor: "var(--app-border)",
+                  color: "var(--app-text)",
+                }}
               >
                 <option value="pragmatist">Pragmatist</option>
                 <option value="systems">Systems architect</option>
@@ -1101,10 +941,18 @@ function WorkspacePage() {
             </label>
 
             <div className="flex flex-col gap-1">
-              <span className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--app-muted)" }}>Model</span>
+              <span
+                className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]"
+                style={{ color: "var(--app-muted)" }}
+              >
+                Model
+              </span>
               <ModelCombobox
                 value={modelName}
-                onChange={(v) => { setModelName(v); setModelOverridden(true) }}
+                onChange={(v) => {
+                  setModelName(v)
+                  setModelOverridden(true)
+                }}
               />
             </div>
           </div>

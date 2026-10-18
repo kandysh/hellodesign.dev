@@ -93,5 +93,8 @@ export interface EvalJobData {
 // SSE event types streamed from API to browser
 export type SSEEvent =
   | { type: "agent:result"; data: AgentResult }
-  | { type: "evaluation:complete"; data: { evaluationId: string; orchestrator: OrchestratorResult } }
+  | {
+      type: "evaluation:complete"
+      data: { evaluationId: string; orchestrator: OrchestratorResult }
+    }
   | { type: "evaluation:error"; data: { message: string } }

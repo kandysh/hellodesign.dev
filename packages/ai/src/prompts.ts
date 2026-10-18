@@ -1,4 +1,4 @@
-import type { RubricConfig, InterviewerMood } from "@sysdesign/shared"
+import type { InterviewerMood, RubricConfig } from "@sysdesign/shared"
 
 interface QuestionForPrompt {
   title: string

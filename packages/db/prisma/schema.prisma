@@ -43,15 +43,15 @@ model User {
   updatedAt     DateTime @updatedAt
   isAdmin       Boolean  @default(false)
 
-  apiKeys     UserApiKey[]
-  submissions Submission[]
-  sessions    Session[]
-  accounts    Account[]
-  communityPosts CommunityPost[]
+  apiKeys           UserApiKey[]
+  submissions       Submission[]
+  sessions          Session[]
+  accounts          Account[]
+  communityPosts    CommunityPost[]
   communityComments CommunityComment[]
-  postVotes CommunityPostVote[]
-  commentVotes CommunityCommentVote[]
-  communityReports CommunityReport[]
+  postVotes         CommunityPostVote[]
+  commentVotes      CommunityCommentVote[]
+  communityReports  CommunityReport[]
 }
 
 model Session {
@@ -109,6 +109,9 @@ model UserApiKey {
   createdAt    DateTime  @default(now())
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionId])
 }
 
 // ─── Interview content ────────────────────────────────────────────────────────
@@ -123,11 +126,12 @@ model Question {
   hints             Json // string[]
   coverageChecklist Json // string[]
   rubric            Json // RubricConfig
+  referenceSolution String?    @db.Text
   isPublished       Boolean    @default(true)
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
-  submissions Submission[]
+  submissions    Submission[]
   communityPosts CommunityPost[]
 }
 
@@ -143,22 +147,28 @@ model Submission {
   agentJobId     String?
   createdAt      DateTime         @default(now())
 
-  question Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  user     User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  result   EvalResult?
-  messages AgentMessage[]
+  question      Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  result        EvalResult?
+  messages      AgentMessage[]
   communityPost CommunityPost?
+
+  @@index([userId, createdAt])
+  @@index([sessionId, createdAt])
 }
 
 model AgentMessage {
   id           String      @id @default(cuid())
   submissionId String
+  sequence     Int?
   role         MessageRole
   content      String      @db.Text
   metadata     Json? // { type: "followup" | "reasoning" | "evaluation_progress" }
   createdAt    DateTime    @default(now())
 
   submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, sequence])
 }
 
 model EvalResult {
@@ -183,22 +193,22 @@ enum CommunityReportStatus {
 }
 
 model CommunityPost {
-  id               String   @id @default(cuid())
-  submissionId     String   @unique
-  authorId         String
-  questionId       String
-  title            String
-  answerText       String   @db.Text
-  diagram          Json?
-  includeEvaluation Boolean @default(false)
-  evaluation       Json?
-  isHidden         Boolean @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                String   @id @default(cuid())
+  submissionId      String   @unique
+  authorId          String
+  questionId        String
+  title             String
+  answerText        String   @db.Text
+  diagram           Json?
+  includeEvaluation Boolean  @default(false)
+  evaluation        Json?
+  isHidden          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  question   Question   @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  submission Submission          @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  author     User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  question   Question            @relation(fields: [questionId], references: [id], onDelete: Cascade)
   comments   CommunityComment[]
   votes      CommunityPostVote[]
   reports    CommunityReport[]
@@ -216,8 +226,8 @@ model CommunityComment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  post    CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    CommunityPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User                   @relation(fields: [authorId], references: [id], onDelete: Cascade)
   votes   CommunityCommentVote[]
   reports CommunityReport[]
 
@@ -240,26 +250,26 @@ model CommunityCommentVote {
   commentId String
   createdAt DateTime @default(now())
 
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   comment CommunityComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@id([userId, commentId])
 }
 
 model CommunityReport {
-  id             String                @id @default(cuid())
-  reporterId     String
-  postId         String?
-  commentId      String?
-  reason         String
-  details        String?               @db.Text
-  status         CommunityReportStatus @default(OPEN)
-  resolvedById   String?
-  createdAt      DateTime              @default(now())
-  resolvedAt     DateTime?
+  id           String                @id @default(cuid())
+  reporterId   String
+  postId       String?
+  commentId    String?
+  reason       String
+  details      String?               @db.Text
+  status       CommunityReportStatus @default(OPEN)
+  resolvedById String?
+  createdAt    DateTime              @default(now())
+  resolvedAt   DateTime?
 
-  reporter User             @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  post     CommunityPost?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reporter User              @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  post     CommunityPost?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment  CommunityComment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@index([status, createdAt])

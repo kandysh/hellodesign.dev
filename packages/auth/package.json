@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "better-auth": "^1.2.7",
+    "better-auth": "^1.6.9",
     "@sysdesign/db": "workspace:*"
   },
   "devDependencies": {

@@ -7,5 +7,3 @@ declare module "fastify" {
     sessionId: string
   }
 }
-
-

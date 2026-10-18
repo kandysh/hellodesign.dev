@@ -23,6 +23,62 @@ export interface ComponentScore {
   improvements: string[]
 }
 
+export const OPENAI_COMPATIBLE_PROVIDER_HOSTS = ["api.openai.com", "openrouter.ai"] as const
+
+export const DEFAULT_MODELS = {
+  openai: { quick: "gpt-4o-mini", deep: "gpt-4o" },
+  openrouter: { quick: "openai/gpt-4o-mini", deep: "openai/gpt-4o" },
+} as const
+
+export function getDefaultModelName(
+  baseUrl?: string | null,
+  mode: "quick" | "deep" = "quick",
+): string {
+  if (!baseUrl) return DEFAULT_MODELS.openai[mode]
+  try {
+    const hostname = new URL(baseUrl).hostname.toLowerCase().replace(/\.$/, "")
+    if (hostname === "openrouter.ai") return DEFAULT_MODELS.openrouter[mode]
+  } catch {
+    // Invalid stored URLs are rejected before any provider call; use the safe default here.
+  }
+  return DEFAULT_MODELS.openai[mode]
+}
+
+export function normalizeOpenAICompatibleBaseUrl(
+  input: string,
+  options: { allowLocalhost?: boolean } = {},
+): string {
+  let url: URL
+  try {
+    url = new URL(input)
+  } catch {
+    throw new Error("API base URL must be a valid URL")
+  }
+
+  const hostname = url.hostname.toLowerCase().replace(/\.$/, "")
+  const localDevelopmentUrl = options.allowLocalhost === true && hostname === "localhost"
+  if (url.protocol !== "https:" && !(localDevelopmentUrl && url.protocol === "http:")) {
+    throw new Error("API base URL must use HTTPS")
+  }
+  if (url.username || url.password || url.search || url.hash) {
+    throw new Error("API base URL cannot contain credentials, query parameters, or fragments")
+  }
+  if (
+    !localDevelopmentUrl &&
+    !OPENAI_COMPATIBLE_PROVIDER_HOSTS.includes(
+      hostname as (typeof OPENAI_COMPATIBLE_PROVIDER_HOSTS)[number],
+    )
+  ) {
+    throw new Error("API base URL host is not an approved OpenAI-compatible provider")
+  }
+  if (url.port && !(localDevelopmentUrl && url.protocol === "http:") && url.port !== "443") {
+    throw new Error("API base URL must use the provider's default HTTPS port")
+  }
+
+  url.hostname = hostname
+  return url.toString().replace(/\/$/, "")
+}
+
 // ─── Agent modes & personas ───────────────────────────────────────────────────
 
 export type InterviewerMood = "pragmatist" | "systems" | "sre" | "pm"
@@ -59,7 +115,7 @@ export interface FollowupJobData {
 
 export type AgentEvent =
   | { type: "reasoning"; content: string }
-  | { type: "followup"; question: string; submissionId: string }
+  | { type: "followup"; question: string; submissionId: string; messageId?: string }
   | { type: "user_reply"; content: string }
   | { type: "eval_start"; dimensions: string[]; dimensionLabels: Record<string, string> }
   | { type: "eval_progress"; dimensionId: string; score: number }
@@ -86,7 +142,11 @@ export const RubricConfigSchema = z.object({
 
 export function assertRubric(rubric: RubricConfig, tolerance = 0.001): void {
   if (rubric.dimensions.length === 0) throw new Error("Rubric must have at least one dimension")
-  if (rubric.dimensions.some((dimension) => !Number.isFinite(dimension.weight) || dimension.weight < 0)) {
+  if (
+    rubric.dimensions.some(
+      (dimension) => !Number.isFinite(dimension.weight) || dimension.weight < 0,
+    )
+  ) {
     throw new Error("Rubric weights must be finite and non-negative")
   }
   const totalWeight = rubric.dimensions.reduce((total, dimension) => total + dimension.weight, 0)
@@ -96,7 +156,11 @@ export function assertRubric(rubric: RubricConfig, tolerance = 0.001): void {
 }
 
 export function normalizeRubric(rubric: RubricConfig): RubricConfig {
-  if (rubric.dimensions.some((dimension) => !Number.isFinite(dimension.weight) || dimension.weight < 0)) {
+  if (
+    rubric.dimensions.some(
+      (dimension) => !Number.isFinite(dimension.weight) || dimension.weight < 0,
+    )
+  ) {
     throw new Error("Rubric weights must be finite and non-negative")
   }
   const totalWeight = rubric.dimensions.reduce((total, dimension) => total + dimension.weight, 0)
@@ -234,15 +298,13 @@ export const DEFAULT_RUBRIC: RubricConfig = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-export function computeWeightedScore(
-  scores: ComponentScore[],
-  rubric: RubricConfig,
-): number {
+export function computeWeightedScore(scores: ComponentScore[], rubric: RubricConfig): number {
   const normalizedRubric = normalizeRubric(rubric)
-  return normalizedRubric.dimensions.reduce((total, dimension) => {
+  const weightedScore = normalizedRubric.dimensions.reduce((total, dimension) => {
     const score = scores.find((item) => item.dimensionId === dimension.id)?.score ?? 0
     return total + Math.min(100, Math.max(0, score)) * dimension.weight
   }, 0)
+  return Math.min(100, Math.max(0, weightedScore))
 }
 
 /**

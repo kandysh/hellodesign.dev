@@ -1,34 +1,31 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import type { ComponentScore } from "@sysdesign/shared"
+import { DEFAULT_RUBRIC, extractLexicalText } from "@sysdesign/shared"
+import { ScoreRing } from "@sysdesign/ui"
 import { useQuery } from "@tanstack/react-query"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import {
+  Activity,
+  ArrowRight,
+  BarChart3,
+  ClipboardList,
+  Code2,
+  Database,
+  FileText,
+  GitBranch,
+  Layers,
+  MessageCircle,
+  RefreshCw,
+  Share2,
+  Shield,
+  Zap,
+} from "lucide-react"
 import { useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { ScoreRing } from "@sysdesign/ui"
-import { DEFAULT_RUBRIC, extractLexicalText } from "@sysdesign/shared"
-import type { ComponentScore } from "@sysdesign/shared"
-import {
-  ArrowRight,
-  RefreshCw,
-  MessageCircle,
-  FileText,
-  BarChart3,
-  Layers,
-  Database,
-  Shield,
-  Code2,
-  ClipboardList,
-  Zap,
-  GitBranch,
-  Activity,
-  Share2,
-} from "lucide-react"
-
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
+import { apiJson } from "@/lib/api-client"
 
 // Map dimensionId → human label using the default rubric
-const dimensionLabel = Object.fromEntries(
-  DEFAULT_RUBRIC.dimensions.map((d) => [d.id, d.label]),
-)
+const dimensionLabel = Object.fromEntries(DEFAULT_RUBRIC.dimensions.map((d) => [d.id, d.label]))
 
 // Map dimensionId → lucide icon element
 const dimensionIcon: Record<string, React.ReactNode> = {
@@ -102,18 +99,17 @@ function ResultPage() {
   const [shareMessage, setShareMessage] = useState("")
   const [sharedPostId, setSharedPostId] = useState<string | null>(null)
   const [sharing, setSharing] = useState(false)
+  const [showReferenceSolution, setShowReferenceSolution] = useState(false)
 
   const { data: session } = useQuery<{ user?: { id: string } } | null>({
     queryKey: ["session"],
-    queryFn: () => fetch(`${API}/api/auth/get-session`, { credentials: "include" }).then((r) => r.ok ? r.json() : null),
+    queryFn: () =>
+      apiJson<{ user?: { id: string } } | null>("/api/auth/get-session").catch(() => null),
   })
 
   const { data: submission, isLoading } = useQuery<SubmissionRow>({
     queryKey: ["submission", submissionId],
-    queryFn: () =>
-      fetch(`${API}/api/submissions/${submissionId}`, { credentials: "include" }).then((r) =>
-        r.json(),
-      ),
+    queryFn: () => apiJson<SubmissionRow>(`/api/submissions/${submissionId}`),
     refetchInterval: (query) => {
       const s = query.state.data?.status
       if (s === "DONE" || s === "FAILED") return false
@@ -121,25 +117,43 @@ function ResultPage() {
     },
   })
 
+  const { data: referenceSolution, isLoading: isLoadingReference } = useQuery<string>({
+    queryKey: ["reference-solution", questionId, submissionId],
+    enabled: showReferenceSolution && submission?.status === "DONE",
+    queryFn: async () => {
+      const payload = await apiJson<{ referenceSolution?: string }>(
+        `/api/questions/${questionId}/reference?submissionId=${encodeURIComponent(submissionId)}`,
+      )
+      if (!payload.referenceSolution) throw new Error("Reference solution is unavailable")
+      return payload.referenceSolution
+    },
+  })
+
   const result = submission?.result ?? null
   const overallScore = result?.overallScore ?? null
   const componentScores: ComponentScore[] = Array.isArray(result?.componentScores)
-    ? (result!.componentScores as ComponentScore[])
+    ? (result?.componentScores as ComponentScore[])
     : []
   const isEvaluating = !result && submission?.status !== "FAILED"
 
   const answerText = extractLexicalText(submission?.lexicalState ?? {})
 
   async function shareSubmission() {
-    setSharing(true); setShareMessage("")
+    setSharing(true)
+    setShareMessage("")
     try {
-      const response = await fetch(`${API}/api/community`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ submissionId, includeEvaluation }) })
-      const data = await response.json().catch(() => ({})) as { id?: string; error?: string }
-      if (!response.ok) throw new Error(data.error ?? "Could not share this answer")
+      const data = await apiJson<{ id?: string }>("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submissionId, includeEvaluation }),
+      })
       setSharedPostId(data.id ?? null)
       setShareMessage("Published to the community.")
-    } catch (error) { setShareMessage(error instanceof Error ? error.message : "Could not share this answer") }
-    finally { setSharing(false) }
+    } catch (error) {
+      setShareMessage(error instanceof Error ? error.message : "Could not share this answer")
+    } finally {
+      setSharing(false)
+    }
   }
 
   const statusLabel =
@@ -154,10 +168,7 @@ function ResultPage() {
   const statusColor = overallScore == null ? DS.amber : scoreColor(overallScore)
 
   return (
-    <div
-      className="mx-auto max-w-5xl px-4 py-8 font-[Manrope,sans-serif]"
-      style={{ color: DS.textPrimary }}
-    >
+    <div className="mx-auto max-w-5xl px-4 py-8 font-sans" style={{ color: DS.textPrimary }}>
       {/* ── Back link + retry row ── */}
       <div className="flex items-center justify-between mb-6">
         <Link
@@ -177,8 +188,12 @@ function ResultPage() {
             border: "1px solid rgba(128,131,255,0.25)",
             color: "var(--app-indigo-pale)",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--app-indigo-20)" }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(128,131,255,0.12)" }}
+          onMouseEnter={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = "var(--app-indigo-20)"
+          }}
+          onMouseLeave={(e) => {
+            ;(e.currentTarget as HTMLElement).style.background = "rgba(128,131,255,0.12)"
+          }}
         >
           <RefreshCw size={13} />
           Improve Your Design
@@ -191,7 +206,10 @@ function ResultPage() {
         style={{ borderBottom: `1px solid ${DS.surfaceVariant}` }}
       >
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight mb-1" style={{ color: DS.textPrimary }}>
+          <h1
+            className="text-2xl font-extrabold tracking-tight mb-1"
+            style={{ color: DS.textPrimary }}
+          >
             Evaluation Results
           </h1>
           <p className="text-sm" style={{ color: DS.textSecondary }}>
@@ -214,15 +232,14 @@ function ResultPage() {
               {isLoading || isEvaluating ? (
                 <span className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white animate-spin inline-block" />
               ) : (
-                <span className="text-xs" style={{ color: DS.textMuted }}>N/A</span>
+                <span className="text-xs" style={{ color: DS.textMuted }}>
+                  N/A
+                </span>
               )}
             </div>
           )}
 
-          <div
-            className="h-14 w-px"
-            style={{ background: DS.surfaceVariant }}
-          />
+          <div className="h-14 w-px" style={{ background: DS.surfaceVariant }} />
 
           <div className="flex flex-col gap-3">
             {/* Numeric score */}
@@ -240,7 +257,9 @@ function ResultPage() {
                 >
                   {overallScore != null ? Math.round(overallScore) : "—"}
                 </span>
-                <span className="text-lg font-semibold" style={{ color: DS.textMuted }}>/100</span>
+                <span className="text-lg font-semibold" style={{ color: DS.textMuted }}>
+                  /100
+                </span>
               </div>
             </div>
             {/* Status */}
@@ -251,7 +270,10 @@ function ResultPage() {
               >
                 Status
               </span>
-              <span className="flex items-center gap-2 text-sm font-medium" style={{ color: statusColor }}>
+              <span
+                className="flex items-center gap-2 text-sm font-medium"
+                style={{ color: statusColor }}
+              >
                 <span
                   className="w-2 h-2 rounded-full animate-pulse inline-block"
                   style={{
@@ -266,11 +288,72 @@ function ResultPage() {
         </div>
       </header>
 
-      {submission?.status === "DONE" && <section className="mb-8 flex flex-wrap items-center gap-3 rounded-xl p-4" style={{ background: DS.cardBg, border: DS.cardBorder }}>
-        <div className="mr-auto"><p className="text-sm font-semibold" style={{ color: DS.textPrimary }}>Share your answer</p><p className="mt-1 text-xs" style={{ color: DS.textSecondary }}>Your answer and any diagram will be public with your account name.</p></div>
-        {session?.user ? <><label className="flex items-center gap-2 text-xs" style={{ color: DS.textSecondary }}><input type="checkbox" checked={includeEvaluation} onChange={(e) => setIncludeEvaluation(e.target.checked)} /> Include AI feedback and score</label><button type="button" disabled={sharing} onClick={() => void shareSubmission()} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" style={{ background: DS.indigo }}><Share2 size={14}/>{sharing ? "Publishing…" : "Publish"}</button></> : <p className="w-full text-xs" style={{ color: DS.textSecondary }}>Guest submissions are not transferred to accounts, so this answer can’t be published. <Link to="/auth/login" className="underline">Sign in before your next submission</Link>.</p>}
-        {shareMessage && <p role="status" className="w-full text-xs" style={{ color: DS.textSecondary }}>{shareMessage}{sharedPostId && <> <Link to="/community/$threadId" params={{ threadId: sharedPostId }} className="underline">View post</Link></>}</p>}
-      </section>}
+      {submission?.status === "DONE" && (
+        <section
+          className="mb-8 flex flex-wrap items-center gap-3 rounded-xl p-4"
+          style={{ background: DS.cardBg, border: DS.cardBorder }}
+        >
+          <div className="mr-auto">
+            <p className="text-sm font-semibold" style={{ color: DS.textPrimary }}>
+              Share your answer
+            </p>
+            <p className="mt-1 text-xs" style={{ color: DS.textSecondary }}>
+              Your answer and any diagram will be public with your account name.
+            </p>
+          </div>
+          {session?.user ? (
+            <>
+              <label
+                className="flex items-center gap-2 text-xs"
+                style={{ color: DS.textSecondary }}
+              >
+                <input
+                  type="checkbox"
+                  checked={includeEvaluation}
+                  onChange={(e) => setIncludeEvaluation(e.target.checked)}
+                />{" "}
+                Include AI feedback and score
+              </label>
+              <button
+                type="button"
+                disabled={sharing}
+                onClick={() => void shareSubmission()}
+                className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                style={{ background: DS.indigo }}
+              >
+                <Share2 size={14} />
+                {sharing ? "Publishing…" : "Publish"}
+              </button>
+            </>
+          ) : (
+            <p className="w-full text-xs" style={{ color: DS.textSecondary }}>
+              Sign in to publish answers. Guest answers are linked to your account when you create
+              one in this browser.{" "}
+              <Link to="/auth/login" className="underline">
+                Sign in before your next submission
+              </Link>
+              .
+            </p>
+          )}
+          {shareMessage && (
+            <output className="w-full text-xs" style={{ color: DS.textSecondary }}>
+              {shareMessage}
+              {sharedPostId && (
+                <>
+                  {" "}
+                  <Link
+                    to="/community/$threadId"
+                    params={{ threadId: sharedPostId }}
+                    className="underline"
+                  >
+                    View post
+                  </Link>
+                </>
+              )}
+            </output>
+          )}
+        </section>
+      )}
 
       {/* ── Pillar Breakdown grid ── */}
       {(componentScores.length > 0 || isLoading || isEvaluating) && (
@@ -285,9 +368,9 @@ function ResultPage() {
 
           {isLoading || (isEvaluating && componentScores.length === 0) ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
+              {["pillar-1", "pillar-2", "pillar-3", "pillar-4"].map((skeletonId) => (
                 <div
-                  key={i}
+                  key={skeletonId}
                   className="animate-pulse rounded-lg h-44"
                   style={{ background: DS.elevatedBg, border: DS.cardBorder }}
                 />
@@ -412,9 +495,11 @@ function ResultPage() {
                   Key Improvements
                 </div>
                 <ul className="mt-6 space-y-3">
-                  {result.improvements.map((item, i) => (
-                    <li key={i} className="flex gap-3 text-sm" style={{ color: DS.textBody }}>
-                      <span className="shrink-0 font-bold" style={{ color: DS.indigo }}>→</span>
+                  {result.improvements.map((item) => (
+                    <li key={item} className="flex gap-3 text-sm" style={{ color: DS.textBody }}>
+                      <span className="shrink-0 font-bold" style={{ color: DS.indigo }}>
+                        →
+                      </span>
                       <span style={{ lineHeight: "1.5" }}>{item}</span>
                     </li>
                   ))}
@@ -426,10 +511,7 @@ function ResultPage() {
       )}
 
       {/* ── Tabs ── */}
-      <div
-        className="flex gap-1 mb-6"
-        style={{ borderBottom: `1px solid ${DS.surfaceVariant}` }}
-      >
+      <div className="flex gap-1 mb-6" style={{ borderBottom: `1px solid ${DS.surfaceVariant}` }}>
         <TabBtn
           active={activeTab === "feedback"}
           onClick={() => setActiveTab("feedback")}
@@ -455,9 +537,9 @@ function ResultPage() {
         <div className="space-y-6">
           {isLoading || (isEvaluating && !result) ? (
             <div className="space-y-3">
-              {[...Array(3)].map((_, i) => (
+              {["feedback-1", "feedback-2", "feedback-3"].map((skeletonId) => (
                 <div
-                  key={i}
+                  key={skeletonId}
                   className="animate-pulse rounded-lg h-24"
                   style={{ background: DS.elevatedBg }}
                 />
@@ -490,6 +572,7 @@ function ResultPage() {
                           >
                             {/* Chevron */}
                             <svg
+                              aria-hidden="true"
                               className="w-3.5 h-3.5 shrink-0 transition-transform group-open:rotate-90"
                               style={{ color: DS.textSecondary }}
                               viewBox="0 0 24 24"
@@ -520,19 +603,24 @@ function ResultPage() {
                             style={{ borderTop: `1px solid ${DS.surfaceVariant}` }}
                           >
                             {cs.reasoning && (
-                              <p className="text-xs leading-relaxed" style={{ color: DS.textSecondary }}>
+                              <p
+                                className="text-xs leading-relaxed"
+                                style={{ color: DS.textSecondary }}
+                              >
                                 {cs.reasoning}
                               </p>
                             )}
                             {cs.improvements?.length > 0 && (
                               <ul className="space-y-1.5">
-                                {cs.improvements.map((s, i) => (
+                                {cs.improvements.map((s) => (
                                   <li
-                                    key={i}
+                                    key={`${cs.dimensionId}:${s}`}
                                     className="flex gap-2 text-xs"
                                     style={{ color: DS.textBody }}
                                   >
-                                    <span className="shrink-0" style={{ color: DS.indigo }}>→</span>
+                                    <span className="shrink-0" style={{ color: DS.indigo }}>
+                                      →
+                                    </span>
                                     {s}
                                   </li>
                                 ))}
@@ -560,23 +648,58 @@ function ResultPage() {
         </div>
       )}
 
+      {activeTab === "feedback" && result && submission?.status === "DONE" && (
+        <section
+          className="mt-8 rounded-lg p-5"
+          style={{ background: DS.cardBg, border: DS.cardBorder }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold">Reference solution</h2>
+              <p className="mt-1 text-xs" style={{ color: DS.textSecondary }}>
+                One sound approach to compare with your design; other designs can also be valid.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="rounded-lg px-3 py-2 text-xs font-semibold"
+              style={{ color: DS.indigoPale, background: DS.elevatedBg, border: DS.cardBorder }}
+              onClick={() => setShowReferenceSolution((shown) => !shown)}
+            >
+              {showReferenceSolution ? "Hide reference" : "Compare designs"}
+            </button>
+          </div>
+          {showReferenceSolution && (
+            <div className="mt-5 border-t pt-4" style={{ borderColor: DS.surfaceVariant }}>
+              {isLoadingReference ? (
+                <p className="text-sm" style={{ color: DS.textMuted }}>
+                  Loading reference…
+                </p>
+              ) : referenceSolution ? (
+                <div className="prose prose-invert max-w-none text-sm">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{referenceSolution}</ReactMarkdown>
+                </div>
+              ) : (
+                <p className="text-sm" style={{ color: DS.textMuted }}>
+                  Reference solution could not be loaded. Try again in a moment.
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* ── Your Answer tab ── */}
       {activeTab === "answer" && (
         <div className="space-y-4">
           {isLoading ? (
-            <div
-              className="animate-pulse rounded-lg h-40"
-              style={{ background: DS.elevatedBg }}
-            />
+            <div className="animate-pulse rounded-lg h-40" style={{ background: DS.elevatedBg }} />
           ) : answerText ? (
             <div
               className="rounded-lg p-5"
               style={{ background: DS.cardBg, border: DS.cardBorder }}
             >
-              <div
-                className="text-sm max-w-none"
-                style={{ color: DS.textBody, lineHeight: "1.6" }}
-              >
+              <div className="text-sm max-w-none" style={{ color: DS.textBody, lineHeight: "1.6" }}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{answerText}</ReactMarkdown>
               </div>
             </div>
@@ -600,11 +723,7 @@ function ResultPage() {
           className="rounded-lg py-14 text-center"
           style={{ border: `1px dashed ${DS.surfaceVariant}` }}
         >
-          <MessageCircle
-            size={24}
-            className="mx-auto mb-2"
-            style={{ color: DS.textMuted }}
-          />
+          <MessageCircle size={24} className="mx-auto mb-2" style={{ color: DS.textMuted }} />
           <p className="text-sm" style={{ color: DS.textMuted }}>
             Conversation history will appear here.
           </p>
@@ -676,4 +795,3 @@ function TabBtn({
     </button>
   )
 }
-

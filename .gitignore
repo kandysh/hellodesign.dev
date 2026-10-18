@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+packages/db/generated/
 
 # Build outputs
 dist/
@@ -17,8 +18,8 @@ dist/
 .DS_Store
 *.swp
 
-# Drizzle
-drizzle/
+# TanStack Router temporary route artifacts
+.tanstack/tmp/
 
 # Logs
 *.log

@@ -24,6 +24,10 @@ export function replyChannel(submissionId: string) {
   return `submission:${submissionId}:reply`
 }
 
+export function replyKey(submissionId: string) {
+  return `submission:${submissionId}:reply`
+}
+
 export function eventBufKey(submissionId: string) {
   return `submission:${submissionId}:eventbuf`
 }

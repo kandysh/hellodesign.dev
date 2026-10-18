@@ -1,25 +1,25 @@
-import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
+import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-const buttonVariants = cva("btn", {
+const buttonVariants = cva("app-button", {
   variants: {
     variant: {
-      default: "btn-primary",
-      destructive: "btn-error",
-      outline: "btn-outline",
-      secondary: "btn-secondary",
-      ghost: "btn-ghost",
-      link: "btn-link",
+      default: "app-button-primary",
+      destructive: "app-button-error",
+      outline: "app-button-outline",
+      secondary: "app-button-secondary",
+      ghost: "app-button-ghost",
+      link: "app-button-link",
     },
     size: {
       default: "",
-      sm: "btn-sm",
-      lg: "btn-lg",
-      icon: "btn-square btn-sm",
+      sm: "app-button-sm",
+      lg: "app-button-lg",
+      icon: "app-button-square app-button-sm",
     },
   },
   defaultVariants: {
@@ -36,14 +36,13 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
+  (
+    { className, variant, size, asChild = false, loading = false, disabled, children, ...props },
+    ref,
+  ) => {
     if (asChild) {
       return (
-        <Slot
-          className={cn(buttonVariants({ variant, size, className }))}
-          ref={ref}
-          {...props}
-        >
+        <Slot className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
           {children}
         </Slot>
       )

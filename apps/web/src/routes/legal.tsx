@@ -2,8 +2,81 @@ import { createFileRoute } from "@tanstack/react-router"
 export const Route = createFileRoute("/legal")({ component: LegalPage })
 
 function LegalPage() {
-  return <main className="page-shell max-w-4xl text-base-content/90"><p className="page-eyebrow">Public beta</p><h1 className="page-title mt-2">Terms and Privacy</h1><p className="mt-3 text-sm text-base-content/60">Draft for this beta · Effective October 18, 2026</p>
-    <section id="terms" className="mt-10 scroll-mt-24 space-y-4"><h2 className="text-2xl font-semibold">Terms of Service</h2><p className="text-sm leading-6 text-base-content/80">Hello Design is a practice tool for system design interview preparation. You may use it to draft answers, create diagrams, receive AI-generated feedback, and optionally participate in the community. Do not use the service to upload information you do not have the right to share, or to harass, mislead, or harm other people.</p><p className="text-sm leading-6 text-base-content/80">You choose and configure your model provider. Your use of that provider, its availability, its terms, and any charges are your responsibility. AI outputs can be incorrect, incomplete, or inconsistent; review them independently. They are practice feedback and do not represent a hiring decision or a guarantee of interview performance.</p><p className="text-sm leading-6 text-base-content/80">Community posts and comments are visible to other visitors. You control whether to publish an answer. The application displays your account name on published posts. You may remove your posts and comments, and may report content for moderation. Administrators may hide content that violates these rules.</p><p className="text-sm leading-6 text-base-content/80">The application is provided in beta and may change or be unavailable. To the extent permitted by applicable law, it is provided without a guarantee that AI feedback, content, or service availability will meet your needs.</p></section>
-    <section id="privacy" className="mt-12 scroll-mt-24 space-y-4"><h2 className="text-2xl font-semibold">Privacy Policy</h2><p className="text-sm leading-6 text-base-content/80">The application stores account details needed for sign-in, your encrypted provider API key, practice submissions and results, and community content you choose to publish. Guest submissions and keys are associated with a browser session identifier. Guest activity is not automatically transferred when you create an account.</p><p className="text-sm leading-6 text-base-content/80">When you request evaluation, the answer, question context, diagram summary, and your configured API key are used by the application worker to call your selected model provider. The selected provider processes that request under its own terms and privacy policy. The application stores the resulting evaluation with your submission.</p><p className="text-sm leading-6 text-base-content/80">A community publication contains the answer text and diagram, your account name, question metadata, and publication time. The evaluation and score are included only if you enable that option. Public pages can be read without signing in. Comments, votes, reports, and moderation records are stored to operate the community.</p><p className="text-sm leading-6 text-base-content/80">Use Settings to clear guest data or delete your account. Account deletion removes associated private submissions, API keys, and community posts and comments. Guest data clearing removes the data associated with the current guest session. A model-provider request already in progress when data is deleted may still complete at that provider.</p><p className="text-sm leading-6 text-base-content/80">This beta page describes the behavior implemented in the application. The operator should publish its legal business identity, contact route, applicable jurisdiction, and retention details before broad public launch; those details are not configured in this codebase.</p></section>
-  </main>
+  return (
+    <main className="page-shell max-w-4xl text-base-content/90">
+      <p className="page-eyebrow">Public beta</p>
+      <h1 className="page-title mt-2">Terms and Privacy</h1>
+      <p className="mt-3 text-sm text-base-content/60">
+        Draft for this beta · Last reviewed October 19, 2026
+      </p>
+      <aside className="mt-6 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm text-base-content/80">
+        <strong className="block text-warning">Public launch blocker</strong>
+        <span>
+          The operator has not yet supplied its legal business name, contact route, governing
+          jurisdiction, or data retention periods. Replace this notice and complete the policy
+          before a broad public launch.
+        </span>
+      </aside>
+      {/* biome-ignore lint/correctness/useUniqueElementIds: Stable anchor target used by legal navigation. */}
+      <section id="terms" className="mt-10 scroll-mt-24 space-y-4">
+        <h2 className="text-2xl font-semibold">Terms of Service</h2>
+        <p className="text-sm leading-6 text-base-content/80">
+          Hello Design is a practice tool for system design interview preparation. You may use it to
+          draft answers, create diagrams, receive AI-generated feedback, and optionally participate
+          in the community. Do not use the service to upload information you do not have the right
+          to share, or to harass, mislead, or harm other people.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          You choose and configure your model provider. Your use of that provider, its availability,
+          its terms, and any charges are your responsibility. AI outputs can be incorrect,
+          incomplete, or inconsistent; review them independently. They are practice feedback and do
+          not represent a hiring decision or a guarantee of interview performance.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          Community posts and comments are visible to other visitors. You control whether to publish
+          an answer. The application displays your account name on published posts. You may remove
+          your posts and comments, and may report content for moderation. Administrators may hide
+          content that violates these rules.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          The application is provided in beta and may change or be unavailable. To the extent
+          permitted by applicable law, it is provided without a guarantee that AI feedback, content,
+          or service availability will meet your needs.
+        </p>
+      </section>
+      {/* biome-ignore lint/correctness/useUniqueElementIds: Stable anchor target used by legal navigation. */}
+      <section id="privacy" className="mt-12 scroll-mt-24 space-y-4">
+        <h2 className="text-2xl font-semibold">Privacy Policy</h2>
+        <p className="text-sm leading-6 text-base-content/80">
+          The application stores account details needed for sign-in, your encrypted provider API
+          key, practice submissions and results, and community content you choose to publish. Guest
+          submissions and keys are associated with a browser session identifier. When you create an
+          account in the same browser, guest submissions and keys are linked to your account.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          When you request evaluation, the answer, question context, diagram summary, and your
+          configured API key are used by the application worker to call your selected model
+          provider. The selected provider processes that request under its own terms and privacy
+          policy. The application stores the resulting evaluation with your submission.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          A community publication contains the answer text and diagram, your account name, question
+          metadata, and publication time. The evaluation and score are included only if you enable
+          that option. Public pages can be read without signing in. Comments, votes, reports, and
+          moderation records are stored to operate the community.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          Use Settings to clear guest data or delete your account. Account deletion removes
+          associated private submissions, API keys, and community posts and comments. Guest data
+          clearing removes the data associated with the current guest session. A model-provider
+          request already in progress when data is deleted may still complete at that provider.
+        </p>
+        <p className="text-sm leading-6 text-base-content/80">
+          This beta page describes the behavior implemented in the application. The operator should
+          publish its legal business identity, contact route, applicable jurisdiction, and retention
+          details before broad public launch; those details are not configured in this codebase.
+        </p>
+      </section>
+    </main>
+  )
 }

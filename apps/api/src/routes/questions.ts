@@ -1,5 +1,6 @@
-import type { FastifyPluginAsync } from "fastify"
 import { db } from "@sysdesign/db"
+import type { FastifyPluginAsync } from "fastify"
+import { ownsSubmission } from "../lib/submission-access.js"
 
 /** Extract a short description from the first line of the prompt. */
 function shortDescription(prompt: string): string {
@@ -64,7 +65,41 @@ const questionsPlugin: FastifyPluginAsync = async (fastify) => {
       difficulty: question.difficulty.toLowerCase() as "easy" | "medium" | "hard",
     }
   })
+
+  fastify.get<{
+    Params: { id: string }
+    Querystring: { submissionId?: string }
+  }>("/:id/reference", async (req, reply) => {
+    const submissionId = req.query.submissionId
+    if (!submissionId) return reply.code(400).send({ error: "submissionId is required" })
+
+    const [question, submission] = await Promise.all([
+      db.question.findUnique({
+        where: { id: req.params.id },
+        select: { referenceSolution: true },
+      }),
+      db.submission.findUnique({
+        where: { id: submissionId },
+        select: { questionId: true, status: true, userId: true, sessionId: true },
+      }),
+    ])
+
+    if (!question || !submission || submission.questionId !== req.params.id) {
+      return reply.code(404).send({ error: "Reference solution not found" })
+    }
+
+    if (!ownsSubmission(submission, { userId: req.user?.id, sessionId: req.sessionId })) {
+      return reply.code(403).send({ error: "Forbidden" })
+    }
+    if (submission.status !== "DONE") {
+      return reply.code(409).send({ error: "Finish the evaluation before viewing the reference" })
+    }
+    if (!question.referenceSolution) {
+      return reply.code(404).send({ error: "Reference solution is not available" })
+    }
+
+    return { referenceSolution: question.referenceSolution }
+  })
 }
 
 export default questionsPlugin
-

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router"
-import { Search, Home } from "lucide-react"
+import { Home, Search } from "lucide-react"
 
 export function NotFound() {
   return (
@@ -10,7 +10,10 @@ export function NotFound() {
       <div className="space-y-3">
         <div
           className="inline-flex h-20 w-20 items-center justify-center rounded-2xl"
-          style={{ background: "rgba(99,102,241,0.12)", border: "1px solid var(--app-indigo-glow)" }}
+          style={{
+            background: "rgba(99,102,241,0.12)",
+            border: "1px solid var(--app-indigo-glow)",
+          }}
         >
           <Search size={40} style={{ color: "var(--app-indigo)" }} />
         </div>
@@ -43,7 +46,11 @@ export function NotFound() {
         <Link
           to="/questions"
           className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm transition-all border"
-          style={{ color: "var(--app-indigo-pale)", borderColor: "var(--app-muted)", background: "transparent" }}
+          style={{
+            color: "var(--app-indigo-pale)",
+            borderColor: "var(--app-muted)",
+            background: "transparent",
+          }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = "var(--app-indigo)"
             e.currentTarget.style.color = "var(--app-indigo)"

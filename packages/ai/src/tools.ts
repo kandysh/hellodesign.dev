@@ -43,9 +43,21 @@ export const flagRiskTool = tool(
     description:
       "Annotate a specific design risk, single point of failure, data-loss scenario, or architectural gap. Call this immediately when you spot one — it does NOT count against your follow-up quota and does NOT require a user response. You may call it multiple times. Typical triggers: no replication on stateful stores, synchronous cascading calls, missing rate limiting, no retry/backoff, missing auth on internal APIs.",
     schema: z.object({
-      component: z.string().describe("The system component or architectural area where the risk lives (e.g. 'MySQL primary', 'Payment service', 'API Gateway')"),
-      risk: z.string().describe("Concise description of the risk or vulnerability (e.g. 'Single point of failure — no read replicas or failover configured')"),
-      severity: z.enum(["critical", "high", "medium"]).describe("critical = likely data loss or full outage; high = major degraded availability or correctness; medium = notable operational concern"),
+      component: z
+        .string()
+        .describe(
+          "The system component or architectural area where the risk lives (e.g. 'MySQL primary', 'Payment service', 'API Gateway')",
+        ),
+      risk: z
+        .string()
+        .describe(
+          "Concise description of the risk or vulnerability (e.g. 'Single point of failure — no read replicas or failover configured')",
+        ),
+      severity: z
+        .enum(["critical", "high", "medium"])
+        .describe(
+          "critical = likely data loss or full outage; high = major degraded availability or correctness; medium = notable operational concern",
+        ),
     }),
   },
 )
@@ -59,9 +71,17 @@ export const probeTradeOffTool = tool(
     description:
       "Challenge a specific design decision the candidate made and ask them to justify it against a reasonable alternative. Use this when an important architectural choice was stated without explanation — e.g. SQL vs NoSQL, monolith vs microservices, sync vs async, eventual vs strong consistency. This counts toward your follow-up quota.",
     schema: z.object({
-      decision: z.string().describe("The design choice the candidate made (e.g. 'PostgreSQL for the user feed')"),
-      alternative: z.string().describe("A reasonable alternative they didn't justify against (e.g. 'Cassandra or a document store')"),
-      question: z.string().describe("The specific challenge to ask the candidate (be pointed, not generic)"),
+      decision: z
+        .string()
+        .describe("The design choice the candidate made (e.g. 'PostgreSQL for the user feed')"),
+      alternative: z
+        .string()
+        .describe(
+          "A reasonable alternative they didn't justify against (e.g. 'Cassandra or a document store')",
+        ),
+      question: z
+        .string()
+        .describe("The specific challenge to ask the candidate (be pointed, not generic)"),
     }),
   },
 )
@@ -75,7 +95,9 @@ export const requestEstimationTool = tool(
     description:
       "Ask the candidate to perform a back-of-envelope capacity estimation. Use when the design relies on scale assumptions that haven't been quantified and the numbers would materially affect the architecture — e.g. whether a single DB can handle write throughput, whether a cache is justified, or what storage tier is needed. This counts toward your follow-up quota.",
     schema: z.object({
-      metric: z.enum(["qps", "storage", "bandwidth", "latency", "compute", "fan_out"]).describe("The primary metric to estimate"),
+      metric: z
+        .enum(["qps", "storage", "bandwidth", "latency", "compute", "fan_out"])
+        .describe("The primary metric to estimate"),
       context: z.string().describe("Which part of the system and why the estimate matters"),
       question: z.string().describe("The estimation question to pose to the candidate"),
     }),

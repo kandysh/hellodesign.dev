@@ -27,7 +27,10 @@ export function DifficultyBadge({ difficulty, solid = false, className }: Diffic
   const { label, color } = config[difficulty] ?? config.medium
   return (
     <span
-      className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold", className)}
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold",
+        className,
+      )}
       style={{
         background: `color-mix(in srgb, ${color} ${solid ? "20%" : "10%"}, transparent)`,
         border: `1px solid color-mix(in srgb, ${color} 28%, transparent)`,

@@ -1,12 +1,12 @@
-import { useCallback, useMemo } from "react";
-import CodeMirror, { type ReactCodeMirrorProps } from "@uiw/react-codemirror";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { languages } from "@codemirror/language-data";
-import { createTheme } from "@uiw/codemirror-themes";
-import { tags as t } from "@lezer/highlight";
-import { EditorView } from "@codemirror/view";
-import { cn } from "@/lib/utils";
-import { useTheme } from "@/hooks/useTheme";
+import { markdown, markdownLanguage } from "@codemirror/lang-markdown"
+import { languages } from "@codemirror/language-data"
+import { EditorView } from "@codemirror/view"
+import { tags as t } from "@lezer/highlight"
+import { createTheme } from "@uiw/codemirror-themes"
+import CodeMirror, { type ReactCodeMirrorProps } from "@uiw/react-codemirror"
+import { useCallback, useMemo } from "react"
+import { useTheme } from "@/hooks/useTheme"
+import { cn } from "@/lib/utils"
 
 // ── Theme matching "Technical Precision" palette ───────────────────────────
 
@@ -52,7 +52,7 @@ const archTheme = createTheme({
     { tag: t.string, color: "#4edea3" },
     { tag: t.number, color: "#ffb86c" },
   ],
-});
+})
 
 const archThemeLight = createTheme({
   theme: "light",
@@ -75,7 +75,13 @@ const archThemeLight = createTheme({
     { tag: t.strikethrough, color: "#738094" },
     { tag: t.link, color: "#3e55bd", textDecoration: "underline" },
     { tag: t.url, color: "#3e55bd" },
-    { tag: t.monospace, color: "#16745d", background: "rgba(23,132,104,0.08)", borderRadius: "3px", padding: "0 3px" },
+    {
+      tag: t.monospace,
+      color: "#16745d",
+      background: "rgba(23,132,104,0.08)",
+      borderRadius: "3px",
+      padding: "0 3px",
+    },
     { tag: t.quote, color: "#667487", fontStyle: "italic" },
     { tag: t.list, color: "#536bd7" },
     { tag: t.punctuation, color: "#8793a4" },
@@ -85,23 +91,23 @@ const archThemeLight = createTheme({
     { tag: t.string, color: "#16745d" },
     { tag: t.number, color: "#9c650e" },
   ],
-});
+})
 
 // ── Base editor extensions ─────────────────────────────────────────────────
 
 const baseExtensions: ReactCodeMirrorProps["extensions"] = [
   markdown({ base: markdownLanguage, codeLanguages: languages }),
   EditorView.lineWrapping,
-];
+]
 
 // ── Public component ───────────────────────────────────────────────────────
 
 interface RichTextEditorProps {
-  value?: string;
-  onChange: (markdown: string) => void;
-  placeholder?: string;
-  className?: string;
-  autoFocus?: boolean;
+  value?: string
+  onChange: (markdown: string) => void
+  placeholder?: string
+  className?: string
+  autoFocus?: boolean
 }
 
 export function RichTextEditor({
@@ -111,13 +117,10 @@ export function RichTextEditor({
   className,
   autoFocus = false,
 }: RichTextEditorProps) {
-  const { theme } = useTheme();
-  const handleChange = useCallback(
-    (value: string) => onChange(value),
-    [onChange],
-  );
+  const { theme } = useTheme()
+  const handleChange = useCallback((value: string) => onChange(value), [onChange])
 
-  const extensions = useMemo(() => baseExtensions, []);
+  const extensions = useMemo(() => baseExtensions, [])
 
   return (
     <div className={cn("flex flex-col h-full overflow-hidden", className)}>
@@ -151,5 +154,5 @@ export function RichTextEditor({
         style={{ height: "100%" }}
       />
     </div>
-  );
+  )
 }

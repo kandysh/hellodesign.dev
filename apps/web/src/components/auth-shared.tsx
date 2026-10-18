@@ -1,7 +1,7 @@
 // Shared components used by both login and register pages
 
-import { Terminal, BookOpen, Users, Zap } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router"
+import { BookOpen, Terminal, Users, Zap } from "lucide-react"
 
 export function BrandingPanel() {
   return (
@@ -41,7 +41,7 @@ export function BrandingPanel() {
               background: "#131b2e",
               border: "1px solid #2d3449",
               color: "#c7c4d7",
-              fontFamily: "'Space Grotesk', monospace",
+              fontFamily: "'Geist Mono Variable', monospace",
             }}
           >
             <Terminal size={12} style={{ color: "#8083ff" }} />
@@ -58,8 +58,8 @@ export function BrandingPanel() {
           </h2>
 
           <p className="text-sm leading-relaxed" style={{ color: "#908fa0" }}>
-            Access the high-density environment engineered for power users,
-            developers, and architects.
+            Access the high-density environment engineered for power users, developers, and
+            architects.
           </p>
         </div>
       </div>
@@ -70,7 +70,7 @@ export function BrandingPanel() {
         </p>
       </div>
     </div>
-  );
+  )
 }
 
 export function SocialButton({
@@ -78,9 +78,9 @@ export function SocialButton({
   label,
   icon,
 }: {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
+  href: string
+  label: string
+  icon: React.ReactNode
 }) {
   return (
     <a
@@ -92,16 +92,16 @@ export function SocialButton({
         color: "var(--app-fg)",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--app-indigo)";
+        ;(e.currentTarget as HTMLElement).style.borderColor = "var(--app-indigo)"
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)";
+        ;(e.currentTarget as HTMLElement).style.borderColor = "var(--app-border)"
       }}
     >
       {icon}
       {label}
     </a>
-  );
+  )
 }
 
 export function Divider() {
@@ -113,7 +113,7 @@ export function Divider() {
       </span>
       <div className="flex-1 h-px" style={{ background: "var(--app-border)" }} />
     </div>
-  );
+  )
 }
 
 export function Field({
@@ -122,10 +122,10 @@ export function Field({
   children,
   trailingAction,
 }: {
-  label: string;
-  icon?: React.ReactNode;
-  children: React.ReactNode;
-  trailingAction?: React.ReactNode;
+  label: string
+  icon?: React.ReactNode
+  children: React.ReactNode
+  trailingAction?: React.ReactNode
 }) {
   return (
     <div className="space-y-1.5">
@@ -145,7 +145,7 @@ export function Field({
         {trailingAction}
       </div>
     </div>
-  );
+  )
 }
 
 export function GoogleIcon() {
@@ -168,7 +168,7 @@ export function GoogleIcon() {
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
       />
     </svg>
-  );
+  )
 }
 
 export function RightPanel() {
@@ -206,14 +206,23 @@ export function RightPanel() {
       {/* Content */}
       <div className="relative z-10 space-y-6">
         <div className="max-w-lg space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-200">System design practice</p>
-          <h2 className="text-3xl font-bold text-base-content">Practice the decisions behind the diagram.</h2>
-          <p className="text-sm leading-relaxed text-base-content/80">Work through a question, explain your trade-offs, and review rubric-based feedback from the model provider you choose.</p>
-          <p className="text-xs text-base-content/60">You bring the API key and pay your provider directly for model usage.</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-200">
+            System design practice
+          </p>
+          <h2 className="text-3xl font-bold text-base-content">
+            Practice the decisions behind the diagram.
+          </h2>
+          <p className="text-sm leading-relaxed text-base-content/80">
+            Work through a question, explain your trade-offs, and review rubric-based feedback from
+            the model provider you choose.
+          </p>
+          <p className="text-xs text-base-content/60">
+            You bring the API key and pay your provider directly for model usage.
+          </p>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export function AuthHeader() {
@@ -244,7 +253,7 @@ export function AuthHeader() {
         </div>
       </nav>
     </header>
-  );
+  )
 }
 
 function AuthNavLink({ to, label, icon }: { to: string; label: string; icon?: React.ReactNode }) {
@@ -256,7 +265,7 @@ function AuthNavLink({ to, label, icon }: { to: string; label: string; icon?: Re
       {icon}
       {label}
     </Link>
-  );
+  )
 }
 
 function HdLogo() {
@@ -272,12 +281,12 @@ function HdLogo() {
     >
       <rect width="32" height="32" rx="7" fill="#0b1326" />
       {/* Material Symbol: polyline (outlined, FILL=1), indigo */}
-      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960">
+      <svg x="3" y="3" width="26" height="26" viewBox="0 -960 960 960" aria-hidden="true">
         <path
           d="M600-80v-100L320-320H120v-240h172l108-124v-196h240v240H468L360-516v126l240 120v-50h240v240H600ZM480-720h80v-80h-80v80ZM200-400h80v-80h-80v80Zm480 240h80v-80h-80v80Z"
           fill="var(--app-indigo)"
         />
       </svg>
     </svg>
-  );
+  )
 }

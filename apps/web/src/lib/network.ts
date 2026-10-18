@@ -20,7 +20,7 @@ export async function fetchWithRetry(
 
       // Retry on server errors (5xx) or network issues
       if (!response.ok && attempt < maxRetries - 1) {
-        const delay = Math.pow(2, attempt) * 1000
+        const delay = 2 ** attempt * 1000
         await new Promise((resolve) => setTimeout(resolve, delay))
         continue
       }
@@ -31,9 +31,8 @@ export async function fetchWithRetry(
 
       // Retry on network error
       if (attempt < maxRetries - 1) {
-        const delay = Math.pow(2, attempt) * 1000
+        const delay = 2 ** attempt * 1000
         await new Promise((resolve) => setTimeout(resolve, delay))
-        continue
       }
     }
   }
@@ -89,7 +88,7 @@ export async function retryAsync<T>(
         throw error
       }
 
-      const delay = Math.pow(2, attempt) * 1000
+      const delay = 2 ** attempt * 1000
       await new Promise((resolve) => setTimeout(resolve, delay))
     }
   }

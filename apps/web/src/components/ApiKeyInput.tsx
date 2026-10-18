@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react"
-import { Eye, EyeOff, Pencil, Check } from "lucide-react"
+import { Check, Eye, EyeOff, Pencil } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 const STORAGE_KEY = "sysdesign:apikey"
@@ -84,7 +84,7 @@ export function ApiKeyInput({ className, onKeyChange }: ApiKeyInputProps) {
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}
                 placeholder="sk-..."
-                className="input input-sm w-full rounded-lg border-base-300/50 bg-base-300/30 pr-8 font-mono text-xs focus-visible:ring-1 focus-visible:ring-primary"
+                className="app-input app-input-sm w-full rounded-lg border-base-300/50 bg-base-300/30 pr-8 font-mono text-xs focus-visible:ring-1 focus-visible:ring-primary"
                 // biome-ignore lint/a11y/noAutofocus: intentional focus on edit
                 autoFocus
               />
@@ -100,7 +100,7 @@ export function ApiKeyInput({ className, onKeyChange }: ApiKeyInputProps) {
             <button
               type="button"
               onClick={handleSave}
-              className="btn btn-xs btn-primary rounded-lg"
+              className="app-button app-button-xs app-button-primary rounded-lg"
               aria-label="Save key"
             >
               <Check size={12} />
@@ -111,7 +111,7 @@ export function ApiKeyInput({ className, onKeyChange }: ApiKeyInputProps) {
             value={draftBaseUrl}
             onChange={(e) => setDraftBaseUrl(e.target.value)}
             placeholder="API base URL (optional)"
-            className="input input-sm w-full rounded-lg border-base-300/50 bg-base-300/30 text-xs focus-visible:ring-1 focus-visible:ring-primary"
+            className="app-input app-input-sm w-full rounded-lg border-base-300/50 bg-base-300/30 text-xs focus-visible:ring-1 focus-visible:ring-primary"
           />
         </div>
       ) : (
@@ -119,13 +119,9 @@ export function ApiKeyInput({ className, onKeyChange }: ApiKeyInputProps) {
           {isSet ? (
             <>
               <div className="flex-1 min-w-0">
-                <span className="block font-mono text-xs text-base-content/60">
-                  {maskKey(key)}
-                </span>
+                <span className="block font-mono text-xs text-base-content/60">{maskKey(key)}</span>
                 {baseUrl && (
-                  <span className="block text-[10px] text-base-content/40 truncate">
-                    {baseUrl}
-                  </span>
+                  <span className="block text-[10px] text-base-content/40 truncate">{baseUrl}</span>
                 )}
               </div>
               <button

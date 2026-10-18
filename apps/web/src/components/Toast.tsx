@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, createContext, useContext } from "react"
+import { AlertCircle, AlertTriangle, CheckCircle, Info, X } from "lucide-react"
+import { createContext, useCallback, useContext, useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -46,7 +46,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div className="toast toast-top toast-end z-[100]" aria-live="polite">
+      <div className="fixed right-4 top-4 z-[100] flex flex-col gap-2" aria-live="polite">
         {toasts.map((t) => (
           <ToastItem key={t.id} toast={t} onDismiss={dismiss} />
         ))}
@@ -58,10 +58,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 // ── Item ───────────────────────────────────────────────────────────────────
 
 const toastConfig: Record<ToastType, { classes: string; Icon: typeof CheckCircle }> = {
-  success: { classes: "alert-success", Icon: CheckCircle },
-  error:   { classes: "alert-error",   Icon: AlertCircle },
-  info:    { classes: "alert-info",    Icon: Info },
-  warning: { classes: "alert-warning", Icon: AlertTriangle },
+  success: { classes: "app-alert-success", Icon: CheckCircle },
+  error: { classes: "app-alert-error", Icon: AlertCircle },
+  info: { classes: "app-alert-info", Icon: Info },
+  warning: { classes: "app-alert-warning", Icon: AlertTriangle },
 }
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
@@ -76,7 +76,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
     <div
       role="alert"
       className={cn(
-        "alert shadow-lg shadow-indigo-950/40 rounded-xl text-sm flex items-center gap-2 animate-in slide-in-from-right-4 duration-200",
+        "app-alert shadow-lg shadow-indigo-950/40 rounded-xl text-sm flex items-center gap-2 animate-in slide-in-from-right-4 duration-200",
         classes,
       )}
     >

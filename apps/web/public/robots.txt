@@ -1,3 +1,8 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /auth/
+Disallow: /admin
+Disallow: /me
+Disallow: /settings
+Sitemap: https://hellodesign.dev/sitemap.xml
