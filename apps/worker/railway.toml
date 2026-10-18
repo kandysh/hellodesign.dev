@@ -7,7 +7,6 @@
 # Required environment variables:
 #   DATABASE_URL   PostgreSQL connection string
 #   REDIS_URL      Redis connection string
-#   OPENAI_API_KEY OpenAI API key
 
 [build]
 builder = "RAILPACK"

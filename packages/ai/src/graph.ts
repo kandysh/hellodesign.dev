@@ -11,11 +11,10 @@ import type {
 import { z } from "zod";
 import { buildEvaluationPrompt } from "./prompts.js";
 import { clarificationTools } from "./tools.js";
-import { ChatDeepSeek } from "@langchain/deepseek";
 
 // ─── Model Configuration ──────────────────────────────────────────────────────
 
-const MODEL_NAME = "deepseek/deepseek-v3.2";
+const MODEL_NAME = "gpt-4o-mini";
 
 // ─── Logger for capturing LangGraph execution ──────────────────────────────────
 
@@ -445,19 +444,20 @@ Write a structured evaluation response with:
 export async function validateOpenAIKey(
   apiKey: string,
   baseUrl?: string,
+  modelName?: string,
 ): Promise<boolean> {
   try {
     const model = new ChatOpenAI({
-      model: MODEL_NAME,
+      // Probe the same OpenAI-compatible model family used by the workspace.
+      // OpenRouter accepts this OpenAI model slug; direct OpenAI uses gpt-4o-mini.
+      model: modelName ?? (baseUrl ? "openai/gpt-4o-mini" : "gpt-4o-mini"),
       apiKey,
       maxTokens: 5,
       ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
     });
     const response = await model.invoke([new HumanMessage("Hi")]);
-    console.log(response);
-    return true;
-  } catch (error) {
-    console.error(error);
+    return Boolean(response);
+  } catch {
     return false;
   }
 }

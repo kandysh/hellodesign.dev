@@ -9,7 +9,6 @@
 #   REDIS_URL           Redis connection string (use PRIVATE_URL for internal)
 #   BETTER_AUTH_SECRET  Random secret ≥ 32 chars
 #   WEB_URL             Public URL of the web service (for CORS)
-#   OPENAI_API_KEY      OpenAI API key
 #   NODE_ENV            production
 #
 # Note: Fastify server has trustProxy: true enabled to handle X-Forwarded-For

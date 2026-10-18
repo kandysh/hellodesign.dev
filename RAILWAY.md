@@ -62,7 +62,6 @@ The API **needs a public domain** because the web SPA runs in the user's browser
 | `BETTER_AUTH_URL` | `https://<your-api-domain>.railway.app` |
 | `WEB_URL` | `https://<your-web-domain>.railway.app` |
 | `ENCRYPTION_KEY` | `openssl rand -base64 32` |
-| `OPENAI_API_KEY` | Your OpenAI key |
 | `NODE_ENV` | `production` |
 
 6. **Deploy** — DB migrations run automatically via `preDeployCommand`
@@ -82,7 +81,6 @@ The Worker has **no public domain** — it only talks to Redis (queue) and Postg
 |----------|-------|
 | `DATABASE_URL` | (link `${{Postgres.DATABASE_PRIVATE_URL}}`) |
 | `REDIS_URL` | (link `${{Redis.REDIS_PRIVATE_URL}}`) |
-| `OPENAI_API_KEY` | Your OpenAI key |
 | `NODE_ENV` | `production` |
 
 5. **Deploy** (no domain needed)
@@ -91,10 +89,7 @@ The Worker has **no public domain** — it only talks to Redis (queue) and Postg
 
 ## Step 5 — Configure the Web service
 
-> `VITE_API_URL` for Railway: use the **private `.railway.internal` domain** when both web and API are in the same Railway project.
-> This avoids mixed-content errors (HTTPS page → HTTP internal API).
-> The `.railway.internal` domain only works for **service-to-service** communication (not from browser).
-> For external users, they access the web via public HTTPS domain, which then proxies to the private API endpoint.
+> The web app runs in each user's browser, so `VITE_API_URL` must be the API's **public HTTPS domain**. A `.railway.internal` hostname is only resolvable by other Railway services and cannot be called by an external browser. The current web service does not proxy API requests.
 
 1. Open the `web` service → **Settings**
 2. Set **Config file path**: `/apps/web/railway.toml`
@@ -104,14 +99,11 @@ The Worker has **no public domain** — it only talks to Redis (queue) and Postg
 
 | Variable | Value |
 |----------|-------|
-| `VITE_API_URL` | `http://api.railway.internal` |
+| `VITE_API_URL` | `https://<your-api-domain>.railway.app` |
 | `NODE_ENV` | `production` |
 
 6. Go back to the **api service** → set `WEB_URL` to the web domain → redeploy
 7. **Deploy**
-
-> **Note:** The `.railway.internal` domain is only resolvable within Railway's network. External browsers cannot reach it directly — they use the public web domain, which proxies requests through Railway's internal routing.
-
 
 ---
 
@@ -146,7 +138,6 @@ Railway auto-deploys each service when relevant files change, thanks to `watchPa
 | `BETTER_AUTH_URL` | Full URL of the API service (for OAuth callbacks) |
 | `WEB_URL` | Full URL of the web service (CORS allow-origin) |
 | `ENCRYPTION_KEY` | Key used to encrypt stored API keys |
-| `OPENAI_API_KEY` | OpenAI key for AI evaluation agents |
 | `GOOGLE_CLIENT_ID` | _(optional)_ Google OAuth |
 | `GOOGLE_CLIENT_SECRET` | _(optional)_ Google OAuth |
 | `GITHUB_CLIENT_ID` | _(optional)_ GitHub OAuth |
@@ -160,7 +151,6 @@ Railway auto-deploys each service when relevant files change, thanks to `watchPa
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string |
 | `REDIS_URL` | Redis connection string |
-| `OPENAI_API_KEY` | OpenAI key for AI evaluation agents |
 | `NODE_ENV` | `production` |
 
 ### Web service

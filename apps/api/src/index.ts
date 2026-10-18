@@ -14,7 +14,7 @@ import keysRouter from "./routes/keys.js"
 import meRouter from "./routes/me.js"
 import modelsRouter from "./routes/models.js"
 
-const fastify = Fastify({ 
+const fastify = Fastify({
   logger: { level: "info" },
   trustProxy: true,
 })
@@ -75,7 +75,7 @@ fastify.addHook("preHandler", async (req, reply) => {
 })
 
 // /api/auth/* handled in preParsing hook above
-fastify.all("/api/auth/*", async (_req, _reply) => {})
+fastify.all("/api/auth/*", async (_req, _reply) => { })
 
 fastify.register(questionsRouter, { prefix: "/api/questions" })
 fastify.register(submissionsRouter, { prefix: "/api/submissions" })

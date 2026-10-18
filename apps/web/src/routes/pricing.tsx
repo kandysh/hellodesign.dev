@@ -1,376 +1,63 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { CheckCircle2, XCircle, Sparkles, Zap, Shield, ArrowRight } from "lucide-react"
+import { ArrowRight, KeyRound, ShieldCheck, Wallet } from "lucide-react"
 
 export const Route = createFileRoute("/pricing")({ component: PricingPage })
 
-// ── Pricing data ──────────────────────────────────────────────────────────────
-
-interface PricingTier {
-  id: string
-  name: string
-  price: string
-  period: string
-  description: string
-  cta: string
-  ctaVariant: "ghost" | "primary" | "secondary"
-  popular?: boolean
-  features: { label: string; included: boolean }[]
-}
-
-const TIERS: PricingTier[] = [
-  {
-    id: "architect",
-    name: "Architect",
-    price: "$0",
-    period: "forever",
-    description: "Essential tools for local system design and basic evaluations.",
-    cta: "Current Plan",
-    ctaVariant: "ghost",
-    features: [
-      { label: "5 AI Interviews / month", included: true },
-      { label: "Standard Evaluation Metrics", included: true },
-      { label: "Question Bank Access", included: true },
-      { label: "Cloud Sync", included: false },
-      { label: "Private Solutions", included: false },
-      { label: "Advanced Evaluation Dimensions", included: false },
-    ],
-  },
-  {
-    id: "lead",
-    name: "Lead Architect",
-    price: "$49",
-    period: "/ mo",
-    description: "Full access to live feeds, deep metrics, and infinite evaluations.",
-    cta: "Upgrade to Lead",
-    ctaVariant: "primary",
-    popular: true,
-    features: [
-      { label: "Unlimited AI Interviews", included: true },
-      { label: "Advanced Evaluation Metrics", included: true },
-      { label: "Question Bank Access", included: true },
-      { label: "Cloud Sync (Real-time)", included: true },
-      { label: "Private Solutions Workspace", included: true },
-      { label: "Advanced Evaluation Dimensions", included: false },
-    ],
-  },
-  {
-    id: "cto",
-    name: "CTO",
-    price: "$499",
-    period: "/ yr",
-    description: "Enterprise-grade compliance and bulk export. Save ~15% annually.",
-    cta: "Go Annual",
-    ctaVariant: "secondary",
-    features: [
-      { label: "Everything in Lead Architect", included: true },
-      { label: "Advanced Evaluation Dimensions", included: true },
-      { label: "Priority Support Routing", included: true },
-      { label: "Custom API Rate Limits", included: true },
-      { label: "Team Licensing (up to 5)", included: true },
-      { label: "Compliance Export (SOC 2)", included: true },
-    ],
-  },
-]
-
-// ── FAQ ───────────────────────────────────────────────────────────────────────
-
-const FAQS = [
-  {
-    q: "Can I switch plans at any time?",
-    a: "Yes. You can upgrade or downgrade your plan at any time. Upgrades take effect immediately; downgrades take effect at the next billing cycle.",
-  },
-  {
-    q: "Are my API keys secure?",
-    a: "Absolutely. Your API keys are encrypted with AES-256-GCM before storage and are never logged or transmitted in plaintext after the initial save.",
-  },
-  {
-    q: "What counts as an AI Interview?",
-    a: "Each practice session where you submit your design for AI evaluation counts as one interview. Viewing past results and browsing the question bank do not count.",
-  },
-  {
-    q: "Is there a free trial for paid plans?",
-    a: "The free Architect tier gives you full access to core features. Paid plans do not require a credit card to start a 7-day trial — contact us for a trial code.",
-  },
-]
-
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 function PricingPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
-      {/* ── Hero ──────────────────────────────────────────────── */}
-      <div className="mb-12 text-center">
+    <main className="mx-auto max-w-4xl px-6 py-16">
+      <header className="mb-12 text-center">
         <div
-          style={{
-            background: "rgba(192,193,255,0.08)",
-            border: "1px solid var(--app-indigo-20)",
-            color: "var(--app-indigo-pale)",
-          }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs mb-4"
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl"
+          style={{ background: "var(--app-indigo-10)", color: "var(--app-indigo)" }}
         >
-          <Sparkles size={12} />
-          Unlock advanced AI evaluation
+          <Wallet size={22} />
         </div>
-        <h1
-          style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
-          className="mb-3 text-4xl font-extrabold md:text-5xl"
-        >
-          Upgrade to{" "}
-          <span style={{ color: "var(--app-indigo)" }}>Hello Design</span>
+        <h1 className="mb-3 text-3xl font-extrabold" style={{ color: "var(--app-fg)" }}>
+          Practice with your own AI key
         </h1>
-        <p style={{ color: "var(--app-subtle)" }} className="mx-auto max-w-xl leading-relaxed text-sm">
-          Unlock advanced evaluation metrics, unlimited AI interviews, and secure cloud sync.
-          Choose the technical tier that matches your architectural demands.
+        <p className="mx-auto max-w-2xl text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>
+          Hello Design uses a bring-your-own-key model. There are no platform AI credits or
+          subscriptions to manage. You choose the provider and model, and pay that provider directly.
         </p>
-      </div>
+      </header>
 
-      {/* ── Pricing cards ─────────────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-3 mb-16">
-        {TIERS.map((tier) => (
-          <TierCard key={tier.id} tier={tier} />
+      <section className="mb-10 grid gap-4 md:grid-cols-3">
+        {[
+          { icon: <KeyRound size={18} />, title: "Connect a provider", text: "Add an OpenAI or OpenAI-compatible API key in Settings. OpenRouter is preconfigured." },
+          { icon: <Wallet size={18} />, title: "You control spend", text: "AI requests are billed by your provider under your account and its current pricing." },
+          { icon: <ShieldCheck size={18} />, title: "Encrypted at rest", text: "Saved keys are encrypted in Hello Design and used by the server to run your evaluations." },
+        ].map((item) => (
+          <article
+            key={item.title}
+            className="rounded-xl p-5"
+            style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
+          >
+            <div className="mb-3" style={{ color: "var(--app-indigo)" }}>{item.icon}</div>
+            <h2 className="mb-2 text-sm font-bold" style={{ color: "var(--app-fg)" }}>{item.title}</h2>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--app-subtle)" }}>{item.text}</p>
+          </article>
         ))}
-      </div>
-
-      {/* ── Feature comparison table ──────────────────────────── */}
-      <section className="mb-16">
-        <h2
-          style={{ color: "var(--app-fg)" }}
-          className="mb-6 text-center text-xl font-bold tracking-tight"
-        >
-          Compare plans
-        </h2>
-        <div
-          style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
-          className="overflow-hidden rounded-xl"
-        >
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ background: "var(--app-surface)", borderBottom: "1px solid var(--app-border)" }}>
-                <th
-                  style={{ color: "var(--app-subtle)" }}
-                  className="px-5 py-3.5 text-left font-medium"
-                >
-                  Feature
-                </th>
-                {TIERS.map((t) => (
-                  <th
-                    key={t.id}
-                    style={{ color: t.popular ? "var(--app-indigo-pale)" : "var(--app-subtle)" }}
-                    className="px-4 py-3.5 text-center font-semibold"
-                  >
-                    {t.name}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                "AI Interviews",
-                "Cloud Sync",
-                "Private Solutions",
-                "Advanced Metrics",
-                "Team Licensing",
-                "Priority Support",
-              ].map((feature, i) => (
-                <tr
-                  key={feature}
-                  style={{
-                    background: i % 2 === 0 ? "rgba(19,27,46,0.4)" : "transparent",
-                    borderBottom: "1px solid var(--app-border)",
-                  }}
-                  className="last:border-0"
-                >
-                  <td className="px-5 py-3" style={{ color: "var(--app-subtle)" }}>
-                    {feature}
-                  </td>
-                  <td className="px-4 py-3 text-center text-xs" style={{ color: "var(--app-muted)" }}>
-                    {feature === "AI Interviews" ? (
-                      <span style={{ color: "var(--app-subtle)" }}>5 / mo</span>
-                    ) : (
-                      <XCircle size={14} className="mx-auto" style={{ color: "var(--app-muted)" }} />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {["AI Interviews", "Cloud Sync", "Private Solutions", "Advanced Metrics"].includes(feature) ? (
-                      feature === "AI Interviews" ? (
-                        <span className="text-xs font-medium" style={{ color: "var(--app-indigo-pale)" }}>
-                          Unlimited
-                        </span>
-                      ) : (
-                        <CheckCircle2 size={14} className="mx-auto" style={{ color: "var(--app-green)" }} />
-                      )
-                    ) : (
-                      <XCircle size={14} className="mx-auto" style={{ color: "var(--app-muted)" }} />
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <CheckCircle2 size={14} className="mx-auto" style={{ color: "var(--app-green)" }} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
 
-      {/* ── Security notice ───────────────────────────────────── */}
-      <div
-        className="mb-12 flex items-center justify-center gap-2 text-xs"
-        style={{ color: "var(--app-muted)" }}
+      <aside
+        className="mb-10 rounded-xl p-5 text-sm leading-relaxed"
+        style={{ background: "var(--app-indigo-10)", border: "1px solid var(--app-indigo-20)", color: "var(--app-subtle)" }}
       >
-        <Shield size={12} />
-        Secure 256-bit encryption. Cancel anytime from your settings.
-      </div>
+        Key storage is optional for browsing and writing. To run an AI evaluation, save a key in
+        Settings first. Guest keys and submissions stay tied to the guest browser session. Signed-in
+        activity is saved to your account; existing guest activity is not migrated automatically.
+      </aside>
 
-      {/* ── FAQ ──────────────────────────────────────────────── */}
-      <section>
-        <h2
-          style={{ color: "var(--app-fg)" }}
-          className="mb-6 text-center text-xl font-bold tracking-tight"
-        >
-          Frequently asked questions
-        </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {FAQS.map((faq) => (
-            <div
-              key={faq.q}
-              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)" }}
-              className="rounded-lg p-5"
-            >
-              <p style={{ color: "var(--app-fg)" }} className="mb-2 font-semibold text-sm">
-                {faq.q}
-              </p>
-              <p style={{ color: "var(--app-subtle)" }} className="text-sm leading-relaxed">
-                {faq.a}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Bottom CTA ───────────────────────────────────────── */}
-      <div
-        style={{
-          background: "rgba(99,102,241,0.08)",
-          border: "1px solid var(--app-indigo-20)",
-        }}
-        className="mt-12 rounded-xl p-8 text-center"
-      >
-        <Zap size={24} className="mx-auto mb-3" style={{ color: "var(--app-indigo)" }} />
-        <h3 style={{ color: "var(--app-fg)" }} className="mb-2 text-xl font-bold">
-          Ready to level up your designs?
-        </h3>
-        <p style={{ color: "var(--app-subtle)" }} className="mb-5 text-sm">
-          Join engineers at top companies who use Hello Design to ace system design interviews.
-        </p>
+      <div className="text-center">
         <Link
-          to="/questions"
-          style={{
-            background: "#6366f1",
-            color: "white",
-            boxShadow: "0 0 12px var(--app-indigo-glow)",
-          }}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded text-sm font-semibold transition-all active:scale-95"
+          to="/settings"
+          className="inline-flex items-center gap-2 rounded px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ background: "#6366f1", boxShadow: "0 0 12px var(--app-indigo-glow)" }}
         >
-          Start for free <ArrowRight size={14} />
+          Configure your key <ArrowRight size={14} />
         </Link>
       </div>
-    </div>
-  )
-}
-
-// ── Tier Card ─────────────────────────────────────────────────────────────────
-
-function TierCard({ tier }: { tier: PricingTier }) {
-  return (
-    <div
-      style={{
-        background: tier.popular ? "rgba(99,102,241,0.08)" : "var(--app-surface-2)",
-        border: tier.popular ? "1px solid rgba(128,131,255,0.4)" : "1px solid var(--app-border)",
-        boxShadow: tier.popular ? "0 0 24px rgba(99,102,241,0.15)" : undefined,
-      }}
-      className="relative flex flex-col rounded-xl p-6"
-    >
-      {tier.popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span
-            style={{
-              background: "rgba(99,102,241,0.2)",
-              border: "1px solid rgba(128,131,255,0.4)",
-              color: "var(--app-indigo-pale)",
-            }}
-            className="rounded-full px-3 py-0.5 text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap"
-          >
-            Most Popular
-          </span>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="mb-5">
-        <p
-          style={{ color: "var(--app-subtle)" }}
-          className="text-xs font-bold uppercase tracking-wider mb-1"
-        >
-          {tier.name}
-        </p>
-        <div className="flex items-baseline gap-1">
-          <span
-            style={{ color: "var(--app-fg)", letterSpacing: "-0.02em" }}
-            className="text-4xl font-extrabold"
-          >
-            {tier.price}
-          </span>
-          <span style={{ color: "var(--app-muted)" }} className="text-sm">
-            {tier.period}
-          </span>
-        </div>
-        <p style={{ color: "var(--app-subtle)" }} className="text-sm mt-2 leading-relaxed">
-          {tier.description}
-        </p>
-      </div>
-
-      {/* Features */}
-      <ul className="mb-6 flex-1 space-y-2.5">
-        {tier.features.map((f) => (
-          <li key={f.label} className="flex items-center gap-2.5 text-sm">
-            {f.included ? (
-              <CheckCircle2 size={14} className="shrink-0" style={{ color: "var(--app-green)" }} />
-            ) : (
-              <XCircle size={14} className="shrink-0" style={{ color: "var(--app-muted)" }} />
-            )}
-            <span style={{ color: f.included ? "var(--app-body)" : "var(--app-muted)" }}>{f.label}</span>
-          </li>
-        ))}
-      </ul>
-
-      {/* CTA Button */}
-      <button
-        type="button"
-        style={
-          tier.ctaVariant === "primary"
-            ? {
-                background: "#6366f1",
-                color: "white",
-                border: "1px solid rgba(99,102,241,0.5)",
-                boxShadow: "0 0 12px var(--app-indigo-glow)",
-              }
-            : tier.ctaVariant === "secondary"
-            ? {
-                background: "transparent",
-                color: "var(--app-indigo-pale)",
-                border: "1px solid rgba(192,193,255,0.3)",
-              }
-            : {
-                background: "transparent",
-                color: "var(--app-subtle)",
-                border: "1px solid var(--app-border)",
-              }
-        }
-        className="w-full py-2.5 rounded text-sm font-semibold transition-all active:scale-95"
-      >
-        {tier.cta}
-      </button>
-    </div>
+    </main>
   )
 }

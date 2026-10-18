@@ -143,7 +143,7 @@ function SettingsPage() {
           <SectionCard
             icon={<Key size={15} style={{ color: "var(--app-indigo)" }} />}
             title="API Keys"
-            subtitle="Manage your OpenAI integration key"
+            subtitle="Use your own OpenAI or OpenAI-compatible provider key"
           >
             <ApiKeySection toast={toast} />
           </SectionCard>
@@ -165,11 +165,12 @@ function SettingsPage() {
           >
             <Shield size={15} className="mt-0.5 shrink-0" style={{ color: "var(--app-indigo)" }} />
             <div style={{ color: "var(--app-subtle)" }} className="leading-relaxed">
-              <span style={{ color: "var(--app-body)" }} className="font-medium">
+                <span style={{ color: "var(--app-body)" }} className="font-medium">
                 Encrypted storage.
               </span>{" "}
-              Your keys are encrypted with AES-256-GCM before storage. They are never
-              logged or sent in plaintext after the initial save.
+              Your key is encrypted with AES-256-GCM at rest. The server decrypts it
+              for each AI request and sends it to the provider you configured. Hello Design
+              does not use a platform-owned AI key.
             </div>
           </div>
 
@@ -241,8 +242,8 @@ function SettingsPage() {
               Sync Your Workflow
             </h2>
             <p style={{ color: "var(--app-subtle)" }} className="text-sm mb-6 max-w-sm mx-auto leading-relaxed">
-              Sign in to save your API keys, track progress, and access your submissions
-              from any device.
+              Create an account to save future keys and practice activity across devices. Existing
+              guest activity stays in this browser session and is not migrated automatically.
             </p>
             <Link
               to="/auth/login"
@@ -270,7 +271,7 @@ function SettingsPage() {
           <SectionCard
             icon={<Key size={15} style={{ color: "var(--app-indigo)" }} />}
             title="API Keys"
-            subtitle="Your key is stored locally in this browser"
+            subtitle="Use your own OpenAI-compatible provider key"
           >
             <ApiKeySection toast={toast} />
           </SectionCard>
@@ -286,8 +287,9 @@ function SettingsPage() {
               <span style={{ color: "var(--app-body)" }} className="font-medium">
                 Encrypted storage.
               </span>{" "}
-              Your keys are encrypted with AES-256-GCM before storage. They are never
-              logged or sent in plaintext after the initial save.
+              Your key is encrypted with AES-256-GCM at rest. The server decrypts it
+              for each AI request and sends it to the provider you configured. Hello Design
+              does not use a platform-owned AI key.
             </div>
           </div>
         </>
@@ -350,7 +352,7 @@ function ApiKeySection({
   const qc = useQueryClient()
   const [showNew, setShowNew] = useState(false)
   const [draft, setDraft] = useState("")
-  const [draftBaseUrl, setDraftBaseUrl] = useState("")
+  const [draftBaseUrl, setDraftBaseUrl] = useState("https://openrouter.ai/api/v1")
   const [showDraft, setShowDraft] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -386,6 +388,7 @@ function ApiKeySection({
           provider: "openai",
           key: trimmed,
           baseUrl: draftBaseUrl.trim() || undefined,
+          modelName: draftBaseUrl.trim() ? "openai/gpt-4o-mini" : "gpt-4o-mini",
           validate: true,
         }),
       })
@@ -398,7 +401,7 @@ function ApiKeySection({
       localStorage.setItem(STORAGE_KEY, `****${saved.keyHint}`)
       await qc.invalidateQueries({ queryKey: ["api-keys"] })
       setDraft("")
-      setDraftBaseUrl("")
+      setDraftBaseUrl("https://openrouter.ai/api/v1")
       setShowNew(false)
       toast("Key saved & validated", "success")
     } catch (err) {
@@ -432,7 +435,7 @@ function ApiKeySection({
           <div>
             <p className="flex items-center gap-2 text-xs font-medium" style={{ color: "var(--app-subtle)" }}>
               <span style={{ background: "var(--app-green)" }} className="inline-block h-1.5 w-1.5 rounded-full" />
-              OpenAI API Key
+              BYOK API Key
               {activeKey.validatedAt && (
                 <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "rgba(78,222,163,0.1)", color: "var(--app-green)" }}>
                   Validated
@@ -476,7 +479,7 @@ function ApiKeySection({
         </button>
       ) : (
         <div style={{ background: "var(--app-surface)", border: "1px solid var(--app-border)" }} className="rounded-lg p-4 space-y-3">
-          <p style={{ color: "var(--app-subtle)" }} className="text-xs font-bold uppercase tracking-widest">Add OpenAI API key</p>
+          <p style={{ color: "var(--app-subtle)" }} className="text-xs font-bold uppercase tracking-widest">Add BYOK API key</p>
           <div className="relative">
             <input
               type={showDraft ? "text" : "password"}
@@ -506,14 +509,14 @@ function ApiKeySection({
               type="url"
               value={draftBaseUrl}
               onChange={(e) => setDraftBaseUrl(e.target.value)}
-              placeholder="API base URL (optional) — e.g. https://openrouter.ai/api/v1"
+              placeholder="OpenAI-compatible API URL (optional), e.g. https://openrouter.ai/api/v1"
               className="w-full rounded px-3 py-2.5 text-sm outline-none transition-all"
               style={{ background: "var(--app-bg)", border: "1px solid var(--app-border)", color: "var(--app-fg)" }}
               onFocus={(e) => { e.currentTarget.style.borderColor = "var(--app-indigo)" }}
               onBlur={(e) => { e.currentTarget.style.borderColor = "var(--app-border)" }}
             />
             <p className="mt-1 text-[10px]" style={{ color: "var(--app-muted)" }}>
-              Leave blank to use the default OpenAI endpoint.
+              Leave blank for OpenAI. For OpenRouter, use https://openrouter.ai/api/v1.
             </p>
           </div>
           <div className="flex gap-2">
@@ -542,7 +545,7 @@ function ApiKeySection({
             </button>
             <button
               type="button"
-              onClick={() => { setShowNew(false); setDraft(""); setDraftBaseUrl("") }}
+              onClick={() => { setShowNew(false); setDraft(""); setDraftBaseUrl("https://openrouter.ai/api/v1") }}
               style={{ color: "var(--app-subtle)", background: "transparent", border: "1px solid var(--app-border)" }}
               className="px-4 py-2.5 rounded text-sm font-medium transition-colors active:scale-95"
               onMouseEnter={(e) => { e.currentTarget.style.color = "var(--app-fg)"; e.currentTarget.style.borderColor = "var(--app-muted)" }}

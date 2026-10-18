@@ -12,22 +12,48 @@ const keysPlugin: FastifyPluginAsync = async (fastify) => {
       provider: string
       key: string
       baseUrl?: string
+      modelName?: string
       validate?: boolean
     }
 
-    if (!body.provider || !body.key) {
+    if (typeof body?.provider !== "string" || typeof body.key !== "string" || !body.key.trim()) {
       return reply.code(400).send({ error: "provider and key are required" })
     }
 
     if (body.provider !== "openai") {
-      return reply.code(400).send({ error: "Only 'openai' provider is currently supported" })
+      return reply.code(400).send({ error: "Use the 'openai' provider for OpenAI-compatible API keys" })
     }
 
     const keyTrimmed = body.key.trim()
-    const baseUrl = body.baseUrl?.trim() || null
+    if (keyTrimmed.length > 512) {
+      return reply.code(400).send({ error: "API key is too long" })
+    }
+    if (body.baseUrl !== undefined && typeof body.baseUrl !== "string") {
+      return reply.code(400).send({ error: "baseUrl must be a URL string" })
+    }
+    const rawBaseUrl = body.baseUrl?.trim()
+    let baseUrl: string | null = null
+    if (rawBaseUrl) {
+      if (rawBaseUrl.length > 2048) {
+        return reply.code(400).send({ error: "API base URL is too long" })
+      }
+      try {
+        const parsed = new URL(rawBaseUrl)
+        if (parsed.protocol !== "https:" && !(process.env.NODE_ENV !== "production" && parsed.hostname === "localhost")) {
+          return reply.code(400).send({ error: "API base URL must use HTTPS" })
+        }
+        if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+          return reply.code(400).send({ error: "API base URL cannot contain credentials, query parameters, or fragments" })
+        }
+        baseUrl = parsed.toString().replace(/\/$/, "")
+      } catch {
+        return reply.code(400).send({ error: "API base URL must be a valid URL" })
+      }
+    }
 
     if (body.validate !== false) {
-      const valid = await validateOpenAIKey(keyTrimmed, baseUrl ?? undefined)
+      const modelName = body.modelName?.trim() || undefined
+      const valid = await validateOpenAIKey(keyTrimmed, baseUrl ?? undefined, modelName)
       if (!valid) {
         return reply
           .code(422)
@@ -67,16 +93,6 @@ const keysPlugin: FastifyPluginAsync = async (fastify) => {
             validatedAt: body.validate !== false ? new Date() : null,
           },
         })
-
-    // Store encrypted key + IV + baseUrl in httpOnly cookie
-    const cookieValue = JSON.stringify({ encryptedKey, iv, baseUrl })
-    void reply.setCookie("api_key_openai", cookieValue, {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 365,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-    })
 
     return reply.code(existing ? 200 : 201).send({
       id: record.id,
@@ -122,14 +138,6 @@ const keysPlugin: FastifyPluginAsync = async (fastify) => {
     if (!isOwner) return reply.code(403).send({ error: "Forbidden" })
 
     await db.userApiKey.delete({ where: { id } })
-
-    void reply.setCookie("api_key_openai", "", {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 0,
-      path: "/",
-      secure: process.env.NODE_ENV === "production",
-    })
 
     return { ok: true }
   })
