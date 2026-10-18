@@ -24,7 +24,6 @@
       "**",
       "!**/routeTree.gen.ts",
       "!**/node_modules/**",
-      "!**/.turbo/**",
       "!**/dist/**",
       "!**/.next/**"
     ]

@@ -1,16 +1,11 @@
 # ── Dockerfile.worker ───────────────────────────────────────────────────────
-# Build context: repo root (required for pnpm workspace packages)
-# Railway UI settings:
-#   Dockerfile path : Dockerfile.worker
-#   Root directory  : / (repo root)
-#
-# Worker has no HTTP port — it processes BullMQ jobs from Redis.
+# Worker service image. Build context must be the repository root for workspace packages.
 
 FROM node:20-alpine
 
 ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 WORKDIR /app
 

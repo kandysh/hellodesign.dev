@@ -12,7 +12,6 @@
 
 # Build artefacts (rebuilt inside Docker)
 **/dist
-**/.turbo
 **/.next
 **/.output
 
@@ -28,5 +27,4 @@ pnpm-debug.log*
 
 # Test / docs that don't affect the build
 ui_docs
-RAILWAY.md
 README.md

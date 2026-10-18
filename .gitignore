@@ -13,9 +13,6 @@ dist/
 .env.local
 .env.*.local
 
-# Turbo
-.turbo/
-
 # Editor
 .DS_Store
 *.swp

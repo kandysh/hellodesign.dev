@@ -1,19 +1,11 @@
 # ── Dockerfile.api ──────────────────────────────────────────────────────────
-# Build context: repo root (required for pnpm workspace packages)
-# Railway UI settings:
-#   Dockerfile path : Dockerfile.api
-#   Root directory  : / (repo root)
-#
-# Uses tsx to run TypeScript directly — workspace packages export .ts source
-# so tsc compilation is skipped; tsx strips types at runtime (Node 20-safe).
+# API service image. Build context must be the repository root for workspace packages.
 
 FROM node:20-alpine
 
-# Declare build-time args up front so Railway can inject them via
-# "Build Arguments" in the service settings before any RUN step needs them.
 ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
 
 WORKDIR /app
 
@@ -44,13 +36,12 @@ COPY . .
 # irrelevant for client generation; it is overridden at runtime.
 ENV DATABASE_URL=${DATABASE_URL}
 RUN pnpm --filter @sysdesign/db exec prisma generate
-# Clear the build-time placeholder — real URL is injected by Railway at runtime
+# Clear the build-time placeholder; the database URL is provided at runtime.
 ENV DATABASE_URL=
 
 ENV NODE_ENV=production
 
 EXPOSE 3001
 
-# 1. Run pending DB migrations (idempotent — safe to run on every deploy)
-# 2. Start the API via tsx (handles TypeScript workspace imports directly)
+# Apply pending database migrations, then start the API.
 CMD ["sh", "-c", "pnpm --filter @sysdesign/db db:deploy && node_modules/.bin/tsx apps/api/src/index.ts"]
