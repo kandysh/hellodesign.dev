@@ -84,6 +84,36 @@ export const RubricConfigSchema = z.object({
   maxFollowupRounds: z.number().min(0).max(5),
 })
 
+export function assertRubric(rubric: RubricConfig, tolerance = 0.001): void {
+  if (rubric.dimensions.length === 0) throw new Error("Rubric must have at least one dimension")
+  if (rubric.dimensions.some((dimension) => !Number.isFinite(dimension.weight) || dimension.weight < 0)) {
+    throw new Error("Rubric weights must be finite and non-negative")
+  }
+  const totalWeight = rubric.dimensions.reduce((total, dimension) => total + dimension.weight, 0)
+  if (!Number.isFinite(totalWeight) || Math.abs(totalWeight - 1) > tolerance) {
+    throw new Error(`Rubric weights must sum to 1 (received ${totalWeight})`)
+  }
+}
+
+export function normalizeRubric(rubric: RubricConfig): RubricConfig {
+  if (rubric.dimensions.some((dimension) => !Number.isFinite(dimension.weight) || dimension.weight < 0)) {
+    throw new Error("Rubric weights must be finite and non-negative")
+  }
+  const totalWeight = rubric.dimensions.reduce((total, dimension) => total + dimension.weight, 0)
+  if (rubric.dimensions.length === 0 || !Number.isFinite(totalWeight) || totalWeight <= 0) {
+    throw new Error("Rubric weights must have a positive finite total")
+  }
+  const normalized = {
+    ...rubric,
+    dimensions: rubric.dimensions.map((dimension) => ({
+      ...dimension,
+      weight: dimension.weight / totalWeight,
+    })),
+  }
+  assertRubric(normalized)
+  return normalized
+}
+
 export const ComponentScoreSchema = z.object({
   dimensionId: z.string(),
   score: z.number().min(0).max(100),
@@ -208,10 +238,10 @@ export function computeWeightedScore(
   scores: ComponentScore[],
   rubric: RubricConfig,
 ): number {
-  return scores.reduce((total, s) => {
-    const dim = rubric.dimensions.find((d) => d.id === s.dimensionId)
-    if (!dim) return total
-    return total + s.score * dim.weight
+  const normalizedRubric = normalizeRubric(rubric)
+  return normalizedRubric.dimensions.reduce((total, dimension) => {
+    const score = scores.find((item) => item.dimensionId === dimension.id)?.score ?? 0
+    return total + Math.min(100, Math.max(0, score)) * dimension.weight
   }, 0)
 }
 

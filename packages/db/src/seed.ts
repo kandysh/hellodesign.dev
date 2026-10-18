@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { db } from "./index.js";
-import { DEFAULT_RUBRIC } from "@sysdesign/shared";
+import { DEFAULT_RUBRIC, normalizeRubric } from "@sysdesign/shared";
 
 const questions = [
   {
@@ -394,9 +394,11 @@ async function seed() {
   console.log("Seeding database...");
 
   for (const q of questions) {
+    const rubric = normalizeRubric(q.rubric);
     const existing = await db.question.findFirst({ where: { title: q.title } });
     if (existing) {
-      console.log(`  ↩ Skipping "${q.title}" (already exists)`);
+      await db.question.update({ where: { id: existing.id }, data: { rubric: rubric as object } });
+      console.log(`  ↻ Updated rubric for "${q.title}"`);
       continue;
     }
     await db.question.create({
@@ -408,7 +410,7 @@ async function seed() {
         estimatedMins: q.estimatedMins,
         hints: q.hints,
         coverageChecklist: q.coverageChecklist,
-        rubric: q.rubric as object,
+        rubric: rubric as object,
         isPublished: true,
       },
     });

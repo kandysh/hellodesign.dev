@@ -6,6 +6,7 @@
     "build": "pnpm --filter @sysdesign/web --filter @sysdesign/api --filter @sysdesign/worker build",
     "lint": "pnpm --filter @sysdesign/web --filter @sysdesign/api --filter @sysdesign/worker lint",
     "typecheck": "pnpm --filter @sysdesign/web --filter @sysdesign/api --filter @sysdesign/worker typecheck",
+    "test": "pnpm --filter @sysdesign/worker exec tsx --test ../../packages/shared/src/index.test.ts ../../packages/ai/src/graph.test.ts",
     "format": "biome format --write .",
     "check": "biome check .",
     "db:migrate": "pnpm --filter @sysdesign/db db:migrate",

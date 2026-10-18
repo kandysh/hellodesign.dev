@@ -14,7 +14,7 @@ import { clarificationTools } from "./tools.js";
 
 // ─── Model Configuration ──────────────────────────────────────────────────────
 
-const MODEL_NAME = "gpt-4o-mini";
+export const DEFAULT_MODEL_NAME = "gpt-4o-mini";
 
 // ─── Logger for capturing LangGraph execution ──────────────────────────────────
 
@@ -127,6 +127,39 @@ export interface FeedbackResult {
   improvements: string[];
 }
 
+export function closeDanglingToolCalls(messages: BaseMessage[]): BaseMessage[] {
+  const closed: BaseMessage[] = []
+  const pending = new Map<string, string>()
+  const appendClosers = () => {
+    for (const [toolCallId, name] of pending) {
+      closed.push(new ToolMessage({
+        tool_call_id: toolCallId,
+        content: `No result was produced for ${name}. Proceeding to evaluation.`,
+      }))
+    }
+    pending.clear()
+  }
+
+  for (const message of messages) {
+    if (AIMessage.isInstance(message)) {
+      appendClosers()
+      closed.push(message)
+      for (const call of message.tool_calls ?? []) {
+        if (call.id) pending.set(call.id, call.name)
+      }
+    } else if (message instanceof ToolMessage) {
+      closed.push(message)
+      pending.delete(message.tool_call_id)
+    } else {
+      appendClosers()
+      closed.push(message)
+    }
+  }
+
+  appendClosers()
+  return closed
+}
+
 // ─── Structured output schemas ────────────────────────────────────────────────
 
 // Defined locally to avoid cross-package Zod version type conflicts
@@ -142,6 +175,30 @@ const EvalOutputSchema = z.object({
     .array(ComponentScoreZod)
     .describe("One score entry per rubric dimension"),
 });
+
+export function validateEvaluationScores(value: unknown, dimensionIds: string[]): ComponentScore[] {
+  const parsed = EvalOutputSchema.safeParse(value)
+  if (!parsed.success) {
+    throw new Error("Evaluation output does not match the score schema: " + parsed.error.message)
+  }
+
+  const expected = new Set(dimensionIds)
+  const returnedIds = parsed.data.scores.map((score) => score.dimensionId)
+  const returned = new Set(returnedIds)
+  const duplicates = returnedIds.filter((id, index) => returnedIds.indexOf(id) !== index)
+  const unknown = [...returned].filter((id) => !expected.has(id))
+  const missing = [...expected].filter((id) => !returned.has(id))
+  if (duplicates.length || unknown.length || missing.length || returned.size !== expected.size) {
+    const problems = [
+      missing.length ? "missing: " + missing.join(", ") : "",
+      unknown.length ? "unknown: " + unknown.join(", ") : "",
+      duplicates.length ? "duplicate: " + [...new Set(duplicates)].join(", ") : "",
+    ].filter(Boolean).join("; ")
+    throw new Error("Evaluation output must contain exactly one score per rubric dimension (" + problems + ")")
+  }
+
+  return parsed.data.scores as ComponentScore[]
+}
 
 const FeedbackOutputSchema = z.object({
   narrative: z
@@ -185,7 +242,7 @@ export async function runClarificationPhase(
   } = params;
 
   const model = new ChatOpenAI({
-    model: modelName ?? MODEL_NAME,
+    model: modelName ?? DEFAULT_MODEL_NAME,
     temperature: 0.2,
     apiKey,
     streaming: true,
@@ -214,14 +271,16 @@ export async function runClarificationPhase(
   // Wait-for-reply node: block on Redis until user responds
   const waitReplyNode = async (state: typeof ClarificationState.State) => {
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    const toolCall = lastMessage.tool_calls?.[0];
+    const toolCalls = lastMessage.tool_calls ?? [];
+    const replyCalls = toolCalls.filter((call) =>
+      ["ask_followup", "probe_trade_off", "request_estimation"].includes(call.name),
+    );
+    if (replyCalls.length === 0) return flagRiskNode(state);
 
-    if (!toolCall) return {};
-
-    // Extract question from any reply-type tool (ask_followup, probe_trade_off, request_estimation)
-    const questionText = (toolCall.args.question ?? toolCall.args.aspect ?? String(toolCall.args)) as string;
-    const toolCallId =
-      typeof toolCall.id === "string" ? toolCall.id : "followup_call";
+    const questionText = [...new Set(replyCalls.map((call) => {
+      const args = call.args as Record<string, unknown>
+      return String(args.question ?? args.aspect ?? JSON.stringify(args))
+    }))].map((question) => `- ${question}`).join("\n")
 
     await publishEvent({
       type: "followup",
@@ -229,18 +288,48 @@ export async function runClarificationPhase(
       submissionId,
     });
 
-    // Tool result message is required before the next human turn
-    const toolResult = new ToolMessage({
-      tool_call_id: toolCallId,
-      content: "Question sent to candidate. Waiting for their response...",
-    });
+    const toolResults = new Map<string, string>()
+    for (const toolCall of toolCalls) {
+      if (toolCall.name !== "flag_risk") continue
+      const args = toolCall.args as Record<string, unknown>
+      const severity = args.severity
+      if (typeof args.component === "string" && typeof args.risk === "string" &&
+          (severity === "critical" || severity === "high" || severity === "medium")) {
+        await publishEvent({
+          type: "risk_flag",
+          component: args.component,
+          risk: args.risk,
+          severity,
+        })
+        if (toolCall.id) toolResults.set(toolCall.id, `Risk flagged (${severity}): ${args.component} — ${args.risk}`)
+      } else if (toolCall.id) {
+        toolResults.set(toolCall.id, "Risk flag was invalid and was not recorded.")
+      }
+    }
 
     const reply = await waitForReply(submissionId);
+    const replyResult = reply
+      ? `Candidate response: ${reply}`
+      : "No candidate response was received before the clarification timed out. Proceed with available information."
+    for (const call of replyCalls) {
+      if (call.id) toolResults.set(call.id, replyResult)
+    }
+    for (const call of toolCalls) {
+      if (call.id && !toolResults.has(call.id)) {
+        toolResults.set(call.id, `Unsupported tool ${call.name}. Proceed with available information.`)
+      }
+    }
+    const toolMessages = toolCalls
+      .filter((call) => call.id)
+      .map((call) => new ToolMessage({
+        tool_call_id: call.id!,
+        content: toolResults.get(call.id!) ?? "Proceed with available information.",
+      }))
 
     if (!reply) {
       // Timed out — let the agent proceed to evaluation
       return {
-        messages: [toolResult],
+        messages: toolMessages,
         followupRounds: state.followupRounds + 1,
       };
     }
@@ -248,7 +337,7 @@ export async function runClarificationPhase(
     await publishEvent({ type: "user_reply", content: reply });
 
     return {
-      messages: [toolResult, new HumanMessage(reply)],
+      messages: [...toolMessages, new HumanMessage(reply)],
       followupRounds: state.followupRounds + 1,
     };
   };
@@ -256,25 +345,31 @@ export async function runClarificationPhase(
   // Risk flag node: publish risk_flag event instantly, return ToolMessage, loop back to agent
   const flagRiskNode = async (state: typeof ClarificationState.State) => {
     const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    const toolCall = lastMessage.tool_calls?.[0];
+    const toolCalls = lastMessage.tool_calls ?? [];
+    const messages: ToolMessage[] = []
 
-    if (!toolCall) return {};
+    for (const toolCall of toolCalls) {
+      let content = `Unsupported tool ${toolCall.name}. Proceed with available information.`
+      if (toolCall.name === "flag_risk") {
+        const args = toolCall.args as Record<string, unknown>
+        const severity = args.severity
+        if (typeof args.component === "string" && typeof args.risk === "string" &&
+            (severity === "critical" || severity === "high" || severity === "medium")) {
+          await publishEvent({
+            type: "risk_flag",
+            component: args.component,
+            risk: args.risk,
+            severity,
+          })
+          content = `Risk flagged (${severity}): ${args.component} — ${args.risk}`
+        } else {
+          content = "Risk flag was invalid and was not recorded."
+        }
+      }
+      if (toolCall.id) messages.push(new ToolMessage({ tool_call_id: toolCall.id, content }))
+    }
 
-    const { component, risk, severity } = toolCall.args as {
-      component: string;
-      risk: string;
-      severity: "critical" | "high" | "medium";
-    };
-    const toolCallId = typeof toolCall.id === "string" ? toolCall.id : "flag_risk_call";
-
-    await publishEvent({ type: "risk_flag", component, risk, severity });
-
-    const toolResult = new ToolMessage({
-      tool_call_id: toolCallId,
-      content: `Risk flagged (${severity}): ${component} — ${risk}`,
-    });
-
-    return { messages: [toolResult] };
+    return { messages }
   };
 
   const maxRounds = maxFollowupOverride !== undefined ? maxFollowupOverride : question.rubric.maxFollowupRounds;
@@ -287,22 +382,21 @@ export async function runClarificationPhase(
     const aiMsg = lastMessage as AIMessage;
     if (!aiMsg.tool_calls?.length) return END;
 
-    const toolName = aiMsg.tool_calls[0]?.name;
+    const toolCalls = aiMsg.tool_calls
+    const hasReplyTool = toolCalls.some((call) =>
+      ["ask_followup", "probe_trade_off", "request_estimation"].includes(call.name),
+    )
+    const hasRiskTool = toolCalls.some((call) => call.name === "flag_risk")
 
-    // Annotation tool: fires instantly, loops back to agent (no quota cost)
-    if (toolName === "flag_risk") {
-      return "flag_risk_node";
-    }
-
-    // Reply tools: block for user response (count toward quota)
-    if (
-      (toolName === "ask_followup" || toolName === "probe_trade_off" || toolName === "request_estimation") &&
-      state.followupRounds < maxRounds
-    ) {
+    if (hasReplyTool && state.followupRounds < maxRounds) {
       return "wait_reply";
     }
 
-    // mark_satisfied, rounds exceeded, or unknown tool → end clarification
+    // Record annotation calls immediately. This node also acknowledges any
+    // parallel or unsupported calls so the model never sees dangling calls.
+    if (hasRiskTool) return "flag_risk_node";
+
+    // mark_satisfied, exhausted follow-up quota, or unknown tools → evaluation.
     return END;
   };
 
@@ -332,7 +426,7 @@ export async function runClarificationPhase(
   );
 
   return {
-    messages: result.messages,
+    messages: closeDanglingToolCalls(result.messages),
     followupRounds: result.followupRounds,
   };
 }
@@ -362,7 +456,7 @@ export async function runEvaluationPhase(
   await publishEvent({ type: "eval_start", dimensions: dimensionIds, dimensionLabels });
 
   const model = new ChatOpenAI({
-    model: modelName ?? MODEL_NAME,
+    model: modelName ?? DEFAULT_MODEL_NAME,
     temperature: 0.1,
     apiKey,
     ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),
@@ -376,10 +470,42 @@ export async function runEvaluationPhase(
 
   await publishEvent({ type: "agent_flow", step: "Evaluating design against rubric", details: { dimensionCount: dimensionIds.length } });
 
-  // biome-ignore lint/suspicious/noExplicitAny: BaseMessage[] generic variance incompatibility across module boundaries
-  const { scores } = (await model.invoke(evalMessages as any)) as {
-    scores: ComponentScore[];
-  };
+  let scores: ComponentScore[] | undefined
+  let lastValidationError: unknown
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt > 0) {
+      await publishEvent({
+        type: "agent_flow",
+        step: "Correcting incomplete evaluation output",
+        details: { attempt },
+      })
+    }
+    try {
+      const retryMessages = attempt === 0
+        ? evalMessages
+        : [
+            ...evalMessages,
+            new HumanMessage(
+              "Your previous evaluation output was invalid: " +
+                (lastValidationError instanceof Error ? lastValidationError.message : String(lastValidationError)) +
+                ". Return the complete structured output again with exactly one score for each dimension and no other dimension IDs: " +
+                dimensionIds.join(", ") + ".",
+            ),
+          ]
+      // biome-ignore lint/suspicious/noExplicitAny: BaseMessage[] generic variance incompatibility across module boundaries
+      const output = await model.invoke(retryMessages as any)
+      scores = validateEvaluationScores(output, dimensionIds)
+      break
+    } catch (error) {
+      lastValidationError = error
+    }
+  }
+  if (!scores) {
+    throw new Error(
+      "Evaluation model returned invalid rubric scores after one retry: " +
+        (lastValidationError instanceof Error ? lastValidationError.message : String(lastValidationError)),
+    )
+  }
 
   for (const score of scores) {
     const dimension = question.rubric.dimensions.find((d) => d.id === score.dimensionId);
@@ -407,7 +533,7 @@ export async function generateNarrativeFeedback(
     params;
 
   const model = new ChatOpenAI({
-    model: modelName ?? MODEL_NAME,
+    model: modelName ?? DEFAULT_MODEL_NAME,
     temperature: 0.3,
     apiKey,
     ...(baseUrl ? { configuration: { baseURL: baseUrl } } : {}),

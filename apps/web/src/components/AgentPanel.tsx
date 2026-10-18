@@ -18,10 +18,16 @@ interface EvalProgressItem {
   score: number
 }
 
+export interface ActivityItem {
+  id: string
+  type: "reasoning" | "status"
+  content: string
+}
+
 export type AgentPanelState =
   | { phase: "idle" }
-  | { phase: "processing"; trace: string[] }
-  | { phase: "follow-up"; question: string; trace: string[] }
+  | { phase: "processing"; trace: ActivityItem[] }
+  | { phase: "follow-up"; question: string; trace: ActivityItem[] }
   | { phase: "evaluating"; agentResults: EvalProgressItem[]; dimensionLabels: string[] }
   | { phase: "done"; submissionId: string; agentResults: EvalProgressItem[]; dimensionLabels: string[] }
 
@@ -206,8 +212,8 @@ export const AgentPanel = memo(function AgentPanel({
             </button>
             {showTrace && (
               <ol className="space-y-0 border-t border-base-300/40 px-3.5 py-2">
-                {trace.map((line, index) => (
-                  <ActivityEntry key={`${index}-${line}`} line={line} isLast={index === trace.length - 1} />
+                {trace.map((item, index) => (
+                  <ActivityEntry key={item.id} item={item} isLast={index === trace.length - 1} />
                 ))}
               </ol>
             )}
@@ -303,7 +309,26 @@ function ActivityMessage({ title, subtitle }: { title: string; subtitle: string 
   )
 }
 
-function ActivityEntry({ line, isLast }: { line: string; isLast: boolean }) {
+function ActivityEntry({ item, isLast }: { item: ActivityItem; isLast: boolean }) {
+  const line = item.content
+  if (item.type === "reasoning") {
+    return (
+      <li className="relative flex gap-3 py-2.5">
+        <div className="flex w-4 shrink-0 justify-center">
+          <span className="relative z-10 mt-1.5 h-2 w-2 rounded-full bg-primary" />
+          {!isLast && <span className="absolute bottom-0 left-[19px] top-5 w-px bg-base-300/70" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-xs font-medium leading-relaxed text-base-content/80">Interviewer reasoning</span>
+            <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">Reasoning</span>
+          </div>
+          <p className="mt-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-base-content/55">{line}</p>
+        </div>
+      </li>
+    )
+  }
+
   const flow = line.match(/^→\s*(.*?)(?:\s+\((\{.*\})\))?$/s)
   const title = flow?.[1]?.trim() || "Interviewer note"
   const rawDetails = flow?.[2]

@@ -25,7 +25,7 @@ import {
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
-import { AgentPanel, type AgentPanelState, type Message } from "@/components/AgentPanel"
+import { AgentPanel, type ActivityItem, type AgentPanelState, type Message } from "@/components/AgentPanel"
 import { useApiKey } from "@/components/ApiKeyInput"
 import { CodeEditor, type CodeLanguage } from "@/components/CodeEditor"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
@@ -42,6 +42,18 @@ const Excalidraw = lazy(() =>
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001"
 const WS_API = API.replace(/^http/, "ws")
+const REASONING_MODELS_QUERY_KEY = ["openrouter-models", "intelligence-high-to-low"] as const
+
+interface RecommendedModel {
+  id: string
+  name: string
+}
+
+async function fetchReasoningModels(): Promise<RecommendedModel[]> {
+  const response = await fetch(`${API}/api/models?sort=intelligence-high-to-low`, { credentials: "include" })
+  if (!response.ok) throw new Error("Reasoning model recommendations are unavailable")
+  return response.json()
+}
 
 const EXCALIDRAW_UI_OPTIONS = { canvasActions: { export: false } } as const
 
@@ -80,6 +92,12 @@ function WorkspacePage() {
   const { theme } = useTheme()
   const apiKey = useApiKey()
   const elapsed = useElapsedTimer()
+  const { data: reasoningModels } = useQuery({
+    queryKey: REASONING_MODELS_QUERY_KEY,
+    queryFn: fetchReasoningModels,
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60,
+  })
 
   // Panel state
   const [leftCollapsed, setLeftCollapsed] = useState(false)
@@ -118,9 +136,10 @@ function WorkspacePage() {
   const [riskFlags, setRiskFlags] = useState<Array<{ component: string; risk: string; severity: "critical" | "high" | "medium" }>>([])
   const [currentSubmissionId, setCurrentSubmissionId] = useState<string | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
-  // Buffer for accumulating rapid reasoning token chunks before flushing to trace
+  // Coalesce streamed reasoning chunks into one activity entry.
   const reasoningBufRef = useRef("")
   const reasoningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reasoningEntryIdRef = useRef<string | null>(null)
 
   const { data: question, isLoading } = useQuery(questionQueryOptions(questionId))
 
@@ -169,18 +188,42 @@ function WorkspacePage() {
       setAgentState({ phase: "processing", trace: [] })
       setAgentMessages([])
       setRiskFlags([])
+      reasoningEntryIdRef.current = null
       toast("Submission received — agent is reading your answer", "success")
 
       // Open WebSocket stream
       const ws = new WebSocket(`${WS_API}/api/submissions/${submissionId}/ws`)
       wsRef.current = ws
 
-      const cleanupReasoningBuf = () => {
+      const flushReasoningBuf = () => {
         if (reasoningTimerRef.current) {
           clearTimeout(reasoningTimerRef.current)
           reasoningTimerRef.current = null
         }
+        const content = reasoningBufRef.current
         reasoningBufRef.current = ""
+        if (!content.trim()) return
+
+        const entryId = reasoningEntryIdRef.current ?? crypto.randomUUID()
+        reasoningEntryIdRef.current = entryId
+        setAgentState((prev) => {
+          if (prev.phase !== "processing" && prev.phase !== "follow-up") return prev
+          const existingIndex = prev.trace.findIndex((item) => item.id === entryId)
+          if (existingIndex < 0) {
+            return { ...prev, trace: [...prev.trace, { id: entryId, type: "reasoning", content } satisfies ActivityItem] }
+          }
+          return {
+            ...prev,
+            trace: prev.trace.map((item, index) => index === existingIndex
+              ? { ...item, content: item.content + content }
+              : item),
+          }
+        })
+      }
+
+      const cleanupReasoningBuf = () => {
+        flushReasoningBuf()
+        reasoningEntryIdRef.current = null
       }
 
       ws.onmessage = (e) => {
@@ -207,24 +250,17 @@ function WorkspacePage() {
             reasoningBufRef.current += content
             if (reasoningTimerRef.current) clearTimeout(reasoningTimerRef.current)
             reasoningTimerRef.current = setTimeout(() => {
-              const line = reasoningBufRef.current.trim()
-              reasoningBufRef.current = ""
-              if (!line) return
-              setAgentState((prev) => {
-                if (prev.phase === "processing" || prev.phase === "follow-up") {
-                  return { ...prev, trace: [...(prev.trace ?? []), line] }
-                }
-                return prev
-              })
+              flushReasoningBuf()
             }, 100)
             break
           }
 
           case "agent_flow": {
+            flushReasoningBuf()
             const flowLine = `→ ${ev.step ?? "Agent progress"}${ev.details ? ` (${JSON.stringify(ev.details)})` : ""}`
             setAgentState((prev) => {
               if (prev.phase === "processing" || prev.phase === "follow-up") {
-                return { ...prev, trace: [...(prev.trace ?? []), flowLine] }
+                return { ...prev, trace: [...prev.trace, { id: crypto.randomUUID(), type: "status", content: flowLine }] }
               }
               return prev
             })
@@ -232,6 +268,8 @@ function WorkspacePage() {
           }
 
           case "followup": {
+            flushReasoningBuf()
+            reasoningEntryIdRef.current = null
             const q = ev.question ?? ev.content ?? ""
             setAgentState((prev) => ({
               phase: "follow-up",
@@ -246,6 +284,7 @@ function WorkspacePage() {
           }
 
           case "user_reply":
+            reasoningEntryIdRef.current = null
             setAgentState((prev) => {
               if (prev.phase === "follow-up") {
                 return { phase: "processing", trace: prev.trace ?? [] }
@@ -255,6 +294,7 @@ function WorkspacePage() {
             break
 
           case "eval_start":
+            cleanupReasoningBuf()
             setAgentState({
               phase: "evaluating",
               agentResults: [],
@@ -388,15 +428,12 @@ function WorkspacePage() {
     }
   }, [])
 
-  const MODE_DEFAULTS: Record<"quick" | "deep", string> = {
-    quick: "openai/gpt-oss-20b:nitro",
-    deep: "deepseek/deepseek-v3.2",
-  }
-
-  // Auto-switch model to mode default unless user manually overrode it
+  // Use the current top result from the reasoning benchmark until the user
+  // explicitly picks a model. Keep the choice stable when review mode changes.
   useEffect(() => {
-    if (!modelOverridden) setModelName(MODE_DEFAULTS[reviewMode])
-  }, [reviewMode]) // eslint-disable-line react-hooks/exhaustive-deps
+    const topReasoningModel = reasoningModels?.[0]?.id
+    if (topReasoningModel && !modelOverridden) setModelName(topReasoningModel)
+  }, [reasoningModels, modelOverridden])
 
   // canSubmit must be declared before the keyboard shortcut useEffect
   // so the dep array can evaluate it without TDZ error
@@ -870,74 +907,32 @@ function WorkspacePage() {
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-5 lg:px-6">
                 <div className="flex flex-wrap items-end justify-between gap-3 px-1">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--app-indigo)" }}>Design notebook</p>
-                    <h2 className="mt-1 text-lg font-semibold" style={{ color: "var(--app-text)" }}>Build your answer in cells</h2>
-                    <p className="mt-1 text-xs" style={{ color: "var(--app-muted)" }}>Notes, architecture diagram, and code are submitted together.</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--app-muted)" }}>
-                    <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--app-border)" }}>Markdown</span>
-                    <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--app-border)" }}>Diagram</span>
-                    <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--app-border)" }}>Code</span>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--app-indigo)" }}>Design notes</p>
+                    <h2 className="mt-1 text-lg font-semibold" style={{ color: "var(--app-text)" }}>Work through your design</h2>
+                    <p className="mt-1 text-xs" style={{ color: "var(--app-muted)" }}>Use this space for your written answer. Your diagram and code have their own tabs.</p>
                   </div>
                 </div>
 
                 <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
                   <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold" style={{ color: "var(--app-indigo)", background: "var(--app-indigo-10)" }}>1</span>
                     <FileText size={14} style={{ color: "var(--app-muted)" }} />
                     <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Design notes</span>
                     <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Markdown</span>
                   </div>
-                  <div className="h-[330px] p-2 sm:h-[380px]">
+                  <div className="min-h-[360px] p-2" style={{ height: "min(68vh, 720px)" }}>
                     <RichTextEditor
                       value={answerCode}
                       onChange={setAnswerCode}
                       placeholder={EDITOR_PLACEHOLDER}
-                      className="rounded-xl"
+                      className="h-full rounded-xl"
                     />
-                  </div>
-                </section>
-
-                <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
-                  <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold" style={{ color: "var(--app-indigo)", background: "var(--app-indigo-10)" }}>2</span>
-                    <Code2 size={14} style={{ color: "var(--app-muted)" }} />
-                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Code cell</span>
-                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Optional</span>
-                  </div>
-                  <div className="h-[280px] p-2 sm:h-[320px]">
-                    <CodeEditor
-                      value={codeSnippet}
-                      onChange={setCodeSnippet}
-                      language={codeLanguage}
-                      onLanguageChange={setCodeLanguage}
-                      filename="implementation"
-                      className="w-full"
-                      height="100%"
-                      placeholder="// Add a focused code or pseudocode example…"
-                      theme={theme}
-                    />
-                  </div>
-                </section>
-
-                <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
-                  <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold" style={{ color: "var(--app-indigo)", background: "var(--app-indigo-10)" }}>3</span>
-                    <Map size={14} style={{ color: "var(--app-muted)" }} />
-                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Architecture diagram</span>
-                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Optional · included with submission</span>
-                  </div>
-                  <div className="h-[400px] sm:h-[480px]">
-                    {diagramMounted
-                      ? renderDiagramCanvas("h-full w-full")
-                      : <div className="flex h-full items-center justify-center text-sm" style={{ color: "var(--app-muted)" }}>Preparing diagram canvas…</div>}
                   </div>
                 </section>
               </div>
             </div>
           )}
 
-          {/* Focused code view shares the notebook code cell. */}
+          {/* Focused code view edits the same code included with the submission. */}
           <div
             className="absolute inset-0 p-3"
             style={{ display: activeTab === "code" ? "flex" : "none" }}
@@ -973,14 +968,14 @@ function WorkspacePage() {
 
         {/* Bottom action bar — clean, compact, modern */}
         <div
-          className="flex items-center justify-between gap-6 shrink-0 px-6 py-3"
+          className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-4 py-2.5"
           style={{
             borderTop: "1px solid var(--app-border-2)",
             background: "var(--app-bg)",
           }}
         >
           {/* Left: Minimal status indicators */}
-          <div className="flex items-center gap-4 text-xs min-w-fit">
+          <div className="flex min-w-fit items-center gap-2 text-xs">
             {/* Word count badge */}
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-full"
@@ -1075,70 +1070,41 @@ function WorkspacePage() {
           </button>
 
           {/* Right: Controls (review + mood + model) */}
-          <div className="flex items-center gap-3 ml-auto">
-            {/* Review mode toggle */}
-            <div
-              className="flex items-center gap-1"
-              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)", borderRadius: "6px", padding: "2px" }}
-            >
-              {[
-                { val: "quick" as const, label: "Quick", icon: null },
-                { val: "deep" as const, label: "Deep", icon: null },
-              ].map(({ val, label }) => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setReviewMode(val)}
-                  className="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                  style={{
-                    background: reviewMode === val ? "var(--app-indigo)" : "transparent",
-                    color: reviewMode === val ? "white" : "var(--app-muted)",
-                  }}
-                  title={
-                    val === "deep"
-                      ? "Deep interview: the agent can ask follow-up questions before evaluation"
-                      : "Quick review: structured feedback without follow-up questions"
-                  }
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+          <div className="ml-auto flex flex-wrap items-end justify-end gap-2">
+            <label className="flex w-[112px] flex-col gap-1">
+              <span className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--app-muted)" }}>Review</span>
+              <select
+                value={reviewMode}
+                onChange={(event) => setReviewMode(event.target.value as "quick" | "deep")}
+                title={reviewMode === "deep" ? "The interviewer can ask follow-up questions before evaluation" : "Receive structured feedback without follow-up questions"}
+                className="h-9 w-full rounded-xl border px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                style={{ background: "var(--app-surface)", borderColor: "var(--app-border)", color: "var(--app-text)" }}
+              >
+                <option value="quick">Quick review</option>
+                <option value="deep">Deep interview</option>
+              </select>
+            </label>
 
-            {/* Mood selector */}
-            <div
-              className="flex items-center gap-1"
-              style={{ background: "var(--app-surface-2)", border: "1px solid var(--app-border)", borderRadius: "6px", padding: "2px" }}
-            >
-              {(["pragmatist", "systems", "sre", "pm"] as const).map((m) => {
-                const labels: Record<string, string> = { pragmatist: "P", systems: "S", sre: "R", pm: "M" }
-                const fullLabels: Record<string, string> = { pragmatist: "Pragmatist", systems: "Systems", sre: "SRE", pm: "PM" }
-                return (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMood(m)}
-                    className="px-2 py-1 rounded text-xs font-semibold transition-all"
-                    style={{
-                      background: mood === m ? "var(--app-indigo)" : "transparent",
-                      color: mood === m ? "white" : "var(--app-muted)",
-                      minWidth: "24px",
-                      textAlign: "center",
-                    }}
-                    title={fullLabels[m]}
-                  >
-                    {labels[m]}
-                  </button>
-                )
-              })}
-            </div>
+            <label className="flex w-[145px] flex-col gap-1">
+              <span className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--app-muted)" }}>Interviewer lens</span>
+              <select
+                value={mood}
+                onChange={(event) => setMood(event.target.value as typeof mood)}
+                className="h-9 w-full rounded-xl border px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+                style={{ background: "var(--app-surface)", borderColor: "var(--app-border)", color: "var(--app-text)" }}
+              >
+                <option value="pragmatist">Pragmatist</option>
+                <option value="systems">Systems architect</option>
+                <option value="sre">Reliability (SRE)</option>
+                <option value="pm">Product manager</option>
+              </select>
+            </label>
 
-            {/* Model selector */}
-            <div className="flex items-center">
+            <div className="flex flex-col gap-1">
+              <span className="px-1 text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--app-muted)" }}>Model</span>
               <ModelCombobox
                 value={modelName}
                 onChange={(v) => { setModelName(v); setModelOverridden(true) }}
-                providers={["openai", "google", "anthropic", "deepseek"]}
               />
             </div>
           </div>

@@ -164,6 +164,7 @@ model AgentMessage {
 model EvalResult {
   id              String   @id @default(cuid())
   submissionId    String   @unique
+  modelName       String?
   overallScore    Float
   componentScores Json // Record<string, ComponentScore>
   feedback        String   @db.Text

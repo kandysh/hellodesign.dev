@@ -7,6 +7,7 @@ import {
   generateNarrativeFeedback,
   buildSystemPrompt,
   buildAnswerPrompt,
+  DEFAULT_MODEL_NAME,
 } from "@sysdesign/ai"
 import type { QuestionContext } from "@sysdesign/ai"
 import {
@@ -221,6 +222,7 @@ export const evalProcessor: Processor<EvalJobData> = async (job) => {
     await db.evalResult.create({
       data: {
         submissionId,
+        modelName: modelName ?? DEFAULT_MODEL_NAME,
         overallScore,
         componentScores: componentScores as object,
         feedback: narrative,

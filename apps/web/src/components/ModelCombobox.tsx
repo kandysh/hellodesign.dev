@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { ChevronDown, Loader2 } from "lucide-react"
+import { Check, ChevronDown, Cpu, Loader2, Search, Sparkles } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
@@ -8,134 +8,94 @@ interface OpenRouterModel {
   name: string
 }
 
-const STYLE = {
-  bg: "#131b2e",
-  border: "1px solid #2d3449",
-  color: "#8083ff",
-  hoverBg: "#1a2540",
-  groupColor: "#4a5080",
-} as const
+const CATEGORIES = [
+  { id: "intelligence-high-to-low", label: "Reasoning", detail: "Intelligence benchmark" },
+  { id: "coding-high-to-low", label: "Coding", detail: "Coding benchmark" },
+  { id: "agentic-high-to-low", label: "Agentic", detail: "Agentic benchmark" },
+  { id: "design-arena-elo-high-to-low", label: "Arena", detail: "Design Arena ELO" },
+  { id: "most-popular", label: "Popular", detail: "OpenRouter usage" },
+] as const
 
+type SortId = (typeof CATEGORIES)[number]["id"]
 const API = (import.meta as any).env?.VITE_API_URL ?? "http://localhost:3001"
 
-async function fetchOpenRouterModels(): Promise<OpenRouterModel[]> {
-  const res = await fetch(`${API}/api/models`)
-  if (!res.ok) throw new Error("Failed to fetch models")
+async function fetchModels(sort: SortId): Promise<OpenRouterModel[]> {
+  const res = await fetch(`${API}/api/models?sort=${encodeURIComponent(sort)}`, { credentials: "include" })
+  if (!res.ok) throw new Error("Model recommendations are unavailable")
   return res.json()
-}
-
-function groupByProvider(models: OpenRouterModel[]): Map<string, OpenRouterModel[]> {
-  const groups = new Map<string, OpenRouterModel[]>()
-  for (const m of models) {
-    const provider = m.id.split("/")[0] ?? m.id
-    if (!groups.has(provider)) groups.set(provider, [])
-    groups.get(provider)!.push(m)
-  }
-  return groups
 }
 
 interface ModelComboboxProps {
   value: string
   onChange: (value: string) => void
-  providers?: string[]
 }
 
-export function ModelCombobox({ value, onChange, providers }: ModelComboboxProps) {
+export function ModelCombobox({ value, onChange }: ModelComboboxProps) {
   const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState(value)
+  const [query, setQuery] = useState("")
+  const [sort, setSort] = useState<SortId>(CATEGORIES[0].id)
   const containerRef = useRef<HTMLDivElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
+  const activeCategory = CATEGORIES.find((category) => category.id === sort) ?? CATEGORIES[0]
 
-  const { data: models, isLoading } = useQuery({
-    queryKey: ["openrouter-models"],
-    queryFn: fetchOpenRouterModels,
-    staleTime: 1000 * 60 * 30, // 30 min
+  const { data: models, isLoading, isError } = useQuery({
+    queryKey: ["openrouter-models", sort],
+    queryFn: () => fetchModels(sort),
+    staleTime: 1000 * 60 * 30,
     gcTime: 1000 * 60 * 60,
+    enabled: open,
   })
 
-  // Keep query in sync when value changes externally
-  useEffect(() => {
-    setQuery(value)
-  }, [value])
-
-  // Close on outside click
   useEffect(() => {
     if (!open) return
-    const handler = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) setOpen(false)
+    const closeOutside = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (!containerRef.current?.contains(target) && !popoverRef.current?.contains(target)) setOpen(false)
     }
-    document.addEventListener("mousedown", handler)
-    return () => document.removeEventListener("mousedown", handler)
+    document.addEventListener("mousedown", closeOutside)
+    return () => document.removeEventListener("mousedown", closeOutside)
   }, [open])
 
-  const filtered = models
-    ? models.filter((m) => {
-        const providerMatch = providers
-          ? providers.some((p) => m.id.startsWith(p + "/"))
-          : true
-        const queryMatch =
-          m.id.toLowerCase().includes(query.toLowerCase()) ||
-          m.name.toLowerCase().includes(query.toLowerCase())
-        return providerMatch && queryMatch
-      })
-    : []
+  const filtered = models?.filter((model) => {
+    return `${model.name} ${model.id}`.toLowerCase().includes(query.trim().toLowerCase())
+  }) ?? []
 
-  const grouped = groupByProvider(filtered)
-
-  function select(modelId: string) {
+  function choose(modelId: string) {
     onChange(modelId)
-    setQuery(modelId)
+    setQuery("")
     setOpen(false)
   }
 
   return (
-    <div ref={containerRef} style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-      <input
-        type="text"
-        value={query}
-        onFocus={() => setOpen(true)}
-        onChange={(e) => {
-          setQuery(e.target.value)
-          onChange(e.target.value)
-          setOpen(true)
-        }}
-        placeholder="provider/model-id"
-        className="input input-xs rounded-lg text-xs pr-6"
-        style={{
-          background: STYLE.bg,
-          border: STYLE.border,
-          color: STYLE.color,
-          width: 190,
-          paddingRight: 24,
-        }}
-        title="Model"
-      />
-      <span
-        style={{
-          position: "absolute",
-          right: 6,
-          pointerEvents: "none",
-          color: STYLE.groupColor,
-          display: "flex",
-          alignItems: "center",
-        }}
+    <div ref={containerRef} className="relative">
+      <button
+        type="button"
+        onClick={() => { setOpen((current) => !current); setQuery("") }}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        title={`Model: ${value}`}
+        className="flex h-9 max-w-[190px] items-center gap-2 rounded-xl border px-2.5 text-left transition hover:border-indigo-400/50"
+        style={{ background: "var(--app-surface)", borderColor: "var(--app-border)", color: "var(--app-text)" }}
       >
-        {isLoading ? (
-          <Loader2 size={11} className="animate-spin" />
-        ) : (
-          <ChevronDown size={11} />
-        )}
-      </span>
+        <Cpu size={14} className="shrink-0" style={{ color: "var(--app-indigo)" }} />
+        <span className="min-w-0 flex-1 truncate text-[11px]">{value || "Choose model"}</span>
+        <ChevronDown size={13} className="shrink-0" style={{ color: "var(--app-muted)" }} />
+      </button>
 
       {open && createPortal(
-        <DropdownList
+        <ModelPopover
           containerRef={containerRef}
-          isLoading={isLoading}
-          filtered={filtered}
-          grouped={grouped}
-          value={value}
+          popoverRef={popoverRef}
+          sort={sort}
+          activeCategory={activeCategory}
           query={query}
-          onSelect={select}
-          onClose={() => setOpen(false)}
+          value={value}
+          models={filtered}
+          isLoading={isLoading}
+          isError={isError}
+          onSortChange={setSort}
+          onQueryChange={setQuery}
+          onChoose={choose}
         />,
         document.body,
       )}
@@ -143,113 +103,120 @@ export function ModelCombobox({ value, onChange, providers }: ModelComboboxProps
   )
 }
 
-interface DropdownListProps {
+interface ModelPopoverProps {
   containerRef: React.RefObject<HTMLDivElement | null>
-  isLoading: boolean
-  filtered: OpenRouterModel[]
-  grouped: Map<string, OpenRouterModel[]>
-  value: string
+  popoverRef: React.RefObject<HTMLDivElement | null>
+  sort: SortId
+  activeCategory: (typeof CATEGORIES)[number]
   query: string
-  onSelect: (id: string) => void
-  onClose: () => void
+  value: string
+  models: OpenRouterModel[]
+  isLoading: boolean
+  isError: boolean
+  onSortChange: (sort: SortId) => void
+  onQueryChange: (query: string) => void
+  onChoose: (modelId: string) => void
 }
 
-function DropdownList({ containerRef, isLoading, filtered, grouped, value, query, onSelect, onClose }: DropdownListProps) {
-  const [pos, setPos] = useState<{ top: number; left: number; width: number } | null>(null)
+function ModelPopover({ containerRef, popoverRef, sort, activeCategory, query, value, models, isLoading, isError, onSortChange, onQueryChange, onChoose }: ModelPopoverProps) {
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
 
   useEffect(() => {
-    const rect = containerRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const dropdownHeight = 320
-    const spaceBelow = window.innerHeight - rect.bottom
-    const spaceAbove = rect.top
-    const openUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow
-    setPos({
-      top: openUpward ? rect.top - dropdownHeight - 4 : rect.bottom + 4,
-      left: rect.left,
-      width: rect.width,
-    })
+    const updatePosition = () => {
+      const rect = containerRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const width = Math.min(360, window.innerWidth - 24)
+      const height = 390
+      const top = Math.max(12, rect.top > height + 12 ? rect.top - height - 8 : Math.min(rect.bottom + 8, window.innerHeight - height - 12))
+      const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12))
+      setPosition({ top, left })
+    }
+    updatePosition()
+    window.addEventListener("resize", updatePosition)
+    window.addEventListener("scroll", updatePosition, true)
+    return () => {
+      window.removeEventListener("resize", updatePosition)
+      window.removeEventListener("scroll", updatePosition, true)
+    }
   }, [containerRef])
 
-  if (!pos) return null
+  if (!position) return null
+
+  const exactModel = models.find((model) => model.id.toLowerCase() === query.trim().toLowerCase())
+  const canUseCustom = query.trim().length > 0 && !exactModel
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: pos.top,
-        left: pos.left,
-        zIndex: 99999,
-        background: STYLE.bg,
-        border: STYLE.border,
-        borderRadius: 8,
-        width: 300,
-        maxHeight: 320,
-        overflowY: "auto",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-      }}
+      ref={popoverRef}
+      role="dialog"
+      aria-label="Choose a model"
+      className="fixed z-[99999] flex max-h-[390px] flex-col overflow-hidden rounded-2xl border shadow-2xl"
+      style={{ top: position.top, left: position.left, width: "min(360px, calc(100vw - 24px))", background: "var(--app-surface)", borderColor: "var(--app-border)", boxShadow: "0 20px 60px rgba(0,0,0,.5)" }}
     >
-      {isLoading && (
-        <div style={{ padding: "10px 12px", color: STYLE.groupColor, fontSize: 11 }}>
-          Loading models…
+      <div className="border-b p-3" style={{ borderColor: "var(--app-border)" }}>
+        <div className="flex items-center gap-2 rounded-xl border px-3" style={{ background: "var(--app-bg)", borderColor: "var(--app-border)" }}>
+          <Search size={14} style={{ color: "var(--app-muted)" }} />
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            onKeyDown={(event) => { if (event.key === "Enter" && query.trim()) onChoose(exactModel?.id ?? query.trim()) }}
+            placeholder="Search recommendations or enter a model ID"
+            aria-label="Search models or enter model ID"
+            className="h-10 min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:opacity-60"
+            style={{ color: "var(--app-text)" }}
+          />
         </div>
-      )}
-      {!isLoading && filtered.length === 0 && (
-        <div style={{ padding: "10px 12px", color: STYLE.groupColor, fontSize: 11 }}>
-          No matches — will use "{query}"
-        </div>
-      )}
-      {Array.from(grouped.entries()).map(([provider, providerModels]) => (
-        <div key={provider}>
-          <div
-            style={{
-              padding: "6px 12px 2px",
-              fontSize: 10,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              color: STYLE.groupColor,
-              borderTop: "1px solid #2d3449",
-            }}
-          >
-            {provider}
-          </div>
-          {providerModels.map((m) => (
+        <div className="mt-3 flex gap-1 overflow-x-auto pb-0.5">
+          {CATEGORIES.map((category) => (
             <button
-              key={m.id}
+              key={category.id}
               type="button"
-              onMouseDown={(e) => {
-                e.preventDefault()
-                onSelect(m.id)
-              }}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-                padding: "5px 12px",
-                fontSize: 11,
-                color: m.id === value ? "#fff" : STYLE.color,
-                background: m.id === value ? "#1e2d50" : "transparent",
-                cursor: "pointer",
-                border: "none",
-                outline: "none",
-              }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLElement).style.background = STYLE.hoverBg)
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.background =
-                  m.id === value ? "#1e2d50" : "transparent")
-              }
+              onClick={() => onSortChange(category.id)}
+              aria-pressed={sort === category.id}
+              className="shrink-0 rounded-lg px-2.5 py-1.5 text-[10px] font-medium transition"
+              style={{ color: sort === category.id ? "white" : "var(--app-muted)", background: sort === category.id ? "var(--app-indigo)" : "transparent" }}
             >
-              <span style={{ opacity: 0.8 }}>{m.id.split("/")[1] ?? m.id}</span>
-              <span style={{ opacity: 0.45, fontSize: 10, marginLeft: 6 }}>
-                {m.name.replace(/^[^:]+:\s*/, "")}
-              </span>
+              {category.label}
             </button>
           ))}
         </div>
-      ))}
+        <div className="mt-2 flex items-center gap-1.5 text-[10px]" style={{ color: "var(--app-muted)" }}>
+          <Sparkles size={11} style={{ color: "var(--app-indigo)" }} />
+          <span>Top 20 · {activeCategory.detail} · external benchmark</span>
+        </div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
+        {isLoading && <div className="flex items-center gap-2 px-3 py-5 text-xs" style={{ color: "var(--app-muted)" }}><Loader2 size={14} className="animate-spin" /> Loading top recommendations…</div>}
+        {isError && <div className="px-3 py-4 text-xs leading-5" style={{ color: "var(--app-muted)" }}>Couldn’t load recommendations. Set an OpenRouter key in Settings, or enter a model ID above.</div>}
+        {!isLoading && !isError && models.length === 0 && <div className="px-3 py-4 text-xs" style={{ color: "var(--app-muted)" }}>No recommendations match this search.</div>}
+        {!isLoading && !isError && models.map((model) => (
+          <button
+            key={model.id}
+            type="button"
+            onClick={() => onChoose(model.id)}
+            className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400"
+            style={{ color: "var(--app-text)" }}
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-xs font-medium">{model.name}</span>
+              <span className="mt-0.5 block truncate font-mono text-[10px]" style={{ color: "var(--app-muted)" }}>{model.id}</span>
+            </span>
+            {model.id === value && <Check size={14} className="shrink-0" style={{ color: "var(--app-indigo)" }} />}
+          </button>
+        ))}
+        {canUseCustom && (
+          <button
+            type="button"
+            onClick={() => onChoose(query.trim())}
+            className="mt-1 flex w-full items-center gap-2 rounded-xl border px-3 py-2.5 text-left text-xs transition hover:bg-white/5"
+            style={{ color: "var(--app-indigo)", borderColor: "var(--app-border)" }}
+          >
+            <Cpu size={14} className="shrink-0" /> <span className="shrink-0">Use custom model ID</span> <span className="min-w-0 flex-1 truncate font-mono">{query.trim()}</span>
+          </button>
+        )}
+      </div>
     </div>
   )
 }
