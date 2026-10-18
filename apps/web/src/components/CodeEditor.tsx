@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils";
 
 // ── Language definitions ───────────────────────────────────────────────────
 
-type LangKey = "javascript" | "typescript" | "python" | "go" | "java";
+export type CodeLanguage = "javascript" | "typescript" | "python" | "go" | "java";
+type LangKey = CodeLanguage;
 
 interface LangDef {
   label: string;
@@ -313,6 +314,8 @@ interface CodeEditorProps {
   value?: string;
   onChange?: (code: string) => void;
   defaultLanguage?: LangKey;
+  language?: LangKey;
+  onLanguageChange?: (language: LangKey) => void;
   filename?: string;
   readOnly?: boolean;
   className?: string;
@@ -327,6 +330,8 @@ export function CodeEditor({
   value,
   onChange,
   defaultLanguage = "javascript",
+  language,
+  onLanguageChange,
   filename,
   readOnly = false,
   className,
@@ -334,7 +339,13 @@ export function CodeEditor({
   placeholder = "// Start coding…",
   theme = "dark",
 }: CodeEditorProps) {
-  const [lang, setLang] = useState<LangKey>(defaultLanguage);
+  const [localLang, setLocalLang] = useState<LangKey>(defaultLanguage);
+  const lang = language ?? localLang;
+
+  function selectLanguage(next: LangKey) {
+    setLocalLang(next);
+    onLanguageChange?.(next);
+  }
 
   const handleChange = useCallback((v: string) => onChange?.(v), [onChange]);
 
@@ -402,7 +413,7 @@ export function CodeEditor({
               key={key}
               role="tab"
               aria-selected={lang === key}
-              onClick={() => setLang(key)}
+              onClick={() => selectLanguage(key)}
               className="px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold tracking-wide transition-all"
               style={{
                 background: lang === key 

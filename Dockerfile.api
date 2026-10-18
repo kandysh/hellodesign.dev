@@ -44,4 +44,4 @@ ENV NODE_ENV=production
 EXPOSE 3001
 
 # Apply pending database migrations, then start the API.
-CMD ["sh", "-c", "pnpm --filter @sysdesign/db db:deploy && node_modules/.bin/tsx apps/api/src/index.ts"]
+CMD ["sh", "-c", "pnpm --filter @sysdesign/db db:deploy && pnpm --filter @sysdesign/api exec tsx src/index.ts"]

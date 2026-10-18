@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Clock,
   Code2,
+  FileText,
   Info,
   Layers,
   ListTodo,
@@ -26,9 +27,10 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { AgentPanel, type AgentPanelState, type Message } from "@/components/AgentPanel"
 import { useApiKey } from "@/components/ApiKeyInput"
-import { CodeEditor } from "@/components/CodeEditor"
+import { CodeEditor, type CodeLanguage } from "@/components/CodeEditor"
 import { DifficultyBadge } from "@/components/DifficultyBadge"
 import { ModelCombobox } from "@/components/ModelCombobox"
+import { RichTextEditor } from "@/components/RichTextEditor"
 import { useToast } from "@/components/Toast"
 import { useTheme } from "@/hooks/useTheme"
 import { questionQueryOptions } from "@/lib/queries/questions"
@@ -43,17 +45,7 @@ const WS_API = API.replace(/^http/, "ws")
 
 const EXCALIDRAW_UI_OPTIONS = { canvasActions: { export: false } } as const
 
-const EDITOR_PLACEHOLDER = `/*
- * Walk through your design step by step:
- *
- * 1. Clarify requirements (functional + non-functional)
- * 2. Capacity estimation (QPS, storage, bandwidth)
- * 3. High-level architecture
- * 4. Data model & database choice
- * 5. API design
- * 6. Scalability, caching, bottlenecks
- */
-`
+const EDITOR_PLACEHOLDER = `# Requirements\n\nDescribe the users, core flows, and reliability goals.\n\n## Architecture\n\nExplain the main components and how requests move through the system.\n\n## Data and trade-offs\n\nCapture your choices, alternatives, and failure modes.`
 
 const CHECKLIST_ITEMS = [
   "Functional requirements",
@@ -94,7 +86,7 @@ function WorkspacePage() {
   const [sidebarTab, setSidebarTab] = useState<"overview" | "checklist">("overview")
   const [hintsOpen, setHintsOpen] = useState(false)
   const [checklist, setChecklist] = useState<Set<string>>(new Set())
-  const [activeTab, setActiveTab] = useState<"diagram" | "code">("code")
+  const [activeTab, setActiveTab] = useState<"notebook" | "diagram" | "code">("notebook")
   const [reviewMode, setReviewMode] = useState<"quick" | "deep">("quick")
   const [mood, setMood] = useState<"pragmatist" | "systems" | "sre" | "pm">("pragmatist")
   const [modelName, setModelName] = useState("openai/gpt-oss-20b:nitro")
@@ -103,9 +95,12 @@ function WorkspacePage() {
 
   // Content state
   const [answerCode, setAnswerCode] = useState("")
+  const [codeSnippet, setCodeSnippet] = useState("")
+  const [codeLanguage, setCodeLanguage] = useState<CodeLanguage>("javascript")
   const [excalidrawData, setExcalidrawData] = useState<Record<string, unknown> | null>(null)
   const [hasExcalidrawElements, setHasExcalidrawElements] = useState(false)
-  // Track if diagram tab has ever been visited so we mount Excalidraw lazily
+  const [diagramResetKey, setDiagramResetKey] = useState(0)
+  // Keep the canvas lazy until the notebook is mounted.
   const [diagramMounted, setDiagramMounted] = useState(false)
 
   const handleExcalidrawChange = useCallback(
@@ -117,7 +112,7 @@ function WorkspacePage() {
   )
 
   // Agent panel state
-  const [agentVisible, setAgentVisible] = useState(false)
+  const [agentVisible, setAgentVisible] = useState(true)
   const [agentState, setAgentState] = useState<AgentPanelState>({ phase: "idle" })
   const [agentMessages, setAgentMessages] = useState<Message[]>([])
   const [riskFlags, setRiskFlags] = useState<Array<{ component: string; risk: string; severity: "critical" | "high" | "medium" }>>([])
@@ -129,8 +124,12 @@ function WorkspacePage() {
 
   const { data: question, isLoading } = useQuery(questionQueryOptions(questionId))
 
-  // Word count derived from editor
-  const wordCount = answerCode.trim() ? answerCode.trim().split(/\s+/).length : 0
+  const formattedAnswer = [
+    answerCode.trim(),
+    codeSnippet.trim() ? `## Code sketch\n\n\`\`\`${codeLanguage}\n${codeSnippet.trim()}\n\`\`\`` : "",
+  ].filter(Boolean).join("\n\n")
+  // Word count reflects text and code included in the submitted notebook.
+  const wordCount = formattedAnswer.trim() ? formattedAnswer.trim().split(/\s+/).length : 0
   const checklistProgress = checklist.size
   const checklistTotal = CHECKLIST_ITEMS.length
 
@@ -151,7 +150,7 @@ function WorkspacePage() {
         credentials: "include",
         body: JSON.stringify({
           questionId,
-          answerText: answerCode,
+          answerText: formattedAnswer,
           excalidrawData: (excalidrawData as any)?.elements ?? [],
           agentType: reviewMode,
           mood,
@@ -188,7 +187,17 @@ function WorkspacePage() {
         const ev = JSON.parse(e.data)
         switch (ev.type) {
           case "ping":
+            break
+
           case "submission_status":
+            if (ev.status === "FAILED") {
+              cleanupReasoningBuf()
+              toast("This evaluation failed. Please retry; if it fails again, check your provider key.", "error")
+              ws.close()
+              wsRef.current = null
+              setAgentState({ phase: "idle" })
+              submitMutation.reset()
+            }
             break
 
           case "reasoning": {
@@ -287,6 +296,7 @@ function WorkspacePage() {
             ws.close()
             wsRef.current = null
             setAgentState({ phase: "idle" })
+            submitMutation.reset()
             break
         }
       }
@@ -300,6 +310,7 @@ function WorkspacePage() {
           cleanupReasoningBuf()
           toast("Lost connection to agent", "error")
           setAgentState({ phase: "idle" })
+          submitMutation.reset()
         }
         ws.close()
         wsRef.current = null
@@ -319,33 +330,52 @@ function WorkspacePage() {
     try {
       const raw = localStorage.getItem(draftKey)
       if (!raw) return
-      const { code, checklist: savedChecklist, savedAt } = JSON.parse(raw)
+      const { code, codeSnippet: savedCodeSnippet, codeLanguage: savedCodeLanguage, diagramElements, checklist: savedChecklist, savedAt } = JSON.parse(raw)
       if (code) setAnswerCode(code)
+      if (typeof savedCodeSnippet === "string") setCodeSnippet(savedCodeSnippet)
+      if (savedCodeLanguage) setCodeLanguage(savedCodeLanguage)
+      if (Array.isArray(diagramElements)) {
+        setExcalidrawData({ elements: diagramElements })
+        setHasExcalidrawElements(diagramElements.length > 0)
+      }
       if (Array.isArray(savedChecklist)) setChecklist(new Set(savedChecklist))
       const mins = Math.round((Date.now() - savedAt) / 60000)
-      if (code?.trim().length > 0) setDraftRestored(mins <= 10080) // show if < 1 week old
+      if (code?.trim().length > 0 || savedCodeSnippet?.trim().length > 0 || diagramElements?.length > 0) {
+        setDraftRestored(mins <= 10080) // show if < 1 week old
+      }
     } catch { /* ignore corrupt data */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftKey])
 
   // Auto-save every 30s when there's content
   useEffect(() => {
-    if (!answerCode.trim()) return
+    if (!answerCode.trim() && !codeSnippet.trim() && !hasExcalidrawElements) return
     const id = setInterval(() => {
       try {
         localStorage.setItem(draftKey, JSON.stringify({
           code: answerCode,
+          codeSnippet,
+          codeLanguage,
+          diagramElements: (excalidrawData as any)?.elements ?? [],
           checklist: [...checklist],
           savedAt: Date.now(),
         }))
       } catch { /* ignore quota errors */ }
     }, 30_000)
     return () => clearInterval(id)
-  }, [answerCode, checklist, draftKey])
+  }, [answerCode, codeSnippet, codeLanguage, excalidrawData, hasExcalidrawElements, checklist, draftKey])
+
+  useEffect(() => {
+    if (activeTab === "notebook") setDiagramMounted(true)
+  }, [activeTab])
 
   function clearDraft() {
     localStorage.removeItem(draftKey)
     setAnswerCode("")
+    setCodeSnippet("")
+    setExcalidrawData(null)
+    setHasExcalidrawElements(false)
+    setDiagramResetKey((key) => key + 1)
     setChecklist(new Set())
     setDraftRestored(false)
   }
@@ -370,7 +400,7 @@ function WorkspacePage() {
 
   // canSubmit must be declared before the keyboard shortcut useEffect
   // so the dep array can evaluate it without TDZ error
-  const canSubmit = answerCode.trim().length > 20 && checklistProgress > 0
+  const canSubmit = formattedAnswer.trim().length > 20
 
   // ── Keyboard shortcut: Cmd/Ctrl+Enter → submit ────────────────
   useEffect(() => {
@@ -394,6 +424,30 @@ function WorkspacePage() {
     ])
     wsRef.current?.send(JSON.stringify({ type: "reply", content: msg }))
   }
+
+  const renderDiagramCanvas = (className: string) => (
+    <div className={className}>
+      <Suspense
+        fallback={
+          <div className="flex h-full items-center justify-center gap-2 text-sm" style={{ color: "var(--app-muted)" }}>
+            <span className="h-4 w-4 animate-spin rounded-full border-2" style={{ borderColor: "var(--app-border)", borderTopColor: "var(--app-indigo)" }} />
+            Loading canvas…
+          </div>
+        }
+      >
+        <Excalidraw
+          key={diagramResetKey}
+          theme={theme}
+          UIOptions={EXCALIDRAW_UI_OPTIONS}
+          initialData={excalidrawData ? {
+            elements: (excalidrawData as any).elements ?? [],
+            appState: (excalidrawData as any).appState ?? {},
+          } : undefined}
+          onChange={handleExcalidrawChange}
+        />
+      </Suspense>
+    </div>
+  )
 
   const handleViewFeedback = useCallback((submissionId: string) => {
     navigate({
@@ -775,11 +829,17 @@ function WorkspacePage() {
           </div>
         )}
 
-        {/* Tab bar */}
+        {/* Workspace tabs */}
         <div
           className="flex items-center px-4 gap-0"
           style={{ borderBottom: "1px solid var(--app-border-2)", background: "var(--app-bg)" }}
         >
+          <TabButton
+            active={activeTab === "notebook"}
+            onClick={() => setActiveTab("notebook")}
+            icon={<BookOpen size={13} />}
+            label="Notebook"
+          />
           <TabButton
             active={activeTab === "diagram"}
             onClick={() => {
@@ -798,31 +858,104 @@ function WorkspacePage() {
           {hasExcalidrawElements && activeTab !== "diagram" && (
             <span className="ml-auto text-xs flex items-center gap-1" style={{ color: "var(--app-muted)" }}>
               <Layers size={11} style={{ color: "rgba(128,131,255,0.6)" }} />
-              Diagram will be included
+              Diagram included
             </span>
           )}
         </div>
 
-        {/* Editor / Diagram content */}
+        {/* Notebook and focused editor views */}
         <div className="flex-1 overflow-hidden relative">
-          {/* Code tab — always in the DOM, toggled via display. */}
+          {activeTab === "notebook" && (
+            <div className="absolute inset-0 overflow-y-auto" style={{ background: "var(--app-bg)" }}>
+              <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-5 lg:px-6">
+                <div className="flex flex-wrap items-end justify-between gap-3 px-1">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--app-indigo)" }}>Design notebook</p>
+                    <h2 className="mt-1 text-lg font-semibold" style={{ color: "var(--app-text)" }}>Build your answer in cells</h2>
+                    <p className="mt-1 text-xs" style={{ color: "var(--app-muted)" }}>Notes, architecture diagram, and code are submitted together.</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--app-muted)" }}>
+                    <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--app-border)" }}>Markdown</span>
+                    <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--app-border)" }}>Diagram</span>
+                    <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--app-border)" }}>Code</span>
+                  </div>
+                </div>
+
+                <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
+                  <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold" style={{ color: "var(--app-indigo)", background: "var(--app-indigo-10)" }}>1</span>
+                    <FileText size={14} style={{ color: "var(--app-muted)" }} />
+                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Design notes</span>
+                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Markdown</span>
+                  </div>
+                  <div className="h-[330px] p-2 sm:h-[380px]">
+                    <RichTextEditor
+                      value={answerCode}
+                      onChange={setAnswerCode}
+                      placeholder={EDITOR_PLACEHOLDER}
+                      className="rounded-xl"
+                    />
+                  </div>
+                </section>
+
+                <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
+                  <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold" style={{ color: "var(--app-indigo)", background: "var(--app-indigo-10)" }}>2</span>
+                    <Code2 size={14} style={{ color: "var(--app-muted)" }} />
+                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Code cell</span>
+                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Optional</span>
+                  </div>
+                  <div className="h-[280px] p-2 sm:h-[320px]">
+                    <CodeEditor
+                      value={codeSnippet}
+                      onChange={setCodeSnippet}
+                      language={codeLanguage}
+                      onLanguageChange={setCodeLanguage}
+                      filename="implementation"
+                      className="w-full"
+                      height="100%"
+                      placeholder="// Add a focused code or pseudocode example…"
+                      theme={theme}
+                    />
+                  </div>
+                </section>
+
+                <section className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--app-border)", background: "var(--app-surface)" }}>
+                  <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--app-border)" }}>
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold" style={{ color: "var(--app-indigo)", background: "var(--app-indigo-10)" }}>3</span>
+                    <Map size={14} style={{ color: "var(--app-muted)" }} />
+                    <span className="text-sm font-medium" style={{ color: "var(--app-text)" }}>Architecture diagram</span>
+                    <span className="ml-auto text-[11px]" style={{ color: "var(--app-muted)" }}>Optional · included with submission</span>
+                  </div>
+                  <div className="h-[400px] sm:h-[480px]">
+                    {diagramMounted
+                      ? renderDiagramCanvas("h-full w-full")
+                      : <div className="flex h-full items-center justify-center text-sm" style={{ color: "var(--app-muted)" }}>Preparing diagram canvas…</div>}
+                  </div>
+                </section>
+              </div>
+            </div>
+          )}
+
+          {/* Focused code view shares the notebook code cell. */}
           <div
             className="absolute inset-0 p-3"
             style={{ display: activeTab === "code" ? "flex" : "none" }}
           >
             <CodeEditor
-              value={answerCode}
-              onChange={setAnswerCode}
+              value={codeSnippet}
+              onChange={setCodeSnippet}
+              language={codeLanguage}
+              onLanguageChange={setCodeLanguage}
+              filename="implementation"
               className="w-full"
               height="100%"
-              placeholder={EDITOR_PLACEHOLDER}
+              placeholder="// Add a focused code or pseudocode example…"
               theme={theme}
             />
           </div>
 
-          {/* Diagram tab — mounted on first visit, then kept alive.
-              Uses opacity (not display/visibility) so Excalidraw can measure its
-              size AND opacity cannot be overridden by children (unlike visibility). */}
+          {/* Focused diagram view shares the notebook canvas data. */}
           {diagramMounted && (
             <div
               className="absolute inset-0"
@@ -833,26 +966,7 @@ function WorkspacePage() {
               aria-label="Architecture diagram canvas"
               aria-hidden={activeTab !== "diagram"}
             >
-              <Suspense
-                fallback={
-                  <div
-                    className="flex h-full items-center justify-center text-sm gap-2"
-                    style={{ color: "var(--app-muted)" }}
-                  >
-                    <span
-                      className="w-4 h-4 rounded-full border-2 animate-spin"
-                      style={{ borderColor: "var(--app-border)", borderTopColor: "var(--app-indigo)" }}
-                    />
-                    Loading canvas…
-                  </div>
-                }
-              >
-                <Excalidraw
-                  theme={theme}
-                  UIOptions={EXCALIDRAW_UI_OPTIONS}
-                  onChange={handleExcalidrawChange}
-                />
-              </Suspense>
+              {activeTab === "diagram" && renderDiagramCanvas("h-full w-full")}
             </div>
           )}
         </div>
@@ -937,9 +1051,7 @@ function WorkspacePage() {
             }
             title={
               !canSubmit && !submitMutation.isSuccess
-                ? answerCode.trim().length <= 20
-                  ? `Write at least 20 chars (${answerCode.trim().length}/20)`
-                  : `Check ${checklistTotal - checklistProgress} checklist item${checklistTotal - checklistProgress > 1 ? "s" : ""}`
+                ? `Write at least 20 characters (${formattedAnswer.trim().length}/20)`
                 : ""
             }
           >

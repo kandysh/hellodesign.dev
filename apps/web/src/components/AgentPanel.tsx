@@ -1,21 +1,18 @@
 import {
   AlertTriangle,
+  Activity,
   Brain,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
   Info,
   Loader2,
-  MessageSquare,
   Send,
   ShieldAlert,
 } from "lucide-react"
 import { memo, useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
-// ── Types ──────────────────────────────────────────────────────────────────
-
-/** Payload shape of the `eval_progress` SSE event sent by the worker */
 interface EvalProgressItem {
   dimensionId: string
   score: number
@@ -52,22 +49,18 @@ interface AgentPanelProps {
   className?: string
 }
 
-// ── Score colors ───────────────────────────────────────────────────────────
-
 function scoreColor(score: number) {
-  if (score >= 85) return { hex: "var(--app-green)", label: "Excellent" }
-  if (score >= 70) return { hex: "var(--app-indigo)", label: "Solid" }
-  if (score >= 50) return { hex: "#f5a623", label: "Adequate" }
-  return { hex: "#ff6b6b", label: "Needs work" }
+  if (score >= 85) return "var(--app-green)"
+  if (score >= 70) return "var(--app-indigo)"
+  if (score >= 50) return "#f5a623"
+  return "#ff6b6b"
 }
 
 function severityConfig(severity: RiskFlagItem["severity"]) {
-  if (severity === "critical") return { hex: "#ff6b6b", label: "Critical", icon: ShieldAlert }
-  if (severity === "high") return { hex: "#f5a623", label: "High", icon: AlertTriangle }
-  return { hex: "#f5c542", label: "Medium", icon: Info }
+  if (severity === "critical") return { color: "#ff6b6b", label: "Critical", icon: ShieldAlert }
+  if (severity === "high") return { color: "#f5a623", label: "High", icon: AlertTriangle }
+  return { color: "#f5c542", label: "Medium", icon: Info }
 }
-
-// ── Main panel ─────────────────────────────────────────────────────────────
 
 export const AgentPanel = memo(function AgentPanel({
   state,
@@ -82,317 +75,170 @@ export const AgentPanel = memo(function AgentPanel({
   const [input, setInput] = useState("")
   const [showTrace, setShowTrace] = useState(false)
   const [showRisks, setShowRisks] = useState(false)
-  const traceRef = useRef<HTMLDivElement>(null)
+  const threadRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const prevMessageLengthRef = useRef(messages.length)
 
-  // Auto-scroll trace
-  // biome-ignore lint/correctness/useExhaustiveDependencies: traceRef is a stable ref, state is the trigger
   useEffect(() => {
-    if (traceRef.current) {
-      traceRef.current.scrollTop = traceRef.current.scrollHeight
-    }
-  }, [state])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
+  }, [messages.length, state.phase])
 
-  // Smart auto-scroll: only on agent messages (not user input)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: messagesEndRef is a stable ref
   useEffect(() => {
-    if (messages.length > prevMessageLengthRef.current) {
-      const newMsg = messages[messages.length - 1]
-      if (newMsg?.role === "agent") {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-      }
-    }
-    prevMessageLengthRef.current = messages.length
-  }, [messages])
-
-  // Open trace automatically when processing starts
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional — only fire when phase changes to processing
-  useEffect(() => {
-    if (state.phase === "processing") setShowTrace(true)
     if (state.phase === "follow-up") setShowTrace(false)
   }, [state.phase])
 
   function handleSend() {
-    const msg = input.trim()
-    if (!msg || !onSendMessage) return
-    onSendMessage(msg)
+    const content = input.trim()
+    if (!content || !onSendMessage) return
+    onSendMessage(content)
     setInput("")
   }
 
   const trace = state.phase === "processing" || state.phase === "follow-up" ? state.trace : []
-  const isFollowUp = state.phase === "follow-up"
+  const latestMessage = messages[messages.length - 1]
+  const needsQuestionFallback = state.phase === "follow-up" &&
+    !(latestMessage?.role === "agent" && latestMessage.content === state.question)
 
   return (
-    <div className={cn("flex h-full flex-col bg-base-200/50 border-l border-base-300/40", className)}>
-      {/* ── Header ───────────────────────────────────────────────────────── */}
+    <div className={cn("flex h-full flex-col border-l border-base-300/50 bg-base-100", className)}>
       <PanelHeader phase={state.phase} riskCount={riskFlags.length} />
 
-      {/* ── Body ─────────────────────────────────────────────────────────── */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
-
-        {/* ── Idle ── */}
-        {state.phase === "idle" && (
-          <div className="flex flex-col items-center justify-center h-full gap-4 px-6 py-10 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Brain size={26} />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-base-content">AI Interviewer</p>
-              <p className="mt-1 text-xs text-base-content/40 leading-relaxed max-w-[200px]">
-                Submit your answer and the agent will review your design, ask follow-up questions, and score your work.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* ── Processing ── */}
-        {state.phase === "processing" && (
-          <div className="flex flex-col gap-0">
-            {/* Status banner */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-base-300/30">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+      <div ref={threadRef} className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-5">
+        {state.phase === "idle" && messages.length === 0 && (
+          <div className="rounded-2xl border border-base-300/60 bg-base-200/40 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-base-content">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Brain size={16} />
               </span>
-              <div>
-                <p className="text-sm font-medium text-base-content">Reading your design…</p>
-                <p className="text-[11px] text-base-content/40 mt-0.5">Agent is analysing your answer and diagram</p>
-              </div>
+              Your interviewer
             </div>
-
-            {/* Reasoning trace — always expanded during processing */}
-            <div className="px-5 py-4 flex flex-col gap-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-base-content/40 uppercase tracking-wider">
-                Thinking
-                <span className="tooltip tooltip-right cursor-default" data-tip="Live reasoning trace — what the agent is thinking, not the final feedback.">
-                  <Info size={10} className="text-base-content/30" />
-                </span>
-              </div>
-              <div
-                ref={traceRef}
-                className="reasoning-trace min-h-[80px] max-h-[calc(100vh-260px)] overflow-y-auto"
-              >
-                {trace.length === 0 ? (
-                  <span className="opacity-40">Initializing…</span>
-                ) : (
-                  trace.map((line, i) => (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: append-only
-                    <div key={i}>{line}</div>
-                  ))
-                )}
-                <span className="inline-block h-3 w-1.5 bg-success/70 align-middle animate-pulse ml-0.5" aria-hidden="true" />
-              </div>
-            </div>
+            <p className="mt-3 text-sm leading-relaxed text-base-content/60">
+              Submit your notebook when you’re ready. I’ll review the design, ask follow-up questions in this thread, and share the evaluation here.
+            </p>
           </div>
         )}
 
-        {/* ── Follow-up ── */}
+        {messages.map((message) => (
+          <ChatBubble
+            key={message.id}
+            message={message}
+            userInitials={userInitials}
+            userAvatar={userAvatar}
+          />
+        ))}
+
+        {needsQuestionFallback && (
+          <ChatBubble
+            message={{ id: "active-follow-up", role: "agent", content: state.question, timestamp: new Date() }}
+            userInitials={userInitials}
+            userAvatar={userAvatar}
+          />
+        )}
+
+        {state.phase === "processing" && <ActivityMessage title="Reviewing your notebook" subtitle="Checking the architecture and key trade-offs" />}
         {state.phase === "follow-up" && (
-          <div className="flex flex-col gap-0">
-            {/* Prominent question card */}
-            <div className="mx-4 mt-4 rounded-xl border border-warning/30 bg-warning/5 p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-warning/15 text-warning mt-0.5">
-                  <MessageSquare size={14} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-semibold text-warning/80 uppercase tracking-wider mb-1.5">
-                    Agent question
-                  </p>
-                  <p className="text-sm text-base-content leading-relaxed">
-                    {state.question}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Collapsible trace */}
-            <div className="px-4 pt-3">
-              <button
-                type="button"
-                onClick={() => setShowTrace((v) => !v)}
-                className="flex items-center gap-1.5 text-[11px] text-base-content/35 hover:text-base-content/55 transition-colors"
-              >
-                {showTrace ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-                Reasoning trace
-              </button>
-              {showTrace && (
-                <div className="mt-2">
-                  <div ref={traceRef} className="reasoning-trace max-h-40 overflow-y-auto">
-                    {trace.map((line, i) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: append-only
-                      <div key={i}>{line}</div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Chat history */}
-            {messages.length > 0 && (
-              <div className="space-y-3 px-4 pt-4 pb-2">
-                {messages.map((msg) => (
-                  <ChatBubble
-                    key={msg.id}
-                    message={msg}
-                    userInitials={userInitials}
-                    userAvatar={userAvatar}
-                  />
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
+          <div className="flex items-center gap-2 pl-10 text-xs font-medium text-warning">
+            <span className="h-1.5 w-1.5 rounded-full bg-warning" />
+            Your turn
           </div>
         )}
 
-        {/* ── Evaluating ── */}
         {state.phase === "evaluating" && (
-          <div className="flex flex-col gap-0">
-            {/* Status banner w/ skeleton */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-base-300/30">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-info opacity-60" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-info" />
+          <div className="rounded-2xl border border-base-300/60 bg-base-200/30 p-4">
+            <div className="mb-4 flex items-center gap-2 text-sm font-medium text-base-content">
+              <Loader2 size={15} className="animate-spin text-info" />
+              Scoring your design
+              <span className="ml-auto text-xs text-base-content/40">
+                {state.agentResults.length}/{state.dimensionLabels.length}
               </span>
-              <div>
-                <p className="text-sm font-medium text-base-content">Scoring your design…</p>
-                <p className="text-[11px] text-base-content/40 mt-0.5">
-                  {state.agentResults.length} of {state.dimensionLabels.length} dimensions scored
-                </p>
-              </div>
             </div>
-
-            {/* Score rows */}
-            <div className="px-5 py-4 flex flex-col gap-3">
-              {state.dimensionLabels.map((label, i) => {
-                const result = state.agentResults[i]
-                const scored = result !== undefined
-                const { hex } = scored ? scoreColor(result.score) : { hex: "var(--app-green)" }
-                return (
-                  <ScoreRow
-                    key={label}
-                    label={label}
-                    score={result?.score}
-                    scored={scored}
-                    hex={hex}
-                  />
-                )
+            <div className="flex flex-col gap-4">
+              {state.dimensionLabels.map((label, index) => {
+                const result = state.agentResults[index]
+                return <ScoreRow key={label} label={label} score={result?.score} />
               })}
             </div>
           </div>
         )}
 
-        {/* ── Done ── */}
         {state.phase === "done" && (
-          <div className="flex flex-col gap-0">
-            {/* Completion banner */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-base-300/30">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
-                <CheckCircle2 size={16} />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-base-content">Review complete</p>
-                <p className="text-[11px] text-base-content/40 mt-0.5">All dimensions scored</p>
-              </div>
+          <div className="rounded-2xl border border-success/20 bg-success/5 p-4">
+            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-base-content">
+              <CheckCircle2 size={16} className="text-success" />
+              Review complete
             </div>
-
-            {/* Scores */}
-            {state.agentResults.length > 0 && (
-              <div className="px-5 py-4 flex flex-col gap-3">
-                {state.agentResults.map((r, i) => {
-                  const label = state.dimensionLabels[i] ?? r.dimensionId
-                  const { hex } = scoreColor(r.score)
-                  return (
-                    <ScoreRow
-                      key={r.dimensionId}
-                      label={label}
-                      score={r.score}
-                      scored
-                      hex={hex}
-                    />
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Previous Q&A if any */}
-            {messages.length > 0 && (
-              <div className="border-t border-base-300/30 px-4 py-3 space-y-3">
-                <p className="text-[11px] font-semibold text-base-content/40 uppercase tracking-wider">
-                  Interview transcript
-                </p>
-                {messages.map((msg) => (
-                  <ChatBubble
-                    key={msg.id}
-                    message={msg}
-                    userInitials={userInitials}
-                    userAvatar={userAvatar}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* CTA */}
-            <div className="px-5 py-4">
-              <button
-                type="button"
-                onClick={() => onViewFeedback?.(state.submissionId)}
-                className="btn btn-success btn-block rounded-xl gap-2"
-              >
-                <CheckCircle2 size={16} />
-                View full feedback →
-              </button>
+            <div className="flex flex-col gap-4">
+              {state.agentResults.map((result, index) => (
+                <ScoreRow
+                  key={result.dimensionId}
+                  label={state.dimensionLabels[index] ?? result.dimensionId}
+                  score={result.score}
+                />
+              ))}
             </div>
+            <button
+              type="button"
+              onClick={() => onViewFeedback?.(state.submissionId)}
+              className="btn btn-success btn-block mt-5 rounded-xl gap-2"
+            >
+              View detailed feedback
+              <ChevronRight size={15} />
+            </button>
           </div>
         )}
 
-        {/* ── Risk flags (persistent, collapsible, collapse by default) ── */}
-        {riskFlags.length > 0 && state.phase !== "idle" && (
-          <div className="border-t border-base-300/30 px-5 py-3">
+        {trace.length > 0 && (
+          <section className="overflow-hidden rounded-2xl border border-base-300/50 bg-base-200/20">
             <button
               type="button"
-              onClick={() => setShowRisks((v) => !v)}
-              className="flex w-full items-center gap-2 text-[11px] font-semibold text-base-content/50 uppercase tracking-wider hover:text-base-content/70 transition-colors"
+              aria-expanded={showTrace}
+              onClick={() => setShowTrace((visible) => !visible)}
+              className="flex w-full items-center gap-2.5 px-3.5 py-3 text-left transition-colors hover:bg-base-200/40"
             >
-              {showRisks ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
-              <ShieldAlert size={11} />
-              Risk flags
-              <span className="ml-auto rounded-full bg-error/15 text-error px-1.5 py-0.5 text-[10px] font-bold">
-                {riskFlags.length}
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Activity size={15} />
               </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-xs font-semibold text-base-content/80">Review activity</span>
+                <span className="mt-0.5 block text-[10px] text-base-content/40">Progress and interviewer notes</span>
+              </span>
+              <span className="rounded-full bg-base-300/60 px-2 py-1 text-[10px] font-medium text-base-content/55">{trace.length}</span>
+              {showTrace ? <ChevronDown size={14} className="text-base-content/40" /> : <ChevronRight size={14} className="text-base-content/40" />}
             </button>
+            {showTrace && (
+              <ol className="space-y-0 border-t border-base-300/40 px-3.5 py-2">
+                {trace.map((line, index) => (
+                  <ActivityEntry key={`${index}-${line}`} line={line} isLast={index === trace.length - 1} />
+                ))}
+              </ol>
+            )}
+          </section>
+        )}
 
+        {riskFlags.length > 0 && state.phase !== "idle" && (
+          <div className="rounded-xl border border-base-300/50 bg-base-200/20">
+            <button
+              type="button"
+              onClick={() => setShowRisks((visible) => !visible)}
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-xs font-medium text-base-content/55"
+            >
+              {showRisks ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+              <ShieldAlert size={13} />
+              Risk flags
+              <span className="ml-auto rounded-full bg-error/15 px-1.5 py-0.5 text-[10px] font-bold text-error">{riskFlags.length}</span>
+            </button>
             {showRisks && (
-              <div className="mt-3 flex flex-col gap-2">
-                {riskFlags.map((flag, i) => {
-                  const cfg = severityConfig(flag.severity)
-                  const Icon = cfg.icon
+              <div className="space-y-2 border-t border-base-300/40 p-3">
+                {riskFlags.map((flag, index) => {
+                  const config = severityConfig(flag.severity)
+                  const Icon = config.icon
                   return (
-                    <div
-                      // biome-ignore lint/suspicious/noArrayIndexKey: order is stable
-                      key={i}
-                      className="rounded-xl border p-3"
-                      style={{
-                        borderColor: `${cfg.hex}30`,
-                        background: `${cfg.hex}0a`,
-                      }}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <Icon size={12} style={{ color: cfg.hex }} />
-                        <span className="text-xs font-semibold text-base-content/80">
-                          {flag.component}
-                        </span>
-                        <span
-                          className="ml-auto text-[10px] font-bold uppercase rounded-full px-1.5 py-0.5"
-                          style={{ color: cfg.hex, background: `${cfg.hex}18` }}
-                        >
-                          {cfg.label}
-                        </span>
+                    <div key={`${flag.component}-${index}`} className="rounded-lg border p-3" style={{ borderColor: `${config.color}30`, background: `${config.color}0a` }}>
+                      <div className="mb-1 flex items-center gap-2">
+                        <Icon size={12} style={{ color: config.color }} />
+                        <span className="text-xs font-semibold text-base-content/80">{flag.component}</span>
+                        <span className="ml-auto text-[10px] font-bold uppercase" style={{ color: config.color }}>{config.label}</span>
                       </div>
-                      <p className="text-[11px] text-base-content/60 leading-relaxed pl-[20px]">
-                        {flag.risk}
-                      </p>
+                      <p className="pl-5 text-xs leading-relaxed text-base-content/60">{flag.risk}</p>
                     </div>
                   )
                 })}
@@ -400,29 +246,39 @@ export const AgentPanel = memo(function AgentPanel({
             )}
           </div>
         )}
+
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* ── Input (follow-up only) ───────────────────────────────────────── */}
-      {isFollowUp && (
-        <div className="border-t border-base-300/40 p-3">
-          <div className="flex gap-2">
-            <input
-              type="text"
+      {state.phase === "follow-up" && (
+        <div className="border-t border-base-300/50 bg-base-100 p-3">
+          <div className="rounded-2xl border border-base-300/70 bg-base-200/40 p-2 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10">
+            <textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
-              placeholder="Reply to the agent…"
-              className="input input-sm flex-1 rounded-xl border-base-300/40 bg-base-300/20 text-sm placeholder:text-base-content/30 focus-visible:ring-1 focus-visible:ring-primary"
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault()
+                  handleSend()
+                }
+              }}
+              placeholder="Reply to the interviewer…"
+              rows={2}
+              className="max-h-28 min-h-12 w-full resize-y bg-transparent px-2 py-1 text-sm leading-relaxed text-base-content outline-none placeholder:text-base-content/35"
             />
-            <button
-              type="button"
-              onClick={handleSend}
-              disabled={!input.trim() || !onSendMessage}
-              className="btn btn-warning btn-sm rounded-xl px-3"
-              aria-label="Send reply"
-            >
-              <Send size={13} />
-            </button>
+            <div className="flex items-center justify-between px-1 pt-1">
+              <span className="text-[10px] text-base-content/35">Enter to send · Shift+Enter for a new line</span>
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={!input.trim() || !onSendMessage}
+                className="btn btn-primary btn-sm h-8 min-h-8 rounded-xl px-3"
+                aria-label="Send reply"
+              >
+                <Send size={13} />
+                Reply
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -430,84 +286,106 @@ export const AgentPanel = memo(function AgentPanel({
   )
 })
 
-// ── Panel header ───────────────────────────────────────────────────────────
+function ActivityMessage({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Brain size={14} />
+      </div>
+      <div className="rounded-2xl rounded-tl-md border border-base-300/50 bg-base-200/40 px-3.5 py-3">
+        <p className="text-sm font-medium text-base-content">{title}</p>
+        <p className="mt-1 text-xs text-base-content/45">{subtitle}</p>
+        <span className="mt-2 flex items-center gap-1 text-[10px] text-primary/70">
+          <Loader2 size={10} className="animate-spin" /> Working
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function ActivityEntry({ line, isLast }: { line: string; isLast: boolean }) {
+  const flow = line.match(/^→\s*(.*?)(?:\s+\((\{.*\})\))?$/s)
+  const title = flow ? flow[1].trim() : "Interviewer note"
+  const rawDetails = flow?.[2]
+  let details: unknown
+  if (rawDetails) {
+    try {
+      details = JSON.parse(rawDetails)
+    } catch {
+      details = rawDetails
+    }
+  }
+  const detailsText = typeof details === "string" ? details : details && typeof details === "object"
+    ? Object.entries(details).map(([key, value]) => `${key}: ${String(value)}`).join(" · ")
+    : ""
+
+  return (
+    <li className="relative flex gap-3 py-2.5">
+      <div className="flex w-4 shrink-0 justify-center">
+        <span className={cn(
+          "relative z-10 mt-1.5 h-2 w-2 rounded-full",
+          flow ? "bg-primary" : "bg-base-content/30",
+        )} />
+        {!isLast && <span className="absolute bottom-0 left-[19px] top-5 w-px bg-base-300/70" />}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-xs font-medium leading-relaxed text-base-content/80">{title}</span>
+          <span className="rounded-md bg-base-300/50 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-base-content/40">
+            {flow ? "System" : "Note"}
+          </span>
+        </div>
+        {!flow && <p className="mt-1 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-base-content/55">{line}</p>}
+        {detailsText && <p className="mt-1 break-words text-[10px] leading-relaxed text-base-content/40">{detailsText}</p>}
+      </div>
+    </li>
+  )
+}
 
 function PanelHeader({ phase, riskCount }: { phase: AgentPanelState["phase"]; riskCount: number }) {
   const subtitles: Record<AgentPanelState["phase"], string> = {
-    idle: "Ready",
-    processing: "Analysing…",
-    "follow-up": "Awaiting your reply",
-    evaluating: "Scoring…",
-    done: "Complete",
+    idle: "Ready when you are",
+    processing: "Reviewing your design",
+    "follow-up": "Waiting for your reply",
+    evaluating: "Scoring your answer",
+    done: "Review complete",
   }
-  const phaseColors: Record<AgentPanelState["phase"], string> = {
-    idle: "text-base-content/40",
-    processing: "text-primary",
-    "follow-up": "text-warning",
-    evaluating: "text-info",
-    done: "text-success",
-  }
+
   return (
-    <div className="flex items-center gap-3 border-b border-base-300/40 px-4 py-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        <Brain size={15} />
+    <div className="flex shrink-0 items-center gap-3 border-b border-base-300/50 px-4 py-3">
+      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Brain size={17} />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-base-content leading-none">AI Interviewer</p>
-        <p className={cn("text-[11px] mt-0.5 leading-none", phaseColors[phase])}>
-          {subtitles[phase]}
-        </p>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold leading-tight text-base-content">AI interviewer</p>
+        <p className="mt-1 truncate text-[11px] text-base-content/45">{subtitles[phase]}</p>
       </div>
       {riskCount > 0 && phase !== "idle" && (
-        <div className="flex items-center gap-1 rounded-full bg-error/10 px-2 py-0.5 text-error">
-          <ShieldAlert size={10} />
-          <span className="text-[10px] font-bold">{riskCount}</span>
-        </div>
+        <span className="flex items-center gap-1 rounded-full bg-error/10 px-2 py-1 text-[10px] font-semibold text-error">
+          <ShieldAlert size={11} /> {riskCount}
+        </span>
       )}
     </div>
   )
 }
 
-// ── Score row ──────────────────────────────────────────────────────────────
-
-function ScoreRow({
-  label,
-  score,
-  scored,
-  hex,
-}: {
-  label: string
-  score?: number
-  scored: boolean
-  hex: string
-}) {
+function ScoreRow({ label, score }: { label: string; score?: number }) {
+  const scored = score !== undefined
+  const color = scored ? scoreColor(score) : "var(--app-indigo)"
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-medium text-base-content/70">{label}</span>
-        {scored && score !== undefined ? (
-          <span className="text-xs font-bold tabular-nums" style={{ color: hex }}>
-            {score}<span className="text-base-content/30 font-normal">/100</span>
-          </span>
-        ) : (
-          <span className="text-[11px] text-base-content/25">Pending…</span>
-        )}
+        {scored ? (
+          <span className="text-xs font-bold tabular-nums" style={{ color }}>{score}<span className="ml-0.5 font-normal text-base-content/35">/100</span></span>
+        ) : <span className="text-[10px] text-base-content/35">Pending</span>}
       </div>
-      <div className="h-1.5 w-full rounded-full bg-base-300/40 overflow-hidden">
-        {scored && score !== undefined ? (
-          <div
-            className="h-full rounded-full transition-all duration-700 ease-out"
-            style={{ width: `${score}%`, background: hex }}
-          />
-        ) : (
-          <div className="h-full w-1/3 rounded-full bg-base-300/60 animate-pulse" />
-        )}
+      <div className="h-1.5 overflow-hidden rounded-full bg-base-300/50">
+        <div className={cn("h-full rounded-full transition-all duration-700", scored ? "" : "w-1/3 animate-pulse bg-base-content/15")} style={scored ? { width: `${score}%`, background: color } : undefined} />
       </div>
     </div>
   )
 }
-
-// ── Chat bubble ────────────────────────────────────────────────────────────
 
 function ChatBubble({
   message,
@@ -520,45 +398,33 @@ function ChatBubble({
 }) {
   const isAgent = message.role === "agent"
   const time = message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  const fullTime = message.timestamp.toLocaleString()
 
   return (
-    <div className={cn("chat", isAgent ? "chat-start" : "chat-end")}>
-      <div className="chat-image avatar">
-        <div
-          className={cn(
-            "w-7 rounded-full flex items-center justify-center text-xs font-semibold",
-            isAgent 
-              ? "bg-cyan-500/15 text-cyan-400" 
-              : "bg-indigo-600/15 text-indigo-400",
-          )}
-        >
-          {isAgent ? (
-            <Brain size={13} />
-          ) : userAvatar ? (
-            <img src={userAvatar} alt="You" referrerPolicy="no-referrer" />
-          ) : (
-            userInitials
-          )}
+    <div className={cn("flex items-end gap-2.5", isAgent ? "justify-start" : "justify-end")}>
+      {isAgent && (
+        <div className="mb-5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <Brain size={13} />
+        </div>
+      )}
+      <div className={cn("flex max-w-[88%] flex-col", isAgent ? "items-start" : "items-end")}>
+        <div className="mb-1 flex items-center gap-2 px-1">
+          <span className="text-[10px] font-semibold text-base-content/45">{isAgent ? "Interviewer" : "You"}</span>
+          <time className="text-[10px] text-base-content/30">{time}</time>
+        </div>
+        <div className={cn(
+          "whitespace-pre-wrap break-words rounded-2xl px-3.5 py-3 text-sm leading-relaxed shadow-sm",
+          isAgent
+            ? "rounded-bl-md border border-base-300/60 bg-base-200/60 text-base-content"
+            : "rounded-br-md bg-primary text-primary-content",
+        )}>
+          {message.content}
         </div>
       </div>
-      <div
-        className={cn(
-          "chat-bubble text-sm leading-relaxed",
-          isAgent 
-            ? "bg-cyan-500/10 text-base-content border border-cyan-500/20" 
-            : "bg-indigo-600/10 text-base-content border border-indigo-600/20",
-        )}
-      >
-        {message.content}
-      </div>
-      <div 
-        className="chat-footer text-[10px] text-base-content/30 mt-0.5 tooltip"
-        data-tip={fullTime}
-      >
-        {time}
-      </div>
+      {!isAgent && (
+        <div className="mb-5 flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-base-300 text-[10px] font-semibold text-base-content/70">
+          {userAvatar ? <img src={userAvatar} alt="You" referrerPolicy="no-referrer" /> : userInitials}
+        </div>
+      )}
     </div>
   )
 }
-

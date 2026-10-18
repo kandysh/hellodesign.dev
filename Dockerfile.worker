@@ -34,4 +34,4 @@ ENV DATABASE_URL=
 
 ENV NODE_ENV=production
 
-CMD ["node_modules/.bin/tsx", "apps/worker/src/index.ts"]
+CMD ["pnpm", "--filter", "@sysdesign/worker", "exec", "tsx", "src/index.ts"]

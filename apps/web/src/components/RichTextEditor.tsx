@@ -63,6 +63,7 @@ const baseExtensions: ReactCodeMirrorProps["extensions"] = [
 // ── Public component ───────────────────────────────────────────────────────
 
 interface RichTextEditorProps {
+  value?: string;
   onChange: (markdown: string) => void;
   placeholder?: string;
   className?: string;
@@ -70,6 +71,7 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({
+  value,
   onChange,
   placeholder,
   className,
@@ -85,6 +87,7 @@ export function RichTextEditor({
   return (
     <div className={cn("flex flex-col h-full overflow-hidden", className)}>
       <CodeMirror
+        value={value}
         className="flex-1 overflow-auto text-sm"
         theme={archTheme}
         extensions={extensions}
